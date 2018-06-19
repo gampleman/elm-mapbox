@@ -285,7 +285,7 @@ encode (Layer value) =
     value
 
 
-layerImpl tipe source id attrs =
+layerImpl tipe id source attrs =
     [ ( "type", Encode.string tipe )
     , ( "id", Encode.string id )
     , ( "source", Encode.string source )

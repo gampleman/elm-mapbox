@@ -1,2 +1,5 @@
 elm-stuff/
 .DS_Store
+examples/example01.js
+node_modules/
+dist/
