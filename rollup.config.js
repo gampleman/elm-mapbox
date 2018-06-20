@@ -10,7 +10,7 @@ export default [
     output: {
       file: pkg.browser,
       format: "umd",
-      name: "elm-mapbox"
+      name: "elmMapbox"
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
