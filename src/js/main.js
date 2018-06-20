@@ -1,6 +1,9 @@
 import mapboxgl from "mapbox-gl";
 
-function wrapElmApplication(elmApp) {
+function wrapElmApplication(elmApp, options = {}) {
+  if (options.token) {
+    mapboxgl.token = options.token;
+  }
   window.customElements.define(
     "elm-mapbox-map",
     class MapboxMap extends window.HTMLElement {
@@ -203,7 +206,9 @@ function wrapElmApplication(elmApp) {
       }
 
       connectedCallback() {
-        mapboxgl.accessToken = this.token;
+        if(this.token) {
+          mapboxgl.accessToken = this.token;
+        }
         this.style.display = "block";
         this.style.width = "100%";
         this.style.height = "100%";
@@ -216,6 +221,17 @@ function wrapElmApplication(elmApp) {
       }
     }
   );
+
+  if (elmApp.ports && elmApp.ports.elmMapboxOutgoing) {
+    elmApp.ports.elmMapboxOutgoing.subscribe(event => {
+      var target = document.getElementById(event.target);
+      switch(event.command) {
+        case "fitBounds":
+          return target.map.fitBounds(event.bounds);
+      }
+    })
+  }
+
   return elmApp;
 }
 
