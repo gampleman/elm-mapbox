@@ -1,8 +1,8 @@
-module Mapbox.Style exposing (Style, encode, Light, defaultLight, Transition, defaultTransition, MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata)
+module Mapbox.Style exposing (Style(..), StyleDef, encode, Light, defaultLight, Transition, defaultTransition, MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata, streets, outdoors, light, dark, satellite, satelliteStreets)
 
 {-| A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a JSON object with specific root level and nested properties. This specification defines and describes these properties.
 
-@docs Style, encode
+@docs Style, encode , StyleDef
 
 
 ### Light
@@ -19,6 +19,13 @@ module Mapbox.Style exposing (Style, encode, Light, defaultLight, Transition, de
 
 @docs MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata
 
+
+### Predefined styles
+
+You can also use one of these predefined styles.
+
+@docs streets, outdoors, light, dark, satellite, satelliteStreets
+
 -}
 
 import Array exposing (Array)
@@ -29,18 +36,71 @@ import Mapbox.Layer exposing (Layer)
 import Mapbox.Source exposing (Source)
 
 
+{-| A mapbox style.
+
+You can either create a style spec in Elm (for which the rest of this library is useful :) or load one from a remote URL.
+
+To load a style from the Mapbox API, you can use a URL of the form `FromUrl "mapbox://styles/:owner/:style"`, where `:owner` is your Mapbox account name and `:style` is the style ID.
+
+-}
+type Style
+    = Style StyleDef
+    | FromUrl String
+
+
+{-| -}
+streets : Style
+streets =
+    FromUrl "mapbox://styles/mapbox/streets-v10"
+
+
+{-| -}
+outdoors : Style
+outdoors =
+    FromUrl "mapbox://styles/mapbox/outdoors-v10"
+
+
+{-| -}
+light : Style
+light =
+    FromUrl "mapbox://styles/mapbox/light-v9"
+
+
+{-| -}
+dark : Style
+dark =
+    FromUrl "mapbox://styles/mapbox/dark-v9"
+
+
+{-| -}
+satellite : Style
+satellite =
+    FromUrl "mapbox://styles/mapbox/satellite-v9"
+
+
+{-| -}
+satelliteStreets : Style
+satelliteStreets =
+    FromUrl "mapbox://styles/mapbox/satellite-streets-v10"
+
+
 {-| Encodes the style into JSON.
 -}
 encode : Style -> Value
 encode style =
-    [ ( "version", Encode.int 8 )
-    , ( "transition", encodeTransition style.transition )
-    , ( "light", encodeLight style.light )
-    , ( "sources", Encode.object <| List.map (\source -> ( Mapbox.Source.getId source, Mapbox.Source.encode source )) style.sources )
-    , ( "layers", Encode.list (List.map Mapbox.Layer.encode style.layers) )
-    ]
-        ++ List.map (\(MiscAttr key value) -> ( key, value )) style.misc
-        |> Encode.object
+    case style of
+        Style styleDef ->
+            [ ( "version", Encode.int 8 )
+            , ( "transition", encodeTransition styleDef.transition )
+            , ( "light", encodeLight styleDef.light )
+            , ( "sources", Encode.object <| List.map (\source -> ( Mapbox.Source.getId source, Mapbox.Source.encode source )) styleDef.sources )
+            , ( "layers", Encode.list (List.map Mapbox.Layer.encode styleDef.layers) )
+            ]
+                ++ List.map (\(MiscAttr key value) -> ( key, value )) styleDef.misc
+                |> Encode.object
+
+        FromUrl s ->
+            Encode.string s
 
 
 encodeTransition : Transition -> Value
@@ -78,7 +138,7 @@ These are all optional attributes.
 All the other keys are values defined below.
 
 -}
-type alias Style =
+type alias StyleDef =
     { transition : Transition
     , light : Light
     , layers : List Layer
