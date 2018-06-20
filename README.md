@@ -1,6 +1,6 @@
 # elm-mapbox
 
-Great looking and performant maps in Elm using MapboxGl.
+Great looking and performant maps in Elm using MapboxGl. Discuss in #maps on the Elm Slack.
 
 ### How this works
 
