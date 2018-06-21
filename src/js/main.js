@@ -1,6 +1,17 @@
 import mapboxgl from "mapbox-gl";
 
-function wrapElmApplication(elmApp, options = {}) {
+function wrapElmApplication(elmApp, settings = {}) {
+  const options = Object.assign(
+    {
+      outgoingPort: "elmMapboxOutgoing",
+      incomingPort: "elmMapboxIncoming",
+      easingFunctions: {
+        linear: t => t
+      }
+    },
+    settings
+  );
+
   if (options.token) {
     mapboxgl.token = options.token;
   }
@@ -206,7 +217,7 @@ function wrapElmApplication(elmApp, options = {}) {
       }
 
       connectedCallback() {
-        if(this.token) {
+        if (this.token) {
           mapboxgl.accessToken = this.token;
         }
         this.style.display = "block";
@@ -223,16 +234,81 @@ function wrapElmApplication(elmApp, options = {}) {
   );
 
   if (elmApp.ports && elmApp.ports.elmMapboxOutgoing) {
-    elmApp.ports.elmMapboxOutgoing.subscribe(event => {
-      var target = document.getElementById(event.target);
-      switch(event.command) {
-        case "fitBounds":
-          return target.map.fitBounds(event.bounds);
+    function processOptions(opts) {
+      if (opts.easing) {
+        return Object.assign({}, opts, {easing: options.easingFunctions[opts.easing]});
       }
-    })
+      return opts;
+    }
+
+    elmApp.ports[options.outgoingPort].subscribe(event => {
+      var map = document.getElementById(event.target).map;
+      switch (event.command) {
+        case "resize":
+          return map.resize();
+
+        case "fitBounds":
+          return map.fitBounds(event.bounds, processOptions(event.options));
+
+        case "panBy":
+          return map.panBy(event.offset, processOptions(event.options));
+
+        case "panTo":
+          return map.panTo(event.location, processOptions(event.options));
+
+        case "zoomTo":
+          return map.zoomTo(event.zoom, processOptions(event.options));
+
+        case "zoomIn":
+          return map.zoomIn(processOptions(event.options));
+
+        case "zoomOut":
+          return map.zoomOut(processOptions(event.options));
+
+        case "rotateTo":
+          return map.rotateTo(event.bearing, processOptions(event.options));
+
+        case "jumpTo":
+          return map.jumpTo(processOptions(event.options));
+
+        case "easeTo":
+          return map.easeTo(processOptions(event.options));
+
+        case "flyTo":
+          return map.flyTo(processOptions(event.options));
+
+        case "stop":
+          return map.stop();
+
+        case "setRTLTextPlugin":
+          return map.setRTLTextPlugin(event.url);
+
+        case "getBounds":
+          return elmApp.ports[options.incomingPort].send({
+            type: "getBounds",
+            id: event.requestId,
+            bounds: map.getBounds().toArray()
+          });
+
+        case "queryRenderedFeatures":
+          return elmApp.ports[options.incomingPort].send({
+            type: "queryRenderedFeatures",
+            id: event.requestId,
+            features:
+              event.query === "viewport"
+                ? map.queryRenderedFeatures(processOptions(event.options))
+                : map.queryRenderedFeatures(
+                    event.query,
+                    processOptions(event.options)
+                  )
+          });
+      }
+    });
   }
 
   return elmApp;
 }
+
+wrapElmApplication.supported = mapboxgl.supported;
 
 export default wrapElmApplication;

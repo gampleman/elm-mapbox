@@ -33,25 +33,7 @@ import elmMapbox from "elm-mapbox";
 var app = elmMapbox(Elm.MyApp.fullscreen(), {token: 'pk45.rejkgnwejk'});
 ```
 
-Next, optionally, setup a ports module:
-
-```elm
-port module MapCommands exposing (flyTo)
-
-import Json.Decode exposing (Value)
-import Mapbox.Cmd as Cmd
-
-port elmMapboxOutgoing : Value -> Cmd msg
-
-port elmMapboxIncoming : (Cmd.Response -> msg) -> Sub msg
-
-mapId =
-    {- this is whatever the `id` attribute on your map is -}
-    "my-map"
-
-flyTo =
-    Cmd.flyTo elmMapboxOutgoing mapId
-```
+Next, optionally, setup a ports module. The best way to do this is to to copy [this file](examples/MapCommands.elm) into your project.
 
 This will allow you to easily use the commands to control parts of your map interactions imperatively.
 
@@ -70,7 +52,7 @@ import Mapbox.Expression as E exposing (false, float, int, str, true)
 import Mapbox.Layer as Layer
 import Mapbox.Source as Source
 import Mapbox.Style as Style exposing (Style(..))
-import MapCmd
+import MapCommands
 
 
 main =
@@ -101,7 +83,7 @@ update msg model =
             ( { model | position = lngLat }, Cmd.none )
 
         Click { lngLat } ->
-            ( model, MapCmd.fitBounds ( mapPair (\a -> a - 0.2) lngLat, mapPair (\a -> a + 0.2) lngLat ) )
+            ( model, MapCommands.fitBounds [] ( mapPair (\a -> a - 0.2) lngLat, mapPair (\a -> a + 0.2) lngLat ) )
 
 style =
     Style
@@ -139,7 +121,40 @@ style =
 view model =
     div [ style [ ( "width", "100vw" ), ( "height", "100vh" ) ] ]
         [ css
-        , map [ onMouseMove Hover, onClick Click, id "my-map"] style
+        , map [ onMouseMove Hover, onClick Click, id MapCommands.id ] style
         , div [ style [ ( "position", "absolute" ), ( "bottom", "20px" ), ( "left", "20px" ) ] ] [ text (toString model.position) ]
         ]
 ```
+
+### Support
+
+This library is supported in all modern browsers. The `elmMapbox` library
+has a `supported` function that can be injected via flags:
+
+```javascript
+import elmMapbox from "elm-mapbox";
+
+var app = elmMapbox(Elm.MyApp.fullscreen({
+  mapboxSupported: elmMapbox.supported({
+    // If  true , the function will return  false if the performance of
+    // Mapbox GL JS would be dramatically worse than expected (e.g. a
+    // software WebGL renderer would be used).
+    failIfMajorPerformanceCaveat: true
+  })
+}));
+```
+
+### Customizing the JS side
+
+The `elmMapbox` function accepts an options object that takes the following options:
+
+ - `token`: the Mapbox token. If you don't pass it here, you will need to use the `token` Elm attribute.
+ - `outgoingPort`: the name of the outgoing port. Default: `elmMapboxOutgoing`.
+ - `incomingPort`: the name of the incoming port. Default `elmMapboxIncoming`.
+ - `easingFunctions`: an object whose values are easing functions (i.e. they take a number between 0..1 and return a number between 0..1). You can refer to these with the `easing` option in the Cmd module.
+
+### License
+
+(c) Jakub Hampl 2018
+
+MIT License
