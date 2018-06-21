@@ -103,6 +103,50 @@ function wrapElmApplication(elmApp, settings = {}) {
         this._pitch = value;
       }
 
+      get featureState() {
+        return this._featureState;
+      }
+      set featureState(value) {
+        // TODO: Clean this up
+        function makeId({id, source, sourceLayer}) {
+          return `${id}::${source}::${sourceLayer}`;
+        }
+        if (this._map) {
+          const map = new Map(this._featureState.map(([feature, state]) => [makeId(feature), {feature, state}]));
+          value.forEach(([feature, state]) => {
+            const id = makeId(feature);
+            if (map.has(id)) {
+              const prevValue = map.get(id).state;
+              const keys = Object.keys(prevValue);
+              let newValue = {};
+              keys.forEach(k => {
+                if (state[k] === undefined) {
+                  newValue[k] = undefined;
+                }
+              });
+              this._map.setFeatureState(
+                feature,
+                Object.assign(newValue, state)
+              );
+            } else {
+              this._map.setFeatureState(feature, state);
+            }
+            map.delete(id);
+          });
+
+          map.forEach(({feature, state}) => {
+            const keys = Object.keys(state);
+            let newValue = {};
+            keys.forEach(k => {
+              newValue[k] = undefined;
+            });
+            this._map.setFeatureState(feature, newValue);
+          });
+        }
+
+        this._featureState = value;
+      }
+
       addEventListener(type, fn, ...args) {
         if (this._map) {
           var wrapped;
@@ -236,7 +280,9 @@ function wrapElmApplication(elmApp, settings = {}) {
   if (elmApp.ports && elmApp.ports.elmMapboxOutgoing) {
     function processOptions(opts) {
       if (opts.easing) {
-        return Object.assign({}, opts, {easing: options.easingFunctions[opts.easing]});
+        return Object.assign({}, opts, {
+          easing: options.easingFunctions[opts.easing]
+        });
       }
       return opts;
     }

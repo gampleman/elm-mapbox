@@ -37,6 +37,7 @@ module Mapbox.Expression
         , has
         , count
         , length
+        , featureState
         , geometryType
         , id
         , properties
@@ -61,7 +62,7 @@ module Mapbox.Expression
         , conditionally
         , matchesStr
         , matchesFloat
-        , coallesce
+        , coalesce
         , interpolate
         , Interpolation(..)
         , step
@@ -198,7 +199,7 @@ You can also use these functions to explicitly cast to a particular type:
 
 ### Feature data
 
-@docs geometryType, id, properties, getProperty, hasProperty
+@docs featureState, geometryType, id, properties, getProperty, hasProperty
 
 
 ### Decision
@@ -217,7 +218,7 @@ Logical operators:
 
 Control flow:
 
-@docs ifElse, conditionally, matchesStr, matchesFloat, coallesce
+@docs ifElse, conditionally, matchesStr, matchesFloat, coalesce
 
 
 ### Ramps, scales, curves
@@ -268,7 +269,7 @@ Note however, that while being a strictly typed language, it has slighlty differ
 
   - There is only a single number type. I have denoted it `Float`. You will notice that the `int` function takes an Elm int
     value and converts it to an `Expression expr Float`.
-  - All values may be `null`. There is no `Maybe` type. You can use the `coallesce` function to handle this.
+  - All values may be `null`. There is no `Maybe` type. You can use the `coalesce` function to handle this.
   - There is no distinction between `List`, `Array`, and tuples. Hence all collections are labeled as `Array`.
   - Dictionaries are called `Object`. The keys are always `String`, but the values can be of mixed types. Hence retrieving
     values from them makes code untyped.
@@ -822,6 +823,13 @@ call name args =
     Expression (Json.Encode.list (Json.Encode.string name :: args))
 
 
+{-| Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. Note that `featureState` can only be used with paint properties that support data-driven styling.
+-}
+featureState : Expression exprType String -> Expression DataExpression any
+featureState =
+    call1 "feature-state"
+
+
 {-| Gets the feature's geometry type: Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon.
 -}
 geometryType : Expression DataExpression String
@@ -993,9 +1001,9 @@ any =
 
 {-| Evaluates each expression in turn until the first non-null value is obtained, and returns that value.
 -}
-coallesce : List (Expression exprType outputType) -> Expression exprType outputType
-coallesce =
-    calln "coallesce"
+coalesce : List (Expression exprType outputType) -> Expression exprType outputType
+coalesce =
+    calln "coalesce"
 
 
 {-| The ternary operator:

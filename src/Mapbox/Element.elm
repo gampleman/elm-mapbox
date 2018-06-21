@@ -1,4 +1,4 @@
-module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers, onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, controlledMap, Viewport)
+module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, featureState, EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers, onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, controlledMap, Viewport)
 
 {-| This library wraps a Custom Element that actually renders a map.
 
@@ -7,7 +7,7 @@ module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoo
 
 ### Attributes
 
-@docs token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies
+@docs token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, featureState
 
 
 ### Events
@@ -134,6 +134,25 @@ decodePair decoder =
                     _ ->
                         Decode.fail "Doesn't apear to be a pair"
             )
+
+
+{-| This is a declarative API for controlling states on the features.
+
+The API takes a bunch of GeoJSON features (these can be returned from the event listeners for example). They should at a minimum have these properties defined:
+
+  - `source`
+  - `sourceLayer` (only for vector sources)
+  - `id` the feature's unique id
+
+Then you can give it a `List ( String, Value )` state. You can use this state infromation through the `Mapbox.Expression.featureState` expression.
+
+-}
+featureState : List ( Value, List ( String, Value ) ) -> MapboxAttr msg
+featureState =
+    List.map (\( feature, state ) -> Encode.list [ feature, Encode.object state ])
+        >> Encode.list
+        >> property "featureState"
+        >> MapboxAttr
 
 
 
