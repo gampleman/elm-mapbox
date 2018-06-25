@@ -13,7 +13,7 @@ function wrapElmApplication(elmApp, settings = {}) {
   );
 
   if (options.token) {
-    mapboxgl.token = options.token;
+    mapboxgl.accessToken = options.token;
   }
   window.customElements.define(
     "elm-mapbox-map",
