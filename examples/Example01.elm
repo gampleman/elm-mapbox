@@ -2,9 +2,9 @@ module Example01 exposing (main)
 
 import Html exposing (div, text)
 import Html.Attributes exposing (style)
-import Json.Decode exposing (Value)
-import Json.Encode
+import LngLat exposing (LngLat)
 import MapCommands
+import Mapbox.Cmd.Option as Opt
 import Mapbox.Element exposing (..)
 import Mapbox.Expression as E exposing (false, float, int, str, true)
 import Mapbox.Layer as Layer
@@ -22,7 +22,7 @@ main =
 
 
 init =
-    ( { position = ( 0, 0 ), selectedFeatures = [] }, Cmd.none )
+    ( { position = LngLat 0 0 }, Cmd.none )
 
 
 type Msg
@@ -30,17 +30,13 @@ type Msg
     | Click EventData
 
 
-mapPair f ( a, b ) =
-    ( f a, f b )
-
-
 update msg model =
     case msg of
-        Hover { lngLat, renderedFeatures } ->
-            ( { model | position = lngLat, selectedFeatures = renderedFeatures }, Cmd.none )
+        Hover { lngLat } ->
+            ( { model | position = lngLat }, Cmd.none )
 
         Click { lngLat } ->
-            ( model, MapCommands.fitBounds [ MapCommands.linear True ] ( mapPair (\a -> a - 0.2) lngLat, mapPair (\a -> a + 0.2) lngLat ) )
+            ( model, MapCommands.fitBounds [ Opt.linear True, Opt.maxZoom 10 ] ( LngLat.map (\a -> a - 0.2) lngLat, LngLat.map (\a -> a + 0.2) lngLat ) )
 
 
 view model =
@@ -51,9 +47,6 @@ view model =
             , onMouseMove Hover
             , onClick Click
             , id "my-map"
-            , model.selectedFeatures
-                |> List.map (\f -> ( f, [ ( "hover", Json.Encode.bool True ) ] ))
-                |> featureState
             ]
             (Style
                 { transition = Style.defaultTransition
@@ -62,7 +55,7 @@ view model =
                     [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7,astrosat.07pz1g3y" ]
                 , misc =
                     [ Style.name "light"
-                    , Style.defaultCenter 20.39789404164037 43.22523201923144
+                    , Style.defaultCenter <| LngLat 20.39789404164037 43.22523201923144
                     , Style.defaultZoomLevel 1.5967483759772743
                     , Style.sprite "mapbox://sprites/astrosat/cjht22eqw0lfc2ro6z0qhlm29"
                     , Style.glyphs "mapbox://fonts/astrosat/{fontstack}/{range}.pbf"

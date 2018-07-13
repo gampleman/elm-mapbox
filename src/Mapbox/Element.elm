@@ -1,4 +1,4 @@
-module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, featureState, EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers, onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, controlledMap, Viewport)
+module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers, onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel)
 
 {-| This library wraps a Custom Element that actually renders a map.
 
@@ -7,7 +7,7 @@ module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoo
 
 ### Attributes
 
-@docs token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, featureState
+@docs token, id, maxZoom, minZoom, maxBounds, renderWorldCopies
 
 
 ### Events
@@ -16,11 +16,6 @@ module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoo
 
 @docs onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel
 
-
-### Controlled mode
-
-@docs controlledMap, Viewport
-
 -}
 
 import Html exposing (Attribute, Html, node)
@@ -28,8 +23,10 @@ import Html.Attributes exposing (attribute, property)
 import Html.Events exposing (Options)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
+import LngLat exposing (LngLat)
 import Mapbox.Expression exposing (DataExpression, Expression)
 import Mapbox.Style exposing (Style)
+import Mapbox.Helpers exposing (encodePair)
 
 
 {-| This is the type that all attributes have.
@@ -99,17 +96,11 @@ id =
     attribute "id" >> MapboxAttr
 
 
-{-| A longitude latitude pair (in that order).
--}
-type alias LngLat =
-    ( Float, Float )
-
-
 {-| If set, the map will be constrained to the given bounds. The bounds are the `(south-west corner, north-east corner)`.
 -}
 maxBounds : ( LngLat, LngLat ) -> MapboxAttr msg
 maxBounds =
-    encodePair (encodePair Encode.float) >> property "maxBounds" >> MapboxAttr
+    encodePair LngLat.encodeAsPair >> property "maxBounds" >> MapboxAttr
 
 
 {-| If true, multiple copies of the world will be rendered, when zoomed out.
@@ -117,23 +108,6 @@ maxBounds =
 renderWorldCopies : Bool -> MapboxAttr msg
 renderWorldCopies =
     Encode.bool >> property "renderWorldCopies" >> MapboxAttr
-
-
-encodePair encoder ( a, b ) =
-    Encode.list [ encoder a, encoder b ]
-
-
-decodePair decoder =
-    Decode.list decoder
-        |> Decode.andThen
-            (\l ->
-                case l of
-                    [ a, b ] ->
-                        Decode.succeed ( a, b )
-
-                    _ ->
-                        Decode.fail "Doesn't apear to be a pair"
-            )
 
 
 {-| This is a declarative API for controlling states on the features.
@@ -145,6 +119,8 @@ The API takes a bunch of GeoJSON features (these can be returned from the event 
   - `id` the feature's unique id
 
 Then you can give it a `List ( String, Value )` state. You can use this state infromation through the `Mapbox.Expression.featureState` expression.
+
+This needs more design before release.
 
 -}
 featureState : List ( Value, List ( String, Value ) ) -> MapboxAttr msg
@@ -220,10 +196,6 @@ type alias TouchEvent =
     }
 
 
-decodeLngLat =
-    Decode.map2 (,) (Decode.field "lng" Decode.float) (Decode.field "lat" Decode.float)
-
-
 decodePoint =
     Decode.map2 (,) (Decode.field "x" Decode.int) (Decode.field "y" Decode.int)
 
@@ -231,7 +203,7 @@ decodePoint =
 decodeEventData =
     Decode.map3 EventData
         (Decode.field "point" decodePoint)
-        (Decode.field "lngLat" decodeLngLat)
+        (Decode.field "lngLat" LngLat.decodeFromObject)
         (Decode.field "features" (Decode.list Decode.value))
 
 
@@ -239,7 +211,7 @@ decodeTouchEvent =
     Decode.map2 TouchEvent
         (Decode.map3 (List.map3 EventData)
             (Decode.field "points" (Decode.list decodePoint))
-            (Decode.field "lngLats" (Decode.list decodeLngLat))
+            (Decode.field "lngLats" (Decode.list LngLat.decodeFromObject))
             (Decode.field "perPointFeatures" (Decode.list (Decode.list Decode.value)))
         )
         decodeEventData
@@ -408,6 +380,9 @@ type alias Viewport =
 
 
 {-| By default the map is "uncontrolled". By this we mean that it has its own internal state (namely the center, zoom level, pitch and bearing). This is nice if you don't care about these, but it does break some of the niceness of TEA. It also means some advanced interaction techniques are impossible to implement. For this reason we allow controlled mode where no event handlers are attached, but you need to feed the element its state. So it's up to you to implement all the user interactions. In the future, this library may help with that, but in the present this is not available.
+
+Not done, so let's not release this.
+
 -}
 controlledMap : Viewport -> List (MapboxAttr msg) -> Style -> Html msg
 controlledMap { center, zoom, bearing, pitch } attrs style =
@@ -415,7 +390,7 @@ controlledMap { center, zoom, bearing, pitch } attrs style =
         props =
             property "mapboxStyle" (Mapbox.Style.encode style)
                 :: property "interactive" (Encode.bool False)
-                :: property "center" (encodePair Encode.float center)
+                :: property "center" (LngLat.encodeAsPair center)
                 :: property "zoom" (Encode.float zoom)
                 :: property "bearing" (Encode.float bearing)
                 :: property "pitch" (Encode.float pitch)

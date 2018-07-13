@@ -7,7 +7,8 @@ function wrapElmApplication(elmApp, settings = {}) {
       incomingPort: "elmMapboxIncoming",
       easingFunctions: {
         linear: t => t
-      }
+      },
+      onMount() {}
     },
     settings
   );
@@ -223,7 +224,7 @@ function wrapElmApplication(elmApp, settings = {}) {
       }
 
       _createMapInstance() {
-        let options = {
+        let mapOptions = {
           container: this,
           style: this._style,
           minZoom: this._minZoom || 0,
@@ -236,18 +237,18 @@ function wrapElmApplication(elmApp, settings = {}) {
           renderWorldCopies: this._renderWorldCopies
         };
         if (this._center) {
-          options.center = this._center;
+          mapOptions.center = this._center;
         }
         if (this._zoom) {
-          options.zoom = this._zoom;
+          mapOptions.zoom = this._zoom;
         }
         if (this._bearing) {
-          options.bearing = this._bearing;
+          mapOptions.bearing = this._bearing;
         }
         if (this._pitch) {
-          options.pitch = this._pitch;
+          mapOptions.pitch = this._pitch;
         }
-        this._map = new mapboxgl.Map(options);
+        this._map = new mapboxgl.Map(mapOptions);
 
         Object.entries(this._eventRegistrationQueue).forEach(
           ([type, listeners]) => {
@@ -257,6 +258,7 @@ function wrapElmApplication(elmApp, settings = {}) {
           }
         );
         this._eventRegistrationQueue = {};
+        options.onMount(this._map, this);
         return this._map;
       }
 

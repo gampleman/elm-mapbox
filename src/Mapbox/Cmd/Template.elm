@@ -1,36 +1,22 @@
-module Mapbox.Cmd exposing (Id, Outgoing, Option, Supported, duration, easing, offset, animate, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, curve, minZoom, speed, screenSpeed, maxDuration, stop, center, zoom, bearing, pitch, around, fitBounds, padding, Padding, linear, maxZoom, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures, Query, layers, filter, resize)
+module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response(..), queryResults, getBounds, queryRenderedFeatures, Query(..), resize)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
-@docs Id, Outgoing
+However, since a published library can't have ports in it, you will need to do some setup. The easiest way to do this is to copy [this file into your app](https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm). You can see the module docs for that [here](https://github.com/gampleman/elm-mapbox/blob/master/docs/MapCommands.md).
 
-However, since a published library can't have ports in it, you will need to do some setup. The easiest way to do this is to copy [this file into your app](https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm).
+@docs Id, Outgoing, Option, Supported
 
-@docs Option, Supported
-
-
-### Animation options
-
-Options common to map movement commands that involve animation, such as panBy and easeTo, controlling the duration and easing function of the animation. All properties are optional.
-
-@docs duration, easing, offset, animate
+You can of course customize the module you copy into your codebase to support things like having multiple maps on the page at once, etc.
 
 
 ### Moving the map around
 
-@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, curve, minZoom, speed, screenSpeed, maxDuration, stop
-
-
-### Camera Options
-
-Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired location, zoom, bearing, and pitch of the camera. All properties are optional, and when a property is omitted, the current camera value for that property will remain unchanged.
-
-@docs center, zoom, bearing, pitch, around
+@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop
 
 
 ### Fiting bounds
 
-@docs fitBounds, padding, Padding, linear, maxZoom
+@docs fitBounds
 
 
 ### Other
@@ -40,14 +26,15 @@ Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired locat
 
 ### Querying the map
 
-@docs Response, queryResults, getBounds, queryRenderedFeatures, Query, layers, filter
+@docs Response, queryResults, getBounds, queryRenderedFeatures, Query
 
 -}
 
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Element exposing (LngLat, Viewport)
-import Mapbox.Expression exposing (DataExpression, Expression)
+import Mapbox.Cmd.Internal as Internal exposing (Option(..), Supported)
+import Mapbox.Helpers exposing (encodePair)
+import LngLat exposing (LngLat)
 
 
 {-| The type of a port that you need to provide for this module to work.
@@ -62,151 +49,16 @@ type alias Id =
     String
 
 
+type alias Option support =
+    Internal.Option support
+
+
+type alias Supported =
+    Internal.Supported
+
+
 
 -- AnimationOptions
-
-
-{-| The animation's duration, measured in milliseconds.
--}
-duration : Int -> Option { a | duration : Supported }
-duration =
-    Encode.int >> Option "duration"
-
-
-{-| The name of an easing function. These must be passed to `elmMapbox`
-in the `easingFunctions` option.
--}
-easing : String -> Option { a | easing : Supported }
-easing =
-    Encode.string >> Option "easing"
-
-
-{-| Offset of the target center relative to real map container center at the end of animation.
--}
-offset : ( Int, Int ) -> Option { a | offset : Supported }
-offset =
-    encodePair Encode.int >> Option "offset"
-
-
-{-| If false, no animation will occur.
--}
-animate : Bool -> Option { a | animate : Supported }
-animate =
-    Encode.bool >> Option "animate"
-
-
-{-| The desired center.
--}
-center : LngLat -> Option { a | center : Supported }
-center =
-    encodePair Encode.float >> Option "center"
-
-
-{-| The desired zoom level.
--}
-zoom : Float -> Option { a | zoom : Supported }
-zoom =
-    Encode.float >> Option "zoom"
-
-
-{-| The desired bearing, in degrees. The bearing is the compass direction that is "up"; for example, a bearing of 90° orients the map so that east is up.
--}
-bearing : Float -> Option { a | bearing : Supported }
-bearing =
-    Encode.float >> Option "bearing"
-
-
-{-| The desired pitch, in degrees.
--}
-pitch : Float -> Option { a | pitch : Supported }
-pitch =
-    Encode.float >> Option "pitch"
-
-
-{-| If `zoom` is specified, `around` determines the point around which the zoom is centered.
--}
-around : LngLat -> Option { a | around : Supported }
-around =
-    encodePair Encode.float >> Option "around"
-
-
-{-| The amount of padding in pixels to add to the given bounds.
--}
-padding : Padding -> Option { a | padding : Supported }
-padding =
-    encodePadding >> Option "padding"
-
-
-{-| -}
-type alias Padding =
-    { top : Int, right : Int, bottom : Int, left : Int }
-
-
-encodePadding { top, right, bottom, left } =
-    Encode.object
-        [ ( "top", Encode.int top )
-        , ( "right", Encode.int right )
-        , ( "bottom", Encode.int bottom )
-        , ( "left", Encode.int left )
-        ]
-
-
-{-| If true, the map transitions using `easeTo` . If false, the map transitions using `flyTo`.
--}
-linear : Bool -> Option { a | linear : Supported }
-linear =
-    Encode.bool >> Option "linear"
-
-
-{-| The maximum zoom level to allow when the map view transitions to the specified bounds.
--}
-maxZoom : Float -> Option { a | maxZoom : Supported }
-maxZoom =
-    Encode.float >> Option "maxZoom"
-
-
-{-| The zooming "curve" that will occur along the flight path.
-A high value maximizes zooming for an exaggerated animation, while a
-low value minimizes zooming for an effect closer to `easeTo`.
-1.42 is the average value selected by participants in the user study discussed in [van Wijk (2003)](https://www.win.tue.nl/~vanwijk/zoompan.pdf).
-A value of `6 ^ 0.25` would be equivalent to the root mean squared average velocity. A value of 1 would produce a circular motion.
--}
-curve : Float -> Option { a | curve : Supported }
-curve =
-    Encode.float >> Option "curve"
-
-
-{-| The zero-based zoom level at the peak of the flight path.
-If `curve` is specified, this option is ignored.
--}
-minZoom : Float -> Option { a | minZoom : Supported }
-minZoom =
-    Encode.float >> Option "minZoom"
-
-
-{-| The average speed of the animation defined in relation to `curve`. A speed of 1.2 means that the map appears to move along the flight path by 1.2 times `curve` screenfuls every second. A screenful is the map's visible span. It does not correspond to a fixed physical distance, but varies by zoom level.
--}
-speed : Float -> Option { a | speed : Supported }
-speed =
-    Encode.float >> Option "speed"
-
-
-{-| The average speed of the animation measured in screenfuls per second, assuming a linear timing curve. If `speed` is specified, this option is ignored.
--}
-screenSpeed : Float -> Option { a | screenSpeed : Supported }
-screenSpeed =
-    Encode.float >> Option "screenSpeed"
-
-
-{-| The animation's maximum duration, measured in milliseconds. If duration exceeds maximum duration, it resets to 0.
--}
-maxDuration : Float -> Option { a | maxDuration : Supported }
-maxDuration =
-    Encode.float >> Option "maxDuration"
-
-
-encodePair encoder ( a, b ) =
-    Encode.list [ encoder a, encoder b ]
 
 
 decodePair decoder =
@@ -263,20 +115,9 @@ fitBounds prt id options bounds =
     makeCmd prt
         id
         "fitBounds"
-        [ ( "bounds", encodePair (encodePair Encode.float) bounds )
+        [ ( "bounds", encodePair LngLat.encodeAsPair bounds )
         , encodeOptions options
         ]
-
-
-{-| Options use phantom types to show which commands support them.
--}
-type Option support
-    = Option String Value
-
-
-{-| -}
-type Supported
-    = Supported
 
 
 encodeOptions opts =
@@ -320,7 +161,7 @@ panTo :
     -> LngLat
     -> Cmd msg
 panTo prt id options location =
-    makeCmd prt id "panTo" [ ( "location", encodePair Encode.float location ), encodeOptions options ]
+    makeCmd prt id "panTo" [ ( "location", LngLat.encodeAsPair location ), encodeOptions options ]
 
 
 {-| Zooms the map to the specified zoom level, with an animated transition.
@@ -513,10 +354,10 @@ encodeQuery query =
             Encode.string "viewport"
 
         Point lngLat ->
-            encodePair Encode.float lngLat
+            LngLat.encodeAsPair lngLat
 
         Box sw ne ->
-            encodePair (encodePair Encode.float) ( sw, ne )
+            encodePair LngLat.encodeAsPair ( sw, ne )
 
 
 {-| Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.
@@ -541,20 +382,6 @@ queryRenderedFeatures prt id reqId options query =
         , ( "query", encodeQuery query )
         , encodeOptions options
         ]
-
-
-{-| A list of style layer IDs for the query to inspect. Only features within these layers will be returned. If this parameter is not set, all layers will be checked.
--}
-layers : List String -> Option { a | layers : Supported }
-layers =
-    List.map Encode.string >> Encode.list >> Option "layers"
-
-
-{-| A filter to limit query results.
--}
-filter : Expression DataExpression Bool -> Option { a | filter : Supported }
-filter =
-    Mapbox.Expression.encode >> Option "filter"
 
 
 {-| A response to the queries. See the relevant methods for more information.
@@ -589,7 +416,7 @@ responseDecoder =
             (\s ->
                 case s of
                     "getBounds" ->
-                        Decode.map2 GetBounds (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair (decodePair Decode.float)))
+                        Decode.map2 GetBounds (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair LngLat.decodeFromPair))
 
                     "queryRenderedFeatures" ->
                         Decode.map2 QueryRenderedFeatures (Decode.field "id" Decode.int) (Decode.field "features" (Decode.list Decode.value))

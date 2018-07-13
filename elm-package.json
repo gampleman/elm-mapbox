@@ -1,18 +1,20 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
-    "license": "BSD3",
+    "summary": "An advanced mapping library",
+    "repository": "https://github.com/gampleman/elm-mapbox.git",
+    "license": "MIT",
     "source-directories": [
         "./src"
     ],
     "exposed-modules": [
         "Mapbox.Element",
-        "Mapbox.Cmd",
+        "Mapbox.Cmd.Template",
+        "Mapbox.Cmd.Option",
         "Mapbox.Style",
         "Mapbox.Source",
         "Mapbox.Layer",
-        "Mapbox.Expression"
+        "Mapbox.Expression",
+        "LngLat"
     ],
     "dependencies": {
         "elm-lang/core": "5.1.1 <= v < 6.0.0",

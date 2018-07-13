@@ -12,3 +12,7 @@ encodeAnchor v =
 
         Map ->
             Encode.string "map"
+
+
+encodePair encoder ( a, b ) =
+    Encode.list [ encoder a, encoder b ]

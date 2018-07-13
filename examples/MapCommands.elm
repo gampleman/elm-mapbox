@@ -1,32 +1,18 @@
-port module MapCommands exposing (id, duration, easing, offset, animate, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, curve, minZoom, speed, screenSpeed, maxDuration, stop, center, zoom, bearing, pitch, around, fitBounds, padding, linear, maxZoom, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures, Query, layers, filter)
+port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures, Query)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
-@docs Option
-
-
-### Animation options
-
-Options common to map movement commands that involve animation, such as panBy and easeTo, controlling the duration and easing function of the animation. All properties are optional.
-
-@docs duration, easing, offset, animate
+@docs id
 
 
 ### Moving the map around
 
-@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, curve, minZoom, speed, screenSpeed, maxDuration, stop
+@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop
 
 
-### Camera Options
+### Fitting bounds
 
-Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired location, zoom, bearing, and pitch of the camera. All properties are optional, and when a property is omitted, the current camera value for that property will remain unchanged.
-
-@docs center, zoom, bearing, pitch, around
-
-
-### Fiting bounds
-
-@docs fitBounds, padding, Padding, linear, maxZoom
+@docs fitBounds
 
 
 ### Right-to-left
@@ -36,15 +22,13 @@ Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired locat
 
 ### Querying the map
 
-@docs Response, queryResults, getBounds, queryRenderedFeatures, Query, layers, filter
+@docs Response, queryResults, getBounds, queryRenderedFeatures, Query
 
 -}
 
-import Mapbox.Cmd as Template exposing (Option, Supported)
-import Json.Decode as Decode
+import Mapbox.Cmd.Template as Template exposing (Option, Supported)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Element exposing (LngLat, Viewport)
-import Mapbox.Expression exposing (DataExpression, Expression)
+import LngLat exposing (LngLat)
 
 
 port elmMapboxOutgoing : Value -> Cmd msg
@@ -55,135 +39,6 @@ port elmMapboxOutgoing : Value -> Cmd msg
 id : Template.Id
 id =
     "my-map"
-
-
-
--- AnimationOptions
-
-
-{-| The animation's duration, measured in milliseconds.
--}
-duration : Int -> Option { a | duration : Supported }
-duration =
-    Template.duration
-
-
-{-| The name of an easing function. These must be passed to `elmMapbox`
-in the `easingFunctions` option.
--}
-easing : String -> Option { a | easing : Supported }
-easing =
-    Template.easing
-
-
-{-| Offset of the target center relative to real map container center at the end of animation.
--}
-offset : ( Int, Int ) -> Option { a | offset : Supported }
-offset =
-    Template.offset
-
-
-{-| If false, no animation will occur.
--}
-animate : Bool -> Option { a | animate : Supported }
-animate =
-    Template.animate
-
-
-{-| The desired center.
--}
-center : LngLat -> Option { a | center : Supported }
-center =
-    Template.center
-
-
-{-| The desired zoom level.
--}
-zoom : Float -> Option { a | zoom : Supported }
-zoom =
-    Template.zoom
-
-
-{-| The desired bearing, in degrees. The bearing is the compass direction that is "up"; for example, a bearing of 90° orients the map so that east is up.
--}
-bearing : Float -> Option { a | bearing : Supported }
-bearing =
-    Template.bearing
-
-
-{-| The desired pitch, in degrees.
--}
-pitch : Float -> Option { a | pitch : Supported }
-pitch =
-    Template.pitch
-
-
-{-| If `zoom` is specified, `around` determines the point around which the zoom is centered.
--}
-around : LngLat -> Option { a | around : Supported }
-around =
-    Template.around
-
-
-{-| The amount of padding in pixels to add to the given bounds.
--}
-padding : Template.Padding -> Option { a | padding : Supported }
-padding =
-    Template.padding
-
-
-{-| If true, the map transitions using `easeTo` . If false, the map transitions using `flyTo`.
--}
-linear : Bool -> Option { a | linear : Supported }
-linear =
-    Template.linear
-
-
-{-| The maximum zoom level to allow when the map view transitions to the specified bounds.
--}
-maxZoom : Float -> Option { a | maxZoom : Supported }
-maxZoom =
-    Template.maxZoom
-
-
-{-| The zooming "curve" that will occur along the flight path.
-A high value maximizes zooming for an exaggerated animation, while a
-low value minimizes zooming for an effect closer to `easeTo`.
-1.42 is the average value selected by participants in the user study discussed in [van Wijk (2003)](https://www.win.tue.nl/~vanwijk/zoompan.pdf).
-A value of `6 ^ 0.25` would be equivalent to the root mean squared average velocity. A value of 1 would produce a circular motion.
--}
-curve : Float -> Option { a | curve : Supported }
-curve =
-    Template.curve
-
-
-{-| The zero-based zoom level at the peak of the flight path.
-If `curve` is specified, this option is ignored.
--}
-minZoom : Float -> Option { a | minZoom : Supported }
-minZoom =
-    Template.minZoom
-
-
-{-| The average speed of the animation defined in relation to `curve`. A speed of 1.2 means that the map appears to move along the flight path by 1.2 times `curve` screenfuls every second. A screenful is the map's visible span. It does not correspond to a fixed physical distance, but varies by zoom level.
--}
-speed : Float -> Option { a | speed : Supported }
-speed =
-    Template.speed
-
-
-{-| The average speed of the animation measured in screenfuls per second, assuming a linear timing curve. If `speed` is specified, this option is ignored.
--}
-screenSpeed : Float -> Option { a | screenSpeed : Supported }
-screenSpeed =
-    Template.screenSpeed
-
-
-{-| The animation's maximum duration, measured in milliseconds. If duration exceeds maximum duration, it resets to 0.
--}
-maxDuration : Float -> Option { a | maxDuration : Supported }
-maxDuration =
-    Template.maxDuration
 
 
 {-| Resizes the map according to the dimensions of its container element.
@@ -214,7 +69,7 @@ fitBounds =
     Template.fitBounds elmMapboxOutgoing id
 
 
-{-| Pans the map by the specified offest.
+{-| Pans the map by the specified offset.
 -}
 panBy :
     List
@@ -427,20 +282,6 @@ queryRenderedFeatures =
     Template.queryRenderedFeatures elmMapboxOutgoing id
 
 
-{-| A list of style layer IDs for the query to inspect. Only features within these layers will be returned. If this parameter is not set, all layers will be checked.
--}
-layers : List String -> Option { a | layers : Supported }
-layers =
-    Template.layers
-
-
-{-| A filter to limit query results.
--}
-filter : Expression DataExpression Bool -> Option { a | filter : Supported }
-filter =
-    Template.filter
-
-
 {-| A response to the queries. See the relevant methods for more information.
 -}
 type alias Response =
@@ -450,7 +291,7 @@ type alias Response =
 port elmMapboxIncoming : (Value -> msg) -> Sub msg
 
 
-{-| Recieve results from the queries
+{-| Receive results from the queries
 -}
 queryResults : (Response -> msg) -> Sub msg
 queryResults =

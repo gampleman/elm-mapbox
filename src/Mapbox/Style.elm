@@ -30,6 +30,7 @@ You can also use one of these predefined styles.
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
+import LngLat exposing (LngLat)
 import Mapbox.Expression exposing (Anchor(Viewport), CameraExpression, Color, Expression, float, floats, rgba)
 import Mapbox.Helpers exposing (encodeAnchor)
 import Mapbox.Layer exposing (Layer)
@@ -161,9 +162,9 @@ name =
 
 {-| Default map center in longitude and latitude. The style center will be used only if the map has not been positioned by other means (e.g. map options or user interaction).
 -}
-defaultCenter : Float -> Float -> MiscAttr
-defaultCenter lat lng =
-    Encode.list [ Encode.float lat, Encode.float lng ] |> MiscAttr "center"
+defaultCenter : LngLat -> MiscAttr
+defaultCenter =
+    LngLat.encodeAsPair >> MiscAttr "center"
 
 
 {-| Default zoom level. The style zoom will be used only if the map has not been positioned by other means (e.g. map options or user interaction).

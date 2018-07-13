@@ -49,6 +49,7 @@ Tiled sources can also take the following attributes:
 -}
 
 import Json.Encode exposing (Value)
+import LngLat exposing (LngLat)
 
 
 {-| Every layer is identified by an id.
@@ -115,11 +116,11 @@ getId (Source k _) =
     k
 
 
-{-| The longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `sw.lng, sw.lat, ne.lng, ne.lat`. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL.
+{-| The longitude and latitude of the southwest and northeast corners of the source's bounding box. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL.
 -}
-bounds : Float -> Float -> Float -> Float -> SourceOption any
-bounds a b c d =
-    SourceOption "bounds" (Json.Encode.list [ Json.Encode.float a, Json.Encode.float b, Json.Encode.float c, Json.Encode.float d ])
+bounds : LngLat -> LngLat -> SourceOption any
+bounds sw ne =
+    SourceOption "bounds" (Json.Encode.list [ Json.Encode.float sw.lng, Json.Encode.float sw.lat, Json.Encode.float sw.lng, Json.Encode.float sw.lat ])
 
 
 {-| Minimum zoom level for which tiles are available, as in the TileJSON spec.
@@ -296,20 +297,21 @@ geoJSONFromValue id options data =
 {-| `(longitude, latitude)` pairs for the corners. You can use the type alias constructor in clockwise order: top left, top right, bottom right, bottom left.
 -}
 type alias Coords =
-    { topLeft : ( Float, Float )
-    , topRight : ( Float, Float )
-    , bottomRight : ( Float, Float )
-    , bottomLeft : ( Float, Float )
+    { topLeft : LngLat
+    , topRight : LngLat
+    , bottomRight : LngLat
+    , bottomLeft : LngLat
     }
 
 
 encodeCoordinates : Coords -> Value
 encodeCoordinates { topLeft, topRight, bottomRight, bottomLeft } =
-    let
-        encodePair ( x, y ) =
-            Json.Encode.list [ Json.Encode.float x, Json.Encode.float y ]
-    in
-        Json.Encode.list [ encodePair topLeft, encodePair topRight, encodePair bottomRight, encodePair bottomLeft ]
+    Json.Encode.list
+        [ LngLat.encodeAsPair topLeft
+        , LngLat.encodeAsPair topRight
+        , LngLat.encodeAsPair bottomRight
+        , LngLat.encodeAsPair bottomLeft
+        ]
 
 
 {-| An image source
