@@ -3,7 +3,7 @@ module Example01 exposing (main)
 import Html exposing (div, text)
 import Html.Attributes exposing (style)
 import LngLat exposing (LngLat)
-import MapCommands
+import MapCommands exposing (Response(..))
 import Mapbox.Cmd.Option as Opt
 import Mapbox.Element exposing (..)
 import Mapbox.Expression as E exposing (false, float, int, str, true)

@@ -1,263 +1,19 @@
 [
   {
-    "name": "Mapbox.Cmd",
-    "comment": " This module has a bunch of essentially imperative commands for your map.\n\n@docs Id, Outgoing\n\nHowever, since a published library can't have ports in it, you will need to do some setup. The easiest way to do this is to copy [this file into your app](https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm).\n\n@docs Option, Supported\n\n\n### Animation options\n\nOptions common to map movement commands that involve animation, such as panBy and easeTo, controlling the duration and easing function of the animation. All properties are optional.\n\n@docs duration, easing, offset, animate\n\n\n### Moving the map around\n\n@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, curve, minZoom, speed, screenSpeed, maxDuration, stop\n\n\n### Camera Options\n\nOptions common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired location, zoom, bearing, and pitch of the camera. All properties are optional, and when a property is omitted, the current camera value for that property will remain unchanged.\n\n@docs center, zoom, bearing, pitch, around\n\n\n### Fiting bounds\n\n@docs fitBounds, padding, Padding, linear, maxZoom\n\n\n### Other\n\n@docs setRTLTextPlugin, resize\n\n\n### Querying the map\n\n@docs Response, queryResults, getBounds, queryRenderedFeatures, Query, layers, filter\n\n",
-    "aliases": [
-      {
-        "name": "Id",
-        "comment": " Every command takes the DOM id of the map that it should operate on.\n",
-        "args": [],
-        "type": "String"
-      },
-      {
-        "name": "Outgoing",
-        "comment": " The type of a port that you need to provide for this module to work.\n",
-        "args": [
-          "msg"
-        ],
-        "type": "Json.Encode.Value -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "Padding",
-        "comment": " ",
-        "args": [],
-        "type": "{ top : Int, right : Int, bottom : Int, left : Int }"
-      }
-    ],
-    "types": [
-      {
-        "name": "Option",
-        "comment": " Options use phantom types to show which commands support them.\n",
-        "args": [
-          "support"
-        ],
-        "cases": []
-      },
-      {
-        "name": "Query",
-        "comment": " The geometry of the query region. Either a point, a bounding box (specified in terms of southwest and northeast points), or what is currently visible in the viewport.\n",
-        "args": [],
-        "cases": []
-      },
-      {
-        "name": "Response",
-        "comment": " A response to the queries. See the relevant methods for more information.\n",
-        "args": [],
-        "cases": []
-      },
-      {
-        "name": "Supported",
-        "comment": " ",
-        "args": [],
-        "cases": []
-      }
-    ],
-    "values": [
-      {
-        "name": "animate",
-        "comment": " If false, no animation will occur.\n",
-        "type": "Bool -> Mapbox.Cmd.Option { a | animate : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "around",
-        "comment": " If `zoom` is specified, `around` determines the point around which the zoom is centered.\n",
-        "type": "Mapbox.Element.LngLat -> Mapbox.Cmd.Option { a | around : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "bearing",
-        "comment": " The desired bearing, in degrees. The bearing is the compass direction that is \"up\"; for example, a bearing of 90° orients the map so that east is up.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | bearing : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "center",
-        "comment": " The desired center.\n",
-        "type": "Mapbox.Element.LngLat -> Mapbox.Cmd.Option { a | center : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "curve",
-        "comment": " The zooming \"curve\" that will occur along the flight path.\nA high value maximizes zooming for an exaggerated animation, while a\nlow value minimizes zooming for an effect closer to `easeTo`.\n1.42 is the average value selected by participants in the user study discussed in [van Wijk (2003)](https://www.win.tue.nl/~vanwijk/zoompan.pdf).\nA value of `6 ^ 0.25` would be equivalent to the root mean squared average velocity. A value of 1 would produce a circular motion.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | curve : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "duration",
-        "comment": " The animation's duration, measured in milliseconds.\n",
-        "type": "Int -> Mapbox.Cmd.Option { a | duration : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "easeTo",
-        "comment": " Changes any combination of center, zoom, bearing, and pitch, with an animated transition between old and new values. The map will retain its current values for any details not specified in options.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { center : Mapbox.Cmd.Supported , zoom : Mapbox.Cmd.Supported , bearing : Mapbox.Cmd.Supported , pitch : Mapbox.Cmd.Supported , around : Mapbox.Cmd.Supported , duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "easing",
-        "comment": " The name of an easing function. These must be passed to `elmMapbox`\nin the `easingFunctions` option.\n",
-        "type": "String -> Mapbox.Cmd.Option { a | easing : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "filter",
-        "comment": " A filter to limit query results.\n",
-        "type": "Mapbox.Expression.Expression Mapbox.Expression.DataExpression Bool -> Mapbox.Cmd.Option { a | filter : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "fitBounds",
-        "comment": " Pans and zooms the map to contain its visible area within the specified geographical bounds. This function will also reset the map's bearing to 0 if bearing is nonzero.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { padding : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , linear : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , maxZoom : Mapbox.Cmd.Supported }) -> ( Mapbox.Element.LngLat, Mapbox.Element.LngLat ) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "flyTo",
-        "comment": " Changes any combination of center, zoom, bearing, and pitch, animating the transition along a curve that evokes flight. The animation seamlessly incorporates zooming and panning to help the user maintain her bearings even after traversing a great distance.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { center : Mapbox.Cmd.Supported , zoom : Mapbox.Cmd.Supported , bearing : Mapbox.Cmd.Supported , pitch : Mapbox.Cmd.Supported , around : Mapbox.Cmd.Supported , duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported , curve : Mapbox.Cmd.Supported , minZoom : Mapbox.Cmd.Supported , speed : Mapbox.Cmd.Supported , screenSpeed : Mapbox.Cmd.Supported , maxDuration : Mapbox.Cmd.Supported }) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "getBounds",
-        "comment": " Responds with the map's geographical bounds. Takes a numerical ID that allows you to associate the question with the answer.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> Int -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "jumpTo",
-        "comment": " Changes any combination of center, zoom, bearing, and pitch, without an animated transition. The map will retain its current values for any details not specified in options.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { center : Mapbox.Cmd.Supported , zoom : Mapbox.Cmd.Supported , bearing : Mapbox.Cmd.Supported , pitch : Mapbox.Cmd.Supported , around : Mapbox.Cmd.Supported }) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "layers",
-        "comment": " A list of style layer IDs for the query to inspect. Only features within these layers will be returned. If this parameter is not set, all layers will be checked.\n",
-        "type": "List String -> Mapbox.Cmd.Option { a | layers : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "linear",
-        "comment": " If true, the map transitions using `easeTo` . If false, the map transitions using `flyTo`.\n",
-        "type": "Bool -> Mapbox.Cmd.Option { a | linear : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "maxDuration",
-        "comment": " The animation's maximum duration, measured in milliseconds. If duration exceeds maximum duration, it resets to 0.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | maxDuration : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "maxZoom",
-        "comment": " The maximum zoom level to allow when the map view transitions to the specified bounds.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | maxZoom : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "minZoom",
-        "comment": " The zero-based zoom level at the peak of the flight path.\nIf `curve` is specified, this option is ignored.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | minZoom : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "offset",
-        "comment": " Offset of the target center relative to real map container center at the end of animation.\n",
-        "type": "( Int, Int ) -> Mapbox.Cmd.Option { a | offset : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "padding",
-        "comment": " The amount of padding in pixels to add to the given bounds.\n",
-        "type": "Mapbox.Cmd.Padding -> Mapbox.Cmd.Option { a | padding : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "panBy",
-        "comment": " Pans the map by the specified offest.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> ( Int, Int ) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "panTo",
-        "comment": " Pans the map to the specified location, with an animated transition.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Mapbox.Element.LngLat -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "pitch",
-        "comment": " The desired pitch, in degrees.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | pitch : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "queryRenderedFeatures",
-        "comment": " Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.\n\nThe response: The properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).\n\nEach feature includes a top-level layer property whose value is an object representing the style layer to which the feature belongs. Layout and paint properties in this object contain values which are fully evaluated for the given zoom level and feature.\n\nFeatures from layers whose visibility property is \"none\", or from layers whose zoom range excludes the current zoom level are not included. Symbol features that have been hidden due to text or icon collision are not included. Features from all other layers are included, including features that may have no visible contribution to the rendered result; for example, because the layer's opacity or color alpha component is set to 0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.\n\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> Int -> List (Mapbox.Cmd.Option { layers : Mapbox.Cmd.Supported, filter : Mapbox.Cmd.Supported }) -> Mapbox.Cmd.Query -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "queryResults",
-        "comment": " Wraps an incoming port so that you can get nicer subscritions:\n\n    port elmMapboxIncoming : (Value -> msg) -> Sub msg\n\n\n    -- exposed\n\n    queryResults : (Response -> msg) -> Sub msg\n\n    queryResuls =\n        Mapbox.Cmd.queryResults elmMapboxIncoming\n\n",
-        "type": "((Json.Encode.Value -> msg) -> Platform.Sub.Sub msg) -> (Mapbox.Cmd.Response -> msg) -> Platform.Sub.Sub msg"
-      },
-      {
-        "name": "resize",
-        "comment": " Resizes the map according to the dimensions of its container element.\n\nThis command must be sent after the map's container is resized, or when the map is shown after being initially hidden with CSS.\n\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "rotateTo",
-        "comment": " Rotates the map to the specified bearing, with an animated transition. The bearing is the compass direction that is \"up\"; for example, a bearing of 90° orients the map so that east is up.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Float -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "screenSpeed",
-        "comment": " The average speed of the animation measured in screenfuls per second, assuming a linear timing curve. If `speed` is specified, this option is ignored.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | screenSpeed : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "setRTLTextPlugin",
-        "comment": " Sets the map's [RTL text plugin](https://www.mapbox.com/mapbox-gl-js/plugins/#mapbox-gl-rtl-text). Necessary for supporting languages like Arabic and Hebrew that are written right-to-left. Takes a URL pointing to the Mapbox RTL text plugin source.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> String -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "speed",
-        "comment": " The average speed of the animation defined in relation to `curve`. A speed of 1.2 means that the map appears to move along the flight path by 1.2 times `curve` screenfuls every second. A screenful is the map's visible span. It does not correspond to a fixed physical distance, but varies by zoom level.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | speed : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "stop",
-        "comment": " Stops any animated transition underway.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "zoom",
-        "comment": " The desired zoom level.\n",
-        "type": "Float -> Mapbox.Cmd.Option { a | zoom : Mapbox.Cmd.Supported }"
-      },
-      {
-        "name": "zoomIn",
-        "comment": " Increases the map's zoom level by 1.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "zoomOut",
-        "comment": " Decreases the map's zoom level by 1.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Platform.Cmd.Cmd msg"
-      },
-      {
-        "name": "zoomTo",
-        "comment": " Zooms the map to the specified zoom level, with an animated transition.\n",
-        "type": "Mapbox.Cmd.Outgoing msg -> Mapbox.Cmd.Id -> List (Mapbox.Cmd.Option { duration : Mapbox.Cmd.Supported , easing : Mapbox.Cmd.Supported , offset : Mapbox.Cmd.Supported , animate : Mapbox.Cmd.Supported }) -> Float -> Platform.Cmd.Cmd msg"
-      }
-    ],
-    "generated-with-elm-version": "0.18.0"
-  },
-  {
     "name": "Mapbox.Element",
-    "comment": " This library wraps a Custom Element that actually renders a map.\n\n@docs map, css, MapboxAttr\n\n\n### Attributes\n\n@docs token, id, maxZoom, minZoom, maxBounds, LngLat, renderWorldCopies, featureState\n\n\n### Events\n\n@docs EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers\n\n@docs onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel\n\n\n### Controlled mode\n\n@docs controlledMap, Viewport\n\n",
+    "comment": " This library wraps a Custom Element that actually renders a map.\n\n@docs map, css, MapboxAttr\n\n\n### Attributes\n\n@docs token, id, maxZoom, minZoom, maxBounds, renderWorldCopies\n\n\n### Events\n\n@docs EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers\n\n@docs onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel\n\n",
     "aliases": [
       {
         "name": "EventData",
         "comment": " `point` is the coordinates in pixels in screen space.\n\n`lngLat` is the coordinates as a longitude, latitude in geographic space.\n\n`renderedFeatures` is a geojson that intersect the `lngLat`:\n\nThe properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).\n\nEach feature includes a top-level layer property whose value is an object representing the style layer to which the feature belongs. Layout and paint properties in this object contain values which are fully evaluated for the given zoom level and feature.\n\nFeatures from layers whose visibility property is \"none\", or from layers whose zoom range excludes the current zoom level are not included. Symbol features that have been hidden due to text or icon collision are not included. Features from all other layers are included, including features that may have no visible contribution to the rendered result; for example, because the layer's opacity or color alpha component is set to 0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.\n\n",
         "args": [],
-        "type": "{ point : ( Int, Int ) , lngLat : Mapbox.Element.LngLat , renderedFeatures : List Json.Decode.Value }"
-      },
-      {
-        "name": "LngLat",
-        "comment": " A longitude latitude pair (in that order).\n",
-        "args": [],
-        "type": "( Float, Float )"
+        "type": "{ point : ( Int, Int ) , lngLat : LngLat.LngLat , renderedFeatures : List Json.Decode.Value }"
       },
       {
         "name": "TouchEvent",
         "comment": " `touches` will list stuff for every finger involved in a gesture.\n\n`center` refers to the point in the geometric center of `touches`.\n\n",
         "args": [],
         "type": "{ touches : List Mapbox.Element.EventData , center : Mapbox.Element.EventData }"
-      },
-      {
-        "name": "Viewport",
-        "comment": " ",
-        "args": [],
-        "type": "{ center : Mapbox.Element.LngLat , zoom : Float , bearing : Float , pitch : Float }"
       }
     ],
     "types": [
@@ -272,13 +28,8 @@
     ],
     "values": [
       {
-        "name": "controlledMap",
-        "comment": " By default the map is \"uncontrolled\". By this we mean that it has its own internal state (namely the center, zoom level, pitch and bearing). This is nice if you don't care about these, but it does break some of the niceness of TEA. It also means some advanced interaction techniques are impossible to implement. For this reason we allow controlled mode where no event handlers are attached, but you need to feed the element its state. So it's up to you to implement all the user interactions. In the future, this library may help with that, but in the present this is not available.\n",
-        "type": "Mapbox.Element.Viewport -> List (Mapbox.Element.MapboxAttr msg) -> Mapbox.Style.Style -> Html.Html msg"
-      },
-      {
         "name": "css",
-        "comment": " This is literally:\n\n    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />\n\nYou can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.\n\n",
+        "comment": " This is literally:\n\n    <link\n      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.css'\n      rel='stylesheet' />\n\nYou can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.\n\n",
         "type": "Html.Html msg"
       },
       {
@@ -290,11 +41,6 @@
         "name": "eventFeaturesLayers",
         "comment": " By default the `renderedFeatures` property in events will return\na lot of data. Here you can specify which layers you want to search for intersections. If you don't care about intersecting data at all, you can optimize performance by passing an empty list to this attribute.\n",
         "type": "List String -> Mapbox.Element.MapboxAttr msg"
-      },
-      {
-        "name": "featureState",
-        "comment": " This is a declarative API for controlling states on the features.\n\nThe API takes a bunch of GeoJSON features (these can be returned from the event listeners for example). They should at a minimum have these properties defined:\n\n  - `source`\n  - `sourceLayer` (only for vector sources)\n  - `id` the feature's unique id\n\nThen you can give it a `List ( String, Value )` state. You can use this state infromation through the `Mapbox.Expression.featureState` expression.\n\n",
-        "type": "List ( Json.Decode.Value, List ( String, Json.Decode.Value ) ) -> Mapbox.Element.MapboxAttr msg"
       },
       {
         "name": "id",
@@ -309,7 +55,7 @@
       {
         "name": "maxBounds",
         "comment": " If set, the map will be constrained to the given bounds. The bounds are the `(south-west corner, north-east corner)`.\n",
-        "type": "( Mapbox.Element.LngLat, Mapbox.Element.LngLat ) -> Mapbox.Element.MapboxAttr msg"
+        "type": "( LngLat.LngLat, LngLat.LngLat ) -> Mapbox.Element.MapboxAttr msg"
       },
       {
         "name": "maxZoom",
@@ -483,7 +229,7 @@
       {
         "name": "defaultCenter",
         "comment": " Default map center in longitude and latitude. The style center will be used only if the map has not been positioned by other means (e.g. map options or user interaction).\n",
-        "type": "Float -> Float -> Mapbox.Style.MiscAttr"
+        "type": "LngLat.LngLat -> Mapbox.Style.MiscAttr"
       },
       {
         "name": "defaultLight",
@@ -554,6 +300,245 @@
         "name": "streets",
         "comment": " ",
         "type": "Mapbox.Style.Style"
+      }
+    ],
+    "generated-with-elm-version": "0.18.0"
+  },
+  {
+    "name": "Mapbox.Cmd.Template",
+    "comment": " This module has a bunch of essentially imperative commands for your map.\n\nHowever, since a published library can't have ports in it, you will need to do some setup. The easiest way to do this is to copy [this file into your app](https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm). You can see the module docs for that [here](https://github.com/gampleman/elm-mapbox/blob/master/docs/MapCommands.md).\n\n@docs Id, Outgoing, Option, Supported\n\nYou can of course customize the module you copy into your codebase to support things like having multiple maps on the page at once, etc.\n\n\n### Moving the map around\n\n@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop\n\n\n### Fiting bounds\n\n@docs fitBounds\n\n\n### Other\n\n@docs setRTLTextPlugin, resize\n\n\n### Querying the map\n\n@docs queryResults, getBounds, queryRenderedFeatures\n\n",
+    "aliases": [
+      {
+        "name": "Id",
+        "comment": " Every command takes the DOM id of the map that it should operate on.\n",
+        "args": [],
+        "type": "String"
+      },
+      {
+        "name": "Option",
+        "comment": " This is exported here to simply for convenience. See `Cmd.Option` for more docs.\n",
+        "args": [
+          "support"
+        ],
+        "type": "Mapbox.Cmd.Internal.Option support"
+      },
+      {
+        "name": "Outgoing",
+        "comment": " The type of a port that you need to provide for this module to work.\n",
+        "args": [
+          "msg"
+        ],
+        "type": "Json.Encode.Value -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "Supported",
+        "comment": " ",
+        "args": [],
+        "type": "Mapbox.Cmd.Internal.Supported"
+      }
+    ],
+    "types": [],
+    "values": [
+      {
+        "name": "easeTo",
+        "comment": " Changes any combination of center, zoom, bearing, and pitch, with an animated transition between old and new values. The map will retain its current values for any details not specified in options.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { center : Mapbox.Cmd.Template.Supported , zoom : Mapbox.Cmd.Template.Supported , bearing : Mapbox.Cmd.Template.Supported , pitch : Mapbox.Cmd.Template.Supported , around : Mapbox.Cmd.Template.Supported , duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "fitBounds",
+        "comment": " Pans and zooms the map to contain its visible area within the specified geographical bounds. This function will also reset the map's bearing to 0 if bearing is nonzero.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { padding : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , linear : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , maxZoom : Mapbox.Cmd.Template.Supported }) -> ( LngLat.LngLat, LngLat.LngLat ) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "flyTo",
+        "comment": " Changes any combination of center, zoom, bearing, and pitch, animating the transition along a curve that evokes flight. The animation seamlessly incorporates zooming and panning to help the user maintain her bearings even after traversing a great distance.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { center : Mapbox.Cmd.Template.Supported , zoom : Mapbox.Cmd.Template.Supported , bearing : Mapbox.Cmd.Template.Supported , pitch : Mapbox.Cmd.Template.Supported , around : Mapbox.Cmd.Template.Supported , duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported , curve : Mapbox.Cmd.Template.Supported , minZoom : Mapbox.Cmd.Template.Supported , speed : Mapbox.Cmd.Template.Supported , screenSpeed : Mapbox.Cmd.Template.Supported , maxDuration : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "getBounds",
+        "comment": " Responds with the map's geographical bounds. Takes a numerical ID that allows you to associate the question with the answer.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> Int -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "jumpTo",
+        "comment": " Changes any combination of center, zoom, bearing, and pitch, without an animated transition. The map will retain its current values for any details not specified in options.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { center : Mapbox.Cmd.Template.Supported , zoom : Mapbox.Cmd.Template.Supported , bearing : Mapbox.Cmd.Template.Supported , pitch : Mapbox.Cmd.Template.Supported , around : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "panBy",
+        "comment": " Pans the map by the specified offest.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> ( Int, Int ) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "panTo",
+        "comment": " Pans the map to the specified location, with an animated transition.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> LngLat.LngLat -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "queryRenderedFeatures",
+        "comment": " Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.\n\nThe response: The properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).\n\nEach feature includes a top-level layer property whose value is an object representing the style layer to which the feature belongs. Layout and paint properties in this object contain values which are fully evaluated for the given zoom level and feature.\n\nFeatures from layers whose visibility property is \"none\", or from layers whose zoom range excludes the current zoom level are not included. Symbol features that have been hidden due to text or icon collision are not included. Features from all other layers are included, including features that may have no visible contribution to the rendered result; for example, because the layer's opacity or color alpha component is set to 0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.\n\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> Int -> List (Mapbox.Cmd.Template.Option { layers : Mapbox.Cmd.Template.Supported , filter : Mapbox.Cmd.Template.Supported , query : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "queryResults",
+        "comment": " Wraps an incoming port so that you can get nicer subscritions:\n\n    port elmMapboxIncoming : (Value -> msg) -> Sub msg\n\n",
+        "type": "((Json.Encode.Value -> msg) -> Platform.Sub.Sub msg) -> (Int -> ( LngLat.LngLat, LngLat.LngLat ) -> response) -> (Int -> List Json.Encode.Value -> response) -> (String -> response) -> (response -> msg) -> Platform.Sub.Sub msg"
+      },
+      {
+        "name": "resize",
+        "comment": " Resizes the map according to the dimensions of its container element.\n\nThis command must be sent after the map's container is resized, or when the map is shown after being initially hidden with CSS.\n\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "rotateTo",
+        "comment": " Rotates the map to the specified bearing, with an animated transition. The bearing is the compass direction that is \"up\"; for example, a bearing of 90° orients the map so that east is up.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> Float -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "setRTLTextPlugin",
+        "comment": " Sets the map's [RTL text plugin](https://www.mapbox.com/mapbox-gl-js/plugins/#mapbox-gl-rtl-text). Necessary for supporting languages like Arabic and Hebrew that are written right-to-left. Takes a URL pointing to the Mapbox RTL text plugin source.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> String -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "stop",
+        "comment": " Stops any animated transition underway.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "zoomIn",
+        "comment": " Increases the map's zoom level by 1.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "zoomOut",
+        "comment": " Decreases the map's zoom level by 1.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> Platform.Cmd.Cmd msg"
+      },
+      {
+        "name": "zoomTo",
+        "comment": " Zooms the map to the specified zoom level, with an animated transition.\n",
+        "type": "Mapbox.Cmd.Template.Outgoing msg -> Mapbox.Cmd.Template.Id -> List (Mapbox.Cmd.Template.Option { duration : Mapbox.Cmd.Template.Supported , easing : Mapbox.Cmd.Template.Supported , offset : Mapbox.Cmd.Template.Supported , animate : Mapbox.Cmd.Template.Supported }) -> Float -> Platform.Cmd.Cmd msg"
+      }
+    ],
+    "generated-with-elm-version": "0.18.0"
+  },
+  {
+    "name": "Mapbox.Cmd.Option",
+    "comment": "\n\n\n### Animation options\n\nOptions common to map movement commands that involve animation, such as panBy and easeTo, controlling the duration and easing function of the animation. All properties are optional.\n\n@docs duration, easing, offset, animate\n\n@docs curve, minZoom, speed, screenSpeed, maxDuration\n\n\n### Camera Options\n\nOptions common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired location, zoom, bearing, and pitch of the camera. All properties are optional, and when a property is omitted, the current camera value for that property will remain unchanged.\n\n@docs center, zoom, bearing, pitch, around\n\n\n### Fiting bounds\n\n@docs padding, Padding, linear, maxZoom\n\n\n### Querying rendered features\n\n@docs layers, filter, intersectsPoint, intersectsBox\n\n",
+    "aliases": [
+      {
+        "name": "Padding",
+        "comment": " ",
+        "args": [],
+        "type": "{ top : Int, right : Int, bottom : Int, left : Int }"
+      }
+    ],
+    "types": [],
+    "values": [
+      {
+        "name": "animate",
+        "comment": " If false, no animation will occur.\n",
+        "type": "Bool -> Mapbox.Cmd.Internal.Option { a | animate : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "around",
+        "comment": " If `zoom` is specified, `around` determines the point around which the zoom is centered.\n",
+        "type": "LngLat.LngLat -> Mapbox.Cmd.Internal.Option { a | around : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "bearing",
+        "comment": " The desired bearing, in degrees. The bearing is the compass direction that is \"up\"; for example, a bearing of 90° orients the map so that east is up.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | bearing : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "center",
+        "comment": " The desired center.\n",
+        "type": "LngLat.LngLat -> Mapbox.Cmd.Internal.Option { a | center : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "curve",
+        "comment": " The zooming \"curve\" that will occur along the flight path.\nA high value maximizes zooming for an exaggerated animation, while a\nlow value minimizes zooming for an effect closer to `easeTo`.\n1.42 is the average value selected by participants in the user study discussed in [van Wijk (2003)](https://www.win.tue.nl/~vanwijk/zoompan.pdf).\nA value of `6 ^ 0.25` would be equivalent to the root mean squared average velocity. A value of 1 would produce a circular motion.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | curve : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "duration",
+        "comment": " The animation's duration, measured in milliseconds.\n",
+        "type": "Int -> Mapbox.Cmd.Internal.Option { a | duration : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "easing",
+        "comment": " The name of an easing function. These must be passed to `elmMapbox`\nin the `easingFunctions` option.\n",
+        "type": "String -> Mapbox.Cmd.Internal.Option { a | easing : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "filter",
+        "comment": " A filter to limit query results.\n",
+        "type": "Mapbox.Expression.Expression Mapbox.Expression.DataExpression Bool -> Mapbox.Cmd.Internal.Option { a | filter : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "intersectsBox",
+        "comment": " Only include layers that instersect the box (defined as south west / north east corners).\n",
+        "type": "( LngLat.LngLat, LngLat.LngLat ) -> Mapbox.Cmd.Internal.Option { a | query : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "intersectsPoint",
+        "comment": " Only include layers that instersect this point.\n",
+        "type": "LngLat.LngLat -> Mapbox.Cmd.Internal.Option { a | query : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "layers",
+        "comment": " A list of style layer IDs for the query to inspect. Only features within these layers will be returned. If this parameter is not set, all layers will be checked.\n",
+        "type": "List String -> Mapbox.Cmd.Internal.Option { a | layers : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "linear",
+        "comment": " If true, the map transitions using `easeTo` . If false, the map transitions using `flyTo`.\n",
+        "type": "Bool -> Mapbox.Cmd.Internal.Option { a | linear : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "maxDuration",
+        "comment": " The animation's maximum duration, measured in milliseconds. If duration exceeds maximum duration, it resets to 0.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | maxDuration : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "maxZoom",
+        "comment": " The maximum zoom level to allow when the map view transitions to the specified bounds.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | maxZoom : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "minZoom",
+        "comment": " The zero-based zoom level at the peak of the flight path.\nIf `curve` is specified, this option is ignored.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | minZoom : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "offset",
+        "comment": " Offset of the target center relative to real map container center at the end of animation.\n",
+        "type": "( Int, Int ) -> Mapbox.Cmd.Internal.Option { a | offset : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "padding",
+        "comment": " The amount of padding in pixels to add to the given bounds.\n",
+        "type": "Mapbox.Cmd.Option.Padding -> Mapbox.Cmd.Internal.Option { a | padding : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "pitch",
+        "comment": " The desired pitch, in degrees.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | pitch : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "screenSpeed",
+        "comment": " The average speed of the animation measured in screenfuls per second, assuming a linear timing curve. If `speed` is specified, this option is ignored.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | screenSpeed : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "speed",
+        "comment": " The average speed of the animation defined in relation to `curve`. A speed of 1.2 means that the map appears to move along the flight path by 1.2 times `curve` screenfuls every second. A screenful is the map's visible span. It does not correspond to a fixed physical distance, but varies by zoom level.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | speed : Mapbox.Cmd.Internal.Supported }"
+      },
+      {
+        "name": "zoom",
+        "comment": " The desired zoom level.\n",
+        "type": "Float -> Mapbox.Cmd.Internal.Option { a | zoom : Mapbox.Cmd.Internal.Supported }"
       }
     ],
     "generated-with-elm-version": "0.18.0"
@@ -1286,7 +1271,7 @@
         "name": "Coords",
         "comment": " `(longitude, latitude)` pairs for the corners. You can use the type alias constructor in clockwise order: top left, top right, bottom right, bottom left.\n",
         "args": [],
-        "type": "{ topLeft : ( Float, Float ) , topRight : ( Float, Float ) , bottomRight : ( Float, Float ) , bottomLeft : ( Float, Float ) }"
+        "type": "{ topLeft : LngLat.LngLat , topRight : LngLat.LngLat , bottomRight : LngLat.LngLat , bottomLeft : LngLat.LngLat }"
       },
       {
         "name": "Id",
@@ -1363,8 +1348,8 @@
       },
       {
         "name": "bounds",
-        "comment": " The longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `sw.lng, sw.lat, ne.lng, ne.lat`. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL.\n",
-        "type": "Float -> Float -> Float -> Float -> Mapbox.Source.SourceOption any"
+        "comment": " The longitude and latitude of the southwest and northeast corners of the source's bounding box. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL.\n",
+        "type": "LngLat.LngLat -> LngLat.LngLat -> Mapbox.Source.SourceOption any"
       },
       {
         "name": "buffer",
@@ -1481,7 +1466,7 @@
   },
   {
     "name": "Mapbox.Expression",
-    "comment": " Expressions form a little language that can be used to compute values for various layer properties.\n\nIt is recommended to import them in the following fashion:\n\n    import Mapbox.Expression as E exposing (str, float, int, true, false)\n\nThis way you can use the language without much syntactic fuss and you have easy access to the literals.\n\n**Note**: If you are familiar with the JS version of the style spec,\nwe have made a few changes. Argument order has been switched for many functions to support using pipeline style more naturally. Some functions use overloading in the original, these have been renamed to\nnot be overloaded. Finally, we have chosen not to represent some parts of the spec that are superflous (especially when used form Elm), namely functions and let-in expressions.\n\n@docs Expression, DataExpression, CameraExpression\n\n@docs encode\n\n\n### Types\n\nAll of the types used as expression results are phantom (i.e. they don't have any runtime values but are used purely for compile-time checking). As such we use a mix of standard elm types for their familiarty:\n\n  - `Float`\n  - `String`\n  - `Array`\n  - `Bool`\n\nWe introduce the following types:\n\n@docs Color, Object, Collator\n\n(And also a bunch of Enum types, that will be documented in the Enums section).\n\nYou can use the following functions to transfer Elm values into the Expression language:\n\n@docs true, false, bool, int, float, str, rgba, floats, strings, object, collator, defaultCollator\n\nIn some cases, you will need to force the type system to cooperate.\nThe following assertions will force the type and cause a run-time error\nif the type is wrong:\n\n@docs assertArray, assertArrayOfStrings, assertArrayOfFloats, assertArrayOfBools, assertBool, assertFloat, assertObject, assertString\n\nYou can also use these functions to explicitly cast to a particular type:\n\n@docs toBool, toColor, toFloat, toString\n\n@docs typeof\n\n\n### Lookup\n\n@docs at, get, has, count, length\n\n\n### Feature data\n\n@docs featureState, geometryType, id, properties, getProperty, hasProperty\n\n\n### Decision\n\nThe expressions in this section can be used to add conditional logic to your styles.\n\n@docs isEqual, notEqual, lessThan, lessThanOrEqual, greaterThan, greaterThanOrEqual\n\nStrings can be compared with a collator for locale specific comparisons:\n\n@docs isEqualWithCollator, notEqualWithCollator,lessThanWithCollator, lessThanOrEqualWithCollator, greaterThanWithCollator, greaterThanOrEqualWithCollator\n\nLogical operators:\n\n@docs not, all, any\n\nControl flow:\n\n@docs ifElse, conditionally, matchesStr, matchesFloat, coalesce\n\n\n### Ramps, scales, curves\n\n@docs interpolate, Interpolation, step\n\n\n### String\n\n@docs append, downcase, upcase, isSupportedScript, resolvedLocale\n\n\n### Color\n\n@docs makeRGBColor, makeRGBAColor, rgbaChannels\n\n\n### Math\n\n@docs minus, multiply, divideBy, modBy, plus, raiseBy, sqrt, abs, ceil, floor, round, cos, sin, tan, acos, asin, atan, e, pi, ln, ln2, log10, log2\n\n\n### Zoom\n\n@docs zoom\n\n\n### Heatmap\n\n@docs heatmapDensity, lineProgress\n\n\n### Enums\n\nThese are required for various layer properties.\n\n@docs Anchor, anchorMap, anchorViewport, AnchorAuto, anchorAutoMap, anchorAutoViewport, anchorAutoAuto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase\n\n",
+    "comment": " Expressions form a little language that can be used to compute values for various layer properties.\n\nIt is recommended to import them in the following fashion:\n\n    import Mapbox.Expression as E exposing (str, float, int, true, false)\n\nThis way you can use the language without much syntactic fuss and you have easy access to the literals.\n\n**Note**: If you are familiar with the JS version of the style spec,\nwe have made a few changes. Argument order has been switched for many functions to support using pipeline style more naturally. Some functions use overloading in the original, these have been renamed to\nnot be overloaded. Finally, we have chosen not to represent some parts of the spec that are superflous (especially when used from Elm), namely functions and let-in expressions.\n\n@docs Expression, DataExpression, CameraExpression\n\n@docs encode\n\n\n### Types\n\nAll of the types used as expression results are phantom (i.e. they don't have any runtime values but are used purely for compile-time checking). As such we use a mix of standard elm types for their familiarty:\n\n  - `Float`\n  - `String`\n  - `Array`\n  - `Bool`\n\nWe introduce the following types:\n\n@docs Color, Object, Collator\n\n(And also a bunch of Enum types, that will be documented in the Enums section).\n\nYou can use the following functions to transfer Elm values into the Expression language:\n\n@docs true, false, bool, int, float, str, rgba, floats, strings, object, collator, defaultCollator\n\nIn some cases, you will need to force the type system to cooperate.\nThe following assertions will force the type and cause a run-time error\nif the type is wrong:\n\n@docs assertArray, assertArrayOfStrings, assertArrayOfFloats, assertArrayOfBools, assertBool, assertFloat, assertObject, assertString\n\nYou can also use these functions to explicitly cast to a particular type:\n\n@docs toBool, toColor, toFloat, toString\n\n@docs typeof\n\n\n### Lookup\n\n@docs at, get, has, count, length\n\n\n### Feature data\n\n@docs featureState, geometryType, id, properties, getProperty, hasProperty\n\n\n### Decision\n\nThe expressions in this section can be used to add conditional logic to your styles.\n\n@docs isEqual, notEqual, lessThan, lessThanOrEqual, greaterThan, greaterThanOrEqual\n\nStrings can be compared with a collator for locale specific comparisons:\n\n@docs isEqualWithCollator, notEqualWithCollator,lessThanWithCollator, lessThanOrEqualWithCollator, greaterThanWithCollator, greaterThanOrEqualWithCollator\n\nLogical operators:\n\n@docs not, all, any\n\nControl flow:\n\n@docs ifElse, conditionally, matchesStr, matchesFloat, coalesce\n\n\n### Ramps, scales, curves\n\n@docs interpolate, Interpolation, step\n\n\n### String\n\n@docs append, downcase, upcase, isSupportedScript, resolvedLocale\n\n\n### Color\n\n@docs makeRGBColor, makeRGBAColor, rgbaChannels\n\n\n### Math\n\n@docs minus, multiply, divideBy, modBy, plus, raiseBy, sqrt, abs, ceil, floor, round, cos, sin, tan, acos, asin, atan, e, pi, ln, ln2, log10, log2\n\n\n### Zoom\n\n@docs zoom\n\n\n### Heatmap\n\n@docs heatmapDensity, lineProgress\n\n\n### Enums\n\nThese are required for various layer properties.\n\n@docs Anchor, anchorMap, anchorViewport, AnchorAuto, anchorAutoMap, anchorAutoViewport, anchorAutoAuto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase\n\n",
     "aliases": [],
     "types": [
       {
@@ -2236,6 +2221,47 @@
         "name": "zoom",
         "comment": " Gets the current zoom level. Note that in style layout and paint properties, `zoom` may only appear as the input to a top-level `step` or `interpolate` expression.\n",
         "type": "Mapbox.Expression.Expression Mapbox.Expression.CameraExpression Float"
+      }
+    ],
+    "generated-with-elm-version": "0.18.0"
+  },
+  {
+    "name": "LngLat",
+    "comment": " Encodes geographic position.\n\n@docs LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map\n\n",
+    "aliases": [
+      {
+        "name": "LngLat",
+        "comment": " A LngLat represents a geographic position.\n",
+        "args": [],
+        "type": "{ lng : Float, lat : Float }"
+      }
+    ],
+    "types": [],
+    "values": [
+      {
+        "name": "decodeFromObject",
+        "comment": " We can also encode from an `{lng: 32, lat: 435}` object.\n",
+        "type": "Json.Decode.Decoder LngLat.LngLat"
+      },
+      {
+        "name": "decodeFromPair",
+        "comment": " Most implementations seem to encode these as a 2 member array.\n",
+        "type": "Json.Decode.Decoder LngLat.LngLat"
+      },
+      {
+        "name": "encodeAsObject",
+        "comment": " We can also encode as an `{lng: 32, lat: 435}` object.\n",
+        "type": "LngLat.LngLat -> Json.Encode.Value"
+      },
+      {
+        "name": "encodeAsPair",
+        "comment": " Most implementations seem to encode these as a 2 member array.\n",
+        "type": "LngLat.LngLat -> Json.Encode.Value"
+      },
+      {
+        "name": "map",
+        "comment": " ",
+        "type": "(Float -> Float) -> LngLat.LngLat -> LngLat.LngLat"
       }
     ],
     "generated-with-elm-version": "0.18.0"

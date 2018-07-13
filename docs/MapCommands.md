@@ -119,7 +119,7 @@ Receive results from the queries.
 
 Responds with the map's geographical bounds. Takes a numerical ID that allows you to associate the question with the answer.
 
-### `queryRenderedFeatures : Int -> List (Option { layers : S, filter : S }) -> Query -> Cmd msg`
+### `queryRenderedFeatures : Int -> List (Option { layers : S, filter : S, query : S }) -> Query -> Cmd msg`
 
 Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.
 
@@ -132,13 +132,3 @@ Features from layers whose visibility property is "none", or from layers whose z
 The topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).
 
 Because features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.
-
-
-```
-type Query
-    = Viewport
-    | Point LngLat
-    | Box LngLat LngLat
-```
-
-The geometry of the query region. Either a point, a bounding box (specified in terms of southwest and northeast points), or what is currently visible in the viewport.

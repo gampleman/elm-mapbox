@@ -1,6 +1,9 @@
 module LngLat exposing (LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map)
 
-{-| @docs LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map
+{-| Encodes geographic position.
+
+@docs LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map
+
 -}
 
 import Json.Encode as Encode exposing (Value)

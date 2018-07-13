@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response(..), queryResults, getBounds, queryRenderedFeatures, Query(..), resize)
+module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, queryResults, getBounds, queryRenderedFeatures, resize)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
@@ -26,7 +26,7 @@ You can of course customize the module you copy into your codebase to support th
 
 ### Querying the map
 
-@docs Response, queryResults, getBounds, queryRenderedFeatures, Query
+@docs queryResults, getBounds, queryRenderedFeatures
 
 -}
 
@@ -49,10 +49,13 @@ type alias Id =
     String
 
 
+{-| This is exported here to simply for convenience. See `Cmd.Option` for more docs.
+-}
 type alias Option support =
     Internal.Option support
 
 
+{-| -}
 type alias Supported =
     Internal.Supported
 
@@ -340,26 +343,6 @@ getBounds prt id reqId =
     makeCmd prt id "getBounds" [ ( "requestId", Encode.int reqId ) ]
 
 
-{-| The geometry of the query region. Either a point, a bounding box (specified in terms of southwest and northeast points), or what is currently visible in the viewport.
--}
-type Query
-    = Viewport
-    | Point LngLat
-    | Box LngLat LngLat
-
-
-encodeQuery query =
-    case query of
-        Viewport ->
-            Encode.string "viewport"
-
-        Point lngLat ->
-            LngLat.encodeAsPair lngLat
-
-        Box sw ne ->
-            encodePair LngLat.encodeAsPair ( sw, ne )
-
-
 {-| Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.
 
 The response: The properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).
@@ -373,63 +356,46 @@ The topmost rendered feature appears first in the returned array, and subsequent
 Because features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.
 
 -}
-queryRenderedFeatures : Outgoing msg -> Id -> Int -> List (Option { layers : Supported, filter : Supported }) -> Query -> Cmd msg
-queryRenderedFeatures prt id reqId options query =
+queryRenderedFeatures : Outgoing msg -> Id -> Int -> List (Option { layers : Supported, filter : Supported, query : Supported }) -> Cmd msg
+queryRenderedFeatures prt id reqId options =
     makeCmd prt
         id
         "queryRenderedFeatures"
         [ ( "requestId", Encode.int reqId )
-        , ( "query", encodeQuery query )
         , encodeOptions options
         ]
-
-
-{-| A response to the queries. See the relevant methods for more information.
--}
-type Response
-    = GetBounds Int ( LngLat, LngLat )
-    | QueryRenderedFeatures Int (List Value)
-    | Error String
 
 
 {-| Wraps an incoming port so that you can get nicer subscritions:
 
     port elmMapboxIncoming : (Value -> msg) -> Sub msg
 
-
-    -- exposed
-
-    queryResults : (Response -> msg) -> Sub msg
-
-    queryResuls =
-        Mapbox.Cmd.queryResults elmMapboxIncoming
-
 -}
-queryResults : ((Value -> msg) -> Sub msg) -> (Response -> msg) -> Sub msg
-queryResults prt tagger =
-    prt (decodeResponse >> tagger)
+queryResults : ((Value -> msg) -> Sub msg) -> (Int -> ( LngLat, LngLat ) -> response) -> (Int -> List Value -> response) -> (String -> response) -> (response -> msg) -> Sub msg
+queryResults prt getBounds queryRenderedFeatures error tagger =
+    prt (decodeResponse getBounds queryRenderedFeatures error >> tagger)
 
 
-responseDecoder =
+responseDecoder getBounds queryRenderedFeatures =
     Decode.field "type" Decode.string
         |> Decode.andThen
             (\s ->
                 case s of
                     "getBounds" ->
-                        Decode.map2 GetBounds (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair LngLat.decodeFromPair))
+                        Decode.map2 getBounds (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair LngLat.decodeFromPair))
 
                     "queryRenderedFeatures" ->
-                        Decode.map2 QueryRenderedFeatures (Decode.field "id" Decode.int) (Decode.field "features" (Decode.list Decode.value))
+                        Decode.map2 queryRenderedFeatures (Decode.field "id" Decode.int) (Decode.field "features" (Decode.list Decode.value))
 
                     _ ->
                         Decode.fail <| "Unrecognized response type: " ++ s
             )
 
 
-decodeResponse value =
-    case Decode.decodeValue responseDecoder value of
+decodeResponse getBounds queryRenderedFeatures error value =
+    case Decode.decodeValue (responseDecoder getBounds queryRenderedFeatures) value of
         Ok res ->
             res
 
         Err e ->
-            Error e
+            error e

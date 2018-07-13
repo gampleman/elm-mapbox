@@ -153,7 +153,7 @@ This way you can use the language without much syntactic fuss and you have easy 
 
 **Note**: If you are familiar with the JS version of the style spec,
 we have made a few changes. Argument order has been switched for many functions to support using pipeline style more naturally. Some functions use overloading in the original, these have been renamed to
-not be overloaded. Finally, we have chosen not to represent some parts of the spec that are superflous (especially when used form Elm), namely functions and let-in expressions.
+not be overloaded. Finally, we have chosen not to represent some parts of the spec that are superflous (especially when used from Elm), namely functions and let-in expressions.
 
 @docs Expression, DataExpression, CameraExpression
 

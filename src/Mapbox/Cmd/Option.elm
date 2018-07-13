@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Option exposing (..)
+module Mapbox.Cmd.Option exposing (duration, easing, offset, animate, curve, minZoom, speed, screenSpeed, maxDuration, center, zoom, bearing, pitch, around, padding, Padding, linear, maxZoom, layers, filter, intersectsPoint, intersectsBox)
 
 {-|
 
@@ -23,7 +23,10 @@ Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired locat
 
 @docs padding, Padding, linear, maxZoom
 
-@docs layers, filter
+
+### Querying rendered features
+
+@docs layers, filter, intersectsPoint, intersectsBox
 
 -}
 
@@ -186,3 +189,17 @@ layers =
 filter : Expression DataExpression Bool -> Option { a | filter : Supported }
 filter =
     Mapbox.Expression.encode >> Option "filter"
+
+
+{-| Only include layers that instersect this point.
+-}
+intersectsPoint : LngLat -> Option { a | query : Supported }
+intersectsPoint =
+    LngLat.encodeAsPair >> Option "query"
+
+
+{-| Only include layers that instersect the box (defined as south west / north east corners).
+-}
+intersectsBox : ( LngLat, LngLat ) -> Option { a | query : Supported }
+intersectsBox =
+    encodePair (LngLat.encodeAsPair) >> Option "query"

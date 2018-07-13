@@ -121,7 +121,7 @@ function wrapElmApplication(elmApp, settings = {}) {
               const keys = Object.keys(prevValue);
               let newValue = {};
               keys.forEach(k => {
-                if (state[k] === undefined) {
+                if (state[k] === undefined ) {
                   newValue[k] = undefined;
                 }
               });
@@ -343,7 +343,7 @@ function wrapElmApplication(elmApp, settings = {}) {
             type: "queryRenderedFeatures",
             id: event.requestId,
             features:
-              event.query === "viewport"
+              event.query
                 ? map.queryRenderedFeatures(processOptions(event.options))
                 : map.queryRenderedFeatures(
                     event.query,

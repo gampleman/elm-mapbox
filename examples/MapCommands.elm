@@ -1,4 +1,4 @@
-port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures, Query)
+port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
@@ -258,12 +258,6 @@ getBounds =
     Template.getBounds elmMapboxOutgoing id
 
 
-{-| The geometry of the query region. Either a point, a bounding box (specified in terms of southwest and northeast points), or what is currently visible in the viewport.
--}
-type alias Query =
-    Template.Query
-
-
 {-| Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.
 
 The response: The properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).
@@ -277,15 +271,17 @@ The topmost rendered feature appears first in the returned array, and subsequent
 Because features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.
 
 -}
-queryRenderedFeatures : Int -> List (Option { layers : Supported, filter : Supported }) -> Query -> Cmd msg
+queryRenderedFeatures : Int -> List (Option { layers : Supported, filter : Supported, query : Supported }) -> Cmd msg
 queryRenderedFeatures =
     Template.queryRenderedFeatures elmMapboxOutgoing id
 
 
 {-| A response to the queries. See the relevant methods for more information.
 -}
-type alias Response =
-    Template.Response
+type Response
+    = GetBounds Int ( LngLat, LngLat )
+    | QueryRenderedFeatures Int (List Value)
+    | Error String
 
 
 port elmMapboxIncoming : (Value -> msg) -> Sub msg
@@ -295,4 +291,4 @@ port elmMapboxIncoming : (Value -> msg) -> Sub msg
 -}
 queryResults : (Response -> msg) -> Sub msg
 queryResults =
-    Template.queryResults elmMapboxIncoming
+    Template.queryResults elmMapboxIncoming GetBounds QueryRenderedFeatures Error
