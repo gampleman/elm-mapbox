@@ -126,6 +126,7 @@ module Mapbox.Layer
         , rasterBrightnessMax
         , rasterBrightnessMin
         , rasterContrast
+        , rasterResampling
         , rasterFadeDuration
         , rasterHueRotate
         , rasterOpacity
@@ -201,7 +202,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Raster Attributes
 
-@docs rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterSaturation
+@docs rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterResampling, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterSaturation
 
 
 ### Hillshade Attributes
@@ -216,9 +217,8 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 -}
 
 import Array exposing (Array)
-import Json.Decode
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, AnchorAuto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, SymbolPlacement, TextFit, TextJustify, TextTransform)
+import Mapbox.Expression as Expression exposing (Anchor, AnchorAuto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, SymbolPlacement, TextFit, TextJustify, TextTransform, RasterResampling)
 
 
 {-| Represents a layer.
@@ -1289,6 +1289,16 @@ Should be between `-1` and `1` inclusive. Defaults to `0`.
 rasterContrast : Expression CameraExpression Float -> LayerAttr Raster
 rasterContrast =
     Expression.encode >> Paint "raster-contrast"
+
+
+{-| The resampling/interpolation method to use for overscaling, also known as texture magnification filter.
+
+Defaults to `rasterResamplingLinear`.
+
+-}
+rasterResampling : Expression CameraExpression RasterResampling -> LayerAttr Raster
+rasterResampling =
+    Expression.encode >> Paint "raster-resampling"
 
 
 {-| Increase or reduce the saturation of the image. Paint property.

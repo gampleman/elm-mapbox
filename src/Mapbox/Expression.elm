@@ -133,6 +133,7 @@ module Mapbox.Expression
         , SymbolPlacement
         , symbolPlacementPoint
         , symbolPlacementLine
+        , symbolPlacementLineCenter
         , TextJustify
         , textJustifyLeft
         , textJustifyCenter
@@ -141,15 +142,40 @@ module Mapbox.Expression
         , textTransformNone
         , textTransformUppercase
         , textTransformLowercase
+        , RasterResampling
+        , rasterResamplingLinear
+        , rasterResamplingNearest
         )
 
 {-| Expressions form a little language that can be used to compute values for various layer properties.
 
 It is recommended to import them in the following fashion:
 
-    import Mapbox.Expression as E exposing (str, float, int, true, false)
+    import Mapbox.Expression as E exposing (Expression, CameraExpression, DataExpression, str, float, int, true, false)
 
 This way you can use the language without much syntactic fuss and you have easy access to the literals.
+
+
+### Example
+
+You'd like to adjust font size of a town based on the number of people who live there. In plain Elm, you might wright the following function:
+
+    sizeByPopulation : Dict String Int -> Int
+    sizeByPopulation properties =
+        Dict.get "population" properties
+            |> Maybe.withDefault 1000
+            |> scale ( 0, 1000 ) ( 9, 20 )
+
+In the expression language you can do this in a similar fassion:
+
+    sizeByPopulation : Expression DataExpression Float
+    sizeByPopulation =
+        E.getProperty "population"
+            |> E.toFloat 1000
+            |> E.interpolate E.Linear
+                [ ( 0, int 9 )
+                , ( 1000, int 20 )
+                ]
 
 **Note**: If you are familiar with the JS version of the style spec,
 we have made a few changes. Argument order has been switched for many functions to support using pipeline style more naturally. Some functions use overloading in the original, these have been renamed to
@@ -255,7 +281,7 @@ Control flow:
 
 These are required for various layer properties.
 
-@docs Anchor, anchorMap, anchorViewport, AnchorAuto, anchorAutoMap, anchorAutoViewport, anchorAutoAuto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase
+@docs Anchor, anchorMap, anchorViewport, AnchorAuto, anchorAutoMap, anchorAutoViewport, anchorAutoAuto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest
 
 -}
 
@@ -532,18 +558,28 @@ lineJoinMiter =
     Expression (Json.Encode.string "miter")
 
 
-{-| -}
+{-| Label placement relative to its geometry.
+-}
 type SymbolPlacement
     = SymbolPlacement
 
 
-{-| -}
+{-| The label is placed at the point where the geometry is located.
+-}
 symbolPlacementPoint : Expression exprType SymbolPlacement
 symbolPlacementPoint =
     Expression (Json.Encode.string "point")
 
 
-{-| -}
+{-| The label is placed at the center of the line of the geometry. Can only be used on LineString and Polygon geometries. Note that a single feature in a vector tile may contain multiple line geometries.
+-}
+symbolPlacementLineCenter : Expression exprType SymbolPlacement
+symbolPlacementLineCenter =
+    Expression (Json.Encode.string "line-center")
+
+
+{-| The label is placed along the line of the geometry. Can only be used on LineString and Polygon geometries.
+-}
 symbolPlacementLine : Expression exprType SymbolPlacement
 symbolPlacementLine =
     Expression (Json.Encode.string "line")
@@ -593,6 +629,25 @@ textTransformUppercase =
 textTransformLowercase : Expression exprType TextTransform
 textTransformLowercase =
     Expression (Json.Encode.string "lowercase")
+
+
+{-| -}
+type RasterResampling
+    = RasterResampling
+
+
+{-| (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled.
+-}
+rasterResamplingLinear : Expression exprType RasterResampling
+rasterResamplingLinear =
+    Expression (Json.Encode.string "linear")
+
+
+{-| Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled.
+-}
+rasterResamplingNearest : Expression exprType RasterResampling
+rasterResamplingNearest =
+    Expression (Json.Encode.string "nearest")
 
 
 
