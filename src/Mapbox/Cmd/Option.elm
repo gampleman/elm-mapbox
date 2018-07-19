@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Option exposing (duration, easing, offset, animate, curve, minZoom, speed, screenSpeed, maxDuration, center, zoom, bearing, pitch, around, padding, Padding, linear, maxZoom, layers, filter, intersectsPoint, intersectsBox)
+module Mapbox.Cmd.Option exposing (duration, easing, offset, animate, curve, minZoom, speed, screenSpeed, maxDuration, center, zoom, bearing, pitch, around, padding, Padding, linear, maxZoom)
 
 {-|
 
@@ -22,11 +22,6 @@ Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired locat
 ### Fiting bounds
 
 @docs padding, Padding, linear, maxZoom
-
-
-### Querying rendered features
-
-@docs layers, filter, intersectsPoint, intersectsBox
 
 -}
 

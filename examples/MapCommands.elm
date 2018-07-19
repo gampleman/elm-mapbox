@@ -1,28 +1,18 @@
-port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, Response, queryResults, getBounds, queryRenderedFeatures)
+port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, resize)
 
-{-| This module has a bunch of essentially imperative commands for your map.
+{-| Tell your map to do something! Most of these Commands tell your map to (with or without animation) to show a different location. You can use the options from `Mapbox.Cmd.Option` to configure these.
 
 @docs id
 
 
 ### Moving the map around
 
-@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop
+@docs panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, fitBounds, stop
 
 
-### Fitting bounds
+### Other
 
-@docs fitBounds
-
-
-### Right-to-left
-
-@docs setRTLTextPlugin
-
-
-### Querying the map
-
-@docs Response, queryResults, getBounds, queryRenderedFeatures, Query
+@docs resize
 
 -}
 

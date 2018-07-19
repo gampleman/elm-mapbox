@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, setRTLTextPlugin, queryResults, getBounds, queryRenderedFeatures, resize)
+module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, resize)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
@@ -21,12 +21,7 @@ You can of course customize the module you copy into your codebase to support th
 
 ### Other
 
-@docs setRTLTextPlugin, resize
-
-
-### Querying the map
-
-@docs queryResults, getBounds, queryRenderedFeatures
+@docs resize
 
 -}
 
