@@ -2,6 +2,19 @@
 
 Great looking and performant maps in Elm using MapboxGl. Discuss in #maps on the Elm Slack.
 
+### High quality mapping in Elm
+
+There have been [some attempts](https://github.com/gampleman/elm-visualization/wiki/Data-Visualization-Packages#maps) to make native elm mapping packages. However, Mapbox offers a very complex solution that offers some killer features that are difficult to reproduce:
+
+- client side high quality cartography
+- high performance with large datasets
+
+The way this works, the map accepts a configuration object called a **style**. The main thing in a style is a list of **layers**. Layers control what you see on the screen. Their order controls their layering (duh). Each layer references a data **source** and has a list of properties. Properties are a bit like CSS for maps in the sense that you can use them to specify colors, line thickness, etc. However, unlike CSS, the values that you pass to these use are **expressions** in a little language, that allows you to style based on other factors like the map's zoom level or actual data in any of the **features** being styled.
+
+**Sources** specify how to get the data that powers the layers. Multiple layers can take in a single source.
+
+This library allows you to specify the **style** declaratively passing it into a specific element in your view function. However, the map element holds some internal state: mostly about the position of the viewport and all the event handling needed to manipulate it. In my experience this is mostly what you want - the default map interactions tend to be appropriate. So this library includes commands that tell the map to modify its internal state (including stuff like animations etc).
+
 ### How this works
 
 This library uses a combination of ports and custom elements. To get going,
@@ -153,7 +166,9 @@ The `elmMapbox` function accepts an options object that takes the following opti
 
  - `token`: the Mapbox token. If you don't pass it here, you will need to use the `token` Elm attribute.
  - `easingFunctions`: an object whose values are easing functions (i.e. they take a number between 0..1 and return a number between 0..1). You can refer to these with the `easing` option in the Cmd.Option module.
- - `onMount` a callback that gives you access to the mapbox instance whenever a map gets instantiated. Mostly useful for registering plugins.
+ - `onMount` a callback that gives you access to the mapbox instance whenever a map gets instantiated. Mostly useful for registering [plugins](https://www.mapbox.com/mapbox-gl-js/plugins).
+
+Furthermore, the elm-mapbox element exposes its internal mapboxgl.js reference as a `map` property, which you can use if necessary (although, worth mentioning on slack if you are needing to do this). 
 
 ### License
 
