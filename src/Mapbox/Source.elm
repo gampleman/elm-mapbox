@@ -1,4 +1,4 @@
-module Mapbox.Source exposing (Source, SourceOption, raster, tileSize, rasterFromUrl, RasterSource, scheme, Scheme(..), rasterDEMMapbox, rasterDEMTerrarium, geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, lineMetrics, Coords, image, video, staticCanvas, animatedCanvas, bounds, minzoom, maxzoom, attribution, encode, getId, Id, Url, vector, vectorFromUrl, VectorSource)
+module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(..), Source, SourceOption, Url, VectorSource, animatedCanvas, attribution, bounds, buffer, cluster, clusterRadius, encode, geoJSONFromUrl, geoJSONFromValue, getId, image, lineMetrics, maxzoom, minzoom, raster, rasterDEMMapbox, rasterDEMTerrarium, rasterFromUrl, scheme, staticCanvas, tileSize, tolerance, vector, vectorFromUrl, video)
 
 {-|
 

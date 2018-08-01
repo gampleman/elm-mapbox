@@ -1,4 +1,4 @@
-port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, resize)
+port module MapCommands exposing (easeTo, fitBounds, flyTo, id, jumpTo, panBy, panTo, resize, rotateTo, stop, zoomIn, zoomOut, zoomTo)
 
 {-| Tell your map to do something! Most of these Commands tell your map to (with or without animation) to show a different location. You can use the options from `Mapbox.Cmd.Option` to configure these.
 
@@ -16,9 +16,9 @@ port module MapCommands exposing (id, panBy, panTo, zoomTo, zoomIn, zoomOut, rot
 
 -}
 
-import Mapbox.Cmd.Template as Template exposing (Option, Supported)
 import Json.Encode as Encode exposing (Value)
 import LngLat exposing (LngLat)
+import Mapbox.Cmd.Template as Template exposing (Option, Supported)
 
 
 port elmMapboxOutgoing : Value -> Cmd msg
@@ -228,57 +228,3 @@ flyTo =
 stop : Cmd msg
 stop =
     Template.stop elmMapboxOutgoing id
-
-
-{-| Sets the map's [RTL text plugin](https://www.mapbox.com/mapbox-gl-js/plugins/#mapbox-gl-rtl-text). Necessary for supporting languages like Arabic and Hebrew that are written right-to-left. Takes a URL pointing to the Mapbox RTL text plugin source.
--}
-setRTLTextPlugin : String -> Cmd msg
-setRTLTextPlugin =
-    Template.setRTLTextPlugin elmMapboxOutgoing id
-
-
-
--- incoming
-
-
-{-| Responds with the map's geographical bounds. Takes a numerical ID that allows you to associate the question with the answer.
--}
-getBounds : Int -> Cmd msg
-getBounds =
-    Template.getBounds elmMapboxOutgoing id
-
-
-{-| Returns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters. Takes a numerical ID that allows you to associate the question with the answer.
-
-The response: The properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).
-
-Each feature includes a top-level layer property whose value is an object representing the style layer to which the feature belongs. Layout and paint properties in this object contain values which are fully evaluated for the given zoom level and feature.
-
-Features from layers whose visibility property is "none", or from layers whose zoom range excludes the current zoom level are not included. Symbol features that have been hidden due to text or icon collision are not included. Features from all other layers are included, including features that may have no visible contribution to the rendered result; for example, because the layer's opacity or color alpha component is set to 0.
-
-The topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).
-
-Because features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.
-
--}
-queryRenderedFeatures : Int -> List (Option { layers : Supported, filter : Supported, query : Supported }) -> Cmd msg
-queryRenderedFeatures =
-    Template.queryRenderedFeatures elmMapboxOutgoing id
-
-
-{-| A response to the queries. See the relevant methods for more information.
--}
-type Response
-    = GetBounds Int ( LngLat, LngLat )
-    | QueryRenderedFeatures Int (List Value)
-    | Error String
-
-
-port elmMapboxIncoming : (Value -> msg) -> Sub msg
-
-
-{-| Receive results from the queries
--}
-queryResults : (Response -> msg) -> Sub msg
-queryResults =
-    Template.queryResults elmMapboxIncoming GetBounds QueryRenderedFeatures Error

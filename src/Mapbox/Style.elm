@@ -1,4 +1,4 @@
-module Mapbox.Style exposing (Style(..), StyleDef, encode, Light, defaultLight, Transition, defaultTransition, MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata, streets, outdoors, light, dark, satellite, satelliteStreets)
+module Mapbox.Style exposing (Light, MiscAttr, Style(..), StyleDef, Transition, dark, defaultBearing, defaultCenter, defaultLight, defaultPitch, defaultTransition, defaultZoomLevel, encode, glyphs, light, metadata, name, outdoors, satellite, satelliteStreets, sprite, streets)
 
 {-| A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a JSON object with specific root level and nested properties. This specification defines and describes these properties.
 

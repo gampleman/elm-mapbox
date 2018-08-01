@@ -108,6 +108,7 @@ function wrapElmApplication(elmApp, settings = {}) {
         return this._featureState;
       }
       set featureState(value) {
+
         // TODO: Clean this up
         function makeId({id, source, sourceLayer}) {
           return `${id}::${source}::${sourceLayer}`;
@@ -171,7 +172,7 @@ function wrapElmApplication(elmApp, settings = {}) {
           ) {
             wrapped = e => {
               e.features = this._map.queryRenderedFeatures(
-                [e.lngLat.lng, e.lngLat.lat],
+                e.point,
                 {
                   layers: this.eventFeaturesLayers,
                   filter: this.eventFeaturesFilter
@@ -182,14 +183,14 @@ function wrapElmApplication(elmApp, settings = {}) {
           } else if (["touchend", "touchmove", "touchcancel"].includes(type)) {
             wrapped = e => {
               e.features = this._map.queryRenderedFeatures(
-                [e.lngLat.lng, e.lngLat.lat],
+                [e.point],
                 {
                   layers: this.eventFeaturesLayers,
                   filter: this.eventFeaturesFilter
                 }
               );
-              e.perPointFeatures = e.lngLats.map(({ lng, lat }) =>
-                this._map.queryRenderedFeatures([lng, lat], {
+              e.perPointFeatures = e.points.map(point =>
+                this._map.queryRenderedFeatures(point, {
                   layers: this.eventFeaturesLayers,
                   filter: this.eventFeaturesFilter
                 })

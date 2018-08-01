@@ -1,55 +1,22 @@
 module Mapbox.Layer
     exposing
-        ( Layer
-        , SourceId
-        , Background
-        , Fill
-        , Symbol
-        , Line
-        , Raster
+        ( Background
         , Circle
+        , Fill
         , FillExtrusion
         , Heatmap
         , Hillshade
+        , Layer
         , LayerAttr
-        , encode
+        , Line
+        , Raster
+        , SourceId
+        , Symbol
         , background
-        , fill
-        , symbol
-        , line
-        , raster
+        , backgroundColor
+        , backgroundOpacity
+        , backgroundPattern
         , circle
-        , fillExtrusion
-        , heatmap
-        , hillshade
-        , metadata
-        , sourceLayer
-        , minzoom
-        , maxzoom
-        , filter
-        , visible
-        , fillAntialias
-        , fillColor
-        , fillOpacity
-        , fillOutlineColor
-        , fillPattern
-        , fillTranslate
-        , fillTranslateAnchor
-        , lineBlur
-        , lineCap
-        , lineColor
-        , lineDasharray
-        , lineGapWidth
-        , lineGradient
-        , lineJoin
-        , lineMiterLimit
-        , lineOffset
-        , lineOpacity
-        , linePattern
-        , lineRoundLimit
-        , lineTranslate
-        , lineTranslateAnchor
-        , lineWidth
         , circleBlur
         , circleColor
         , circleOpacity
@@ -61,11 +28,11 @@ module Mapbox.Layer
         , circleStrokeWidth
         , circleTranslate
         , circleTranslateAnchor
-        , heatmapColor
-        , heatmapIntensity
-        , heatmapOpacity
-        , heatmapRadius
-        , heatmapWeight
+        , encode
+        , fill
+        , fillAntialias
+        , fillColor
+        , fillExtrusion
         , fillExtrusionBase
         , fillExtrusionColor
         , fillExtrusionHeight
@@ -73,6 +40,25 @@ module Mapbox.Layer
         , fillExtrusionPattern
         , fillExtrusionTranslate
         , fillExtrusionTranslateAnchor
+        , fillOpacity
+        , fillOutlineColor
+        , fillPattern
+        , fillTranslate
+        , fillTranslateAnchor
+        , filter
+        , heatmap
+        , heatmapColor
+        , heatmapIntensity
+        , heatmapOpacity
+        , heatmapRadius
+        , heatmapWeight
+        , hillshade
+        , hillshadeAccentColor
+        , hillshadeExaggeration
+        , hillshadeHighlightColor
+        , hillshadeIlluminationAnchor
+        , hillshadeIlluminationDirection
+        , hillshadeShadowColor
         , iconAllowOverlap
         , iconAnchor
         , iconColor
@@ -94,6 +80,36 @@ module Mapbox.Layer
         , iconTextFitPadding
         , iconTranslate
         , iconTranslateAnchor
+        , line
+        , lineBlur
+        , lineCap
+        , lineColor
+        , lineDasharray
+        , lineGapWidth
+        , lineGradient
+        , lineJoin
+        , lineMiterLimit
+        , lineOffset
+        , lineOpacity
+        , linePattern
+        , lineRoundLimit
+        , lineTranslate
+        , lineTranslateAnchor
+        , lineWidth
+        , maxzoom
+        , metadata
+        , minzoom
+        , raster
+        , rasterBrightnessMax
+        , rasterBrightnessMin
+        , rasterContrast
+        , rasterFadeDuration
+        , rasterHueRotate
+        , rasterOpacity
+        , rasterResampling
+        , rasterSaturation
+        , sourceLayer
+        , symbol
         , symbolAvoidEdges
         , symbolPlacement
         , symbolSpacing
@@ -123,30 +139,14 @@ module Mapbox.Layer
         , textTransform
         , textTranslate
         , textTranslateAnchor
-        , rasterBrightnessMax
-        , rasterBrightnessMin
-        , rasterContrast
-        , rasterResampling
-        , rasterFadeDuration
-        , rasterHueRotate
-        , rasterOpacity
-        , rasterSaturation
-        , hillshadeAccentColor
-        , hillshadeExaggeration
-        , hillshadeHighlightColor
-        , hillshadeIlluminationAnchor
-        , hillshadeIlluminationDirection
-        , hillshadeShadowColor
-        , backgroundColor
-        , backgroundOpacity
-        , backgroundPattern
+        , visible
         )
 
 {-| Layers specify what is actually rendered on the map and are rendered in order.
 
 Except for layers of the background type, each layer needs to refer to a source. Layers take the data that they get from a source, optionally filter features, and then define how those features are styled.
 
-There are two kinds of properties: *Layout* and *Paint* properties.
+There are two kinds of properties: _Layout_ and _Paint_ properties.
 
 Layout properties are applied early in the rendering process and define how data for that layer is passed to the GPU. Changes to a layout property require an asynchronous "layout" step.
 
@@ -218,7 +218,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, AnchorAuto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, SymbolPlacement, TextFit, TextJustify, TextTransform, RasterResampling)
+import Mapbox.Expression as Expression exposing (Anchor, AnchorAuto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform)
 
 
 {-| Represents a layer.
@@ -313,7 +313,7 @@ encodeAttrs attrs =
                 { top = [], layout = [], paint = [] }
                 attrs
     in
-        ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top
+    ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top
 
 
 {-| The background color or pattern of the map.

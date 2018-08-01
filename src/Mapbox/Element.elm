@@ -1,4 +1,4 @@
-module Mapbox.Element exposing (map, css, MapboxAttr, token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers, onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel)
+module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFeaturesFilter, eventFeaturesLayers, id, map, maxBounds, maxZoom, minZoom, onClick, onContextMenu, onDblClick, onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onRotate, onRotateEnd, onRotateStart, onTouchCancel, onTouchEnd, onTouchMove, onZoom, onZoomEnd, onZoomStart, renderWorldCopies, token)
 
 {-| This library wraps a Custom Element that actually renders a map.
 
@@ -25,8 +25,8 @@ import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 import LngLat exposing (LngLat)
 import Mapbox.Expression exposing (DataExpression, Expression)
-import Mapbox.Style exposing (Style)
 import Mapbox.Helpers exposing (encodePair)
+import Mapbox.Style exposing (Style)
 
 
 {-| This is the type that all attributes have.
@@ -51,15 +51,15 @@ map attrs style =
             (Mapbox.Style.encode style
                 |> property "mapboxStyle"
             )
-                :: (List.map (\(MapboxAttr attr) -> attr) attrs)
+                :: List.map (\(MapboxAttr attr) -> attr) attrs
     in
-        node "elm-mapbox-map" props []
+    node "elm-mapbox-map" props []
 
 
 {-| This is literally:
 
     <link
-      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.css'
+      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css'
       rel='stylesheet' />
 
 You can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.
@@ -67,7 +67,7 @@ You can include the required styles yourself if it fits better with the way you 
 -}
 css : Html msg
 css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).
@@ -398,4 +398,4 @@ controlledMap { center, zoom, bearing, pitch } attrs style =
                 :: property "pitch" (Encode.float pitch)
                 :: List.map (\(MapboxAttr attr) -> attr) attrs
     in
-        node "elm-mapbox-map" props []
+    node "elm-mapbox-map" props []

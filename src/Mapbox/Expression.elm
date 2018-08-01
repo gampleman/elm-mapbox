@@ -1,150 +1,150 @@
 module Mapbox.Expression
     exposing
-        ( Expression
-        , DataExpression
+        ( Anchor(..)
+        , AnchorAuto
         , CameraExpression
-        , encode
-        , Color
-        , Object
         , Collator
-        , defaultCollator
-        , true
-        , false
-        , bool
-        , int
-        , float
-        , str
-        , rgba
-        , floats
-        , strings
-        , object
-        , collator
+        , Color
+        , DataExpression
+        , Expression
+        , Interpolation(..)
+        , LineCap
+        , LineJoin
+        , Object
+        , Position
+        , RasterResampling
+        , SymbolPlacement
+        , TextFit
+        , TextJustify
+        , TextTransform
+        , abs
+        , acos
+        , all
+        , anchorAutoAuto
+        , anchorAutoMap
+        , anchorAutoViewport
+        , anchorMap
+        , anchorViewport
+        , any
+        , append
+        , asin
         , assertArray
-        , assertArrayOfStrings
-        , assertArrayOfFloats
         , assertArrayOfBools
+        , assertArrayOfFloats
+        , assertArrayOfStrings
         , assertBool
         , assertFloat
         , assertObject
         , assertString
-        , toBool
-        , toColor
-        , toFloat
-        , toString
-        , typeof
         , at
-        , get
-        , has
+        , atan
+        , bool
+        , ceil
+        , coalesce
+        , collator
+        , conditionally
+        , cos
         , count
-        , length
+        , defaultCollator
+        , divideBy
+        , downcase
+        , e
+        , encode
+        , false
         , featureState
+        , float
+        , floats
+        , floor
         , geometryType
-        , id
-        , properties
+        , get
         , getProperty
-        , hasProperty
-        , isEqual
-        , notEqual
-        , lessThan
-        , lessThanOrEqual
         , greaterThan
         , greaterThanOrEqual
-        , isEqualWithCollator
-        , notEqualWithCollator
-        , lessThanWithCollator
-        , lessThanOrEqualWithCollator
-        , greaterThanWithCollator
         , greaterThanOrEqualWithCollator
-        , not
-        , all
-        , any
+        , greaterThanWithCollator
+        , has
+        , hasProperty
+        , heatmapDensity
+        , id
         , ifElse
-        , conditionally
-        , matchesStr
-        , matchesFloat
-        , coalesce
+        , int
         , interpolate
-        , Interpolation(..)
-        , step
-        , append
-        , downcase
-        , upcase
+        , isEqual
+        , isEqualWithCollator
         , isSupportedScript
-        , resolvedLocale
-        , makeRGBColor
-        , makeRGBAColor
-        , rgbaChannels
-        , minus
-        , multiply
-        , divideBy
-        , modBy
-        , plus
-        , raiseBy
-        , sqrt
-        , abs
-        , ceil
-        , floor
-        , round
-        , cos
-        , sin
-        , tan
-        , acos
-        , asin
-        , atan
-        , e
-        , pi
+        , length
+        , lessThan
+        , lessThanOrEqual
+        , lessThanOrEqualWithCollator
+        , lessThanWithCollator
+        , lineCapButt
+        , lineCapRound
+        , lineCapSquare
+        , lineJoinBevel
+        , lineJoinMiter
+        , lineJoinRound
+        , lineProgress
         , ln
         , ln2
         , log10
         , log2
-        , zoom
-        , heatmapDensity
-        , lineProgress
-        , Anchor(..)
-        , anchorMap
-        , anchorViewport
-        , AnchorAuto
-        , anchorAutoMap
-        , anchorAutoViewport
-        , anchorAutoAuto
-        , Position
+        , makeRGBAColor
+        , makeRGBColor
+        , matchesFloat
+        , matchesStr
+        , minus
+        , modBy
+        , multiply
+        , not
+        , notEqual
+        , notEqualWithCollator
+        , object
+        , pi
+        , plus
+        , positionBottom
+        , positionBottomLeft
+        , positionBottomRight
         , positionCenter
         , positionLeft
         , positionRight
         , positionTop
-        , positionBottom
         , positionTopLeft
         , positionTopRight
-        , positionBottomLeft
-        , positionBottomRight
-        , TextFit
-        , textFitNone
-        , textFitWidth
-        , textFitHeight
-        , textFitBoth
-        , LineCap
-        , lineCapButt
-        , lineCapRound
-        , lineCapSquare
-        , LineJoin
-        , lineJoinBevel
-        , lineJoinRound
-        , lineJoinMiter
-        , SymbolPlacement
-        , symbolPlacementPoint
-        , symbolPlacementLine
-        , symbolPlacementLineCenter
-        , TextJustify
-        , textJustifyLeft
-        , textJustifyCenter
-        , textJustifyRight
-        , TextTransform
-        , textTransformNone
-        , textTransformUppercase
-        , textTransformLowercase
-        , RasterResampling
+        , properties
+        , raiseBy
         , rasterResamplingLinear
         , rasterResamplingNearest
+        , resolvedLocale
+        , rgba
+        , rgbaChannels
+        , round
+        , sin
+        , sqrt
+        , step
+        , str
+        , strings
+        , symbolPlacementLine
+        , symbolPlacementLineCenter
+        , symbolPlacementPoint
+        , tan
+        , textFitBoth
+        , textFitHeight
+        , textFitNone
+        , textFitWidth
+        , textJustifyCenter
+        , textJustifyLeft
+        , textJustifyRight
+        , textTransformLowercase
+        , textTransformNone
+        , textTransformUppercase
+        , toBool
+        , toColor
+        , toFloat
+        , toString
+        , true
+        , typeof
+        , upcase
+        , zoom
         )
 
 {-| Expressions form a little language that can be used to compute values for various layer properties.
@@ -779,6 +779,12 @@ assertBool =
     call1 "boolean"
 
 
+{-| -}
+assertBoolWithFalback : Bool -> Expression exprType any -> Expression exprType Bool
+assertBoolWithFalback fallback value =
+    call2 "boolean" value (bool fallback)
+
+
 
 -- assertAtLeastOneBool : List (Expression exprType any) -> Expression exprType Bool
 -- assertAtLeastOneBool =
@@ -1099,7 +1105,7 @@ matchesStr options (Expression default) (Expression input) =
         properOptions =
             List.concatMap (\( label, Expression output ) -> [ Json.Encode.string label, output ]) options
     in
-        call "match" (input :: properOptions ++ [ default ])
+    call "match" (input :: properOptions ++ [ default ])
 
 
 {-| Selects the output whose label value matches the input value, or the fallback value if no match is found.
@@ -1119,7 +1125,7 @@ matchesFloat options (Expression default) (Expression input) =
         properOptions =
             List.concatMap (\( label, Expression output ) -> [ Json.Encode.float label, output ]) options
     in
-        call "match" (input :: properOptions ++ [ default ])
+    call "match" (input :: properOptions ++ [ default ])
 
 
 {-| Interpolation types:
