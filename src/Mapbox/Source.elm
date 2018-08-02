@@ -120,7 +120,7 @@ getId (Source k _) =
 -}
 bounds : LngLat -> LngLat -> SourceOption any
 bounds sw ne =
-    SourceOption "bounds" (Json.Encode.list [ Json.Encode.float sw.lng, Json.Encode.float sw.lat, Json.Encode.float sw.lng, Json.Encode.float sw.lat ])
+    SourceOption "bounds" (Json.Encode.list Json.Encode.float [ sw.lng, sw.lat, sw.lng, sw.lat ])
 
 
 {-| Minimum zoom level for which tiles are available, as in the TileJSON spec.
@@ -222,7 +222,7 @@ This takes an array of one or more tile source URLs, as in the TileJSON spec.
 -}
 vector : Id -> List Url -> List (SourceOption VectorSource) -> Source
 vector id urls options =
-    ( "tiles", Json.Encode.list (List.map Json.Encode.string urls) )
+    ( "tiles", Json.Encode.list Json.Encode.string urls )
         :: ( "type", Json.Encode.string "vector" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
@@ -240,7 +240,7 @@ rasterFromUrl id url =
 -}
 raster : Id -> List Url -> List (SourceOption RasterSource) -> Source
 raster id urls options =
-    ( "tiles", Json.Encode.list (List.map Json.Encode.string urls) )
+    ( "tiles", Json.Encode.list Json.Encode.string urls )
         :: ( "type", Json.Encode.string "raster" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
@@ -306,11 +306,11 @@ type alias Coords =
 
 encodeCoordinates : Coords -> Value
 encodeCoordinates { topLeft, topRight, bottomRight, bottomLeft } =
-    Json.Encode.list
-        [ LngLat.encodeAsPair topLeft
-        , LngLat.encodeAsPair topRight
-        , LngLat.encodeAsPair bottomRight
-        , LngLat.encodeAsPair bottomLeft
+    Json.Encode.list LngLat.encodeAsPair
+        [ topLeft
+        , topRight
+        , bottomRight
+        , bottomLeft
         ]
 
 
@@ -331,7 +331,7 @@ image id url coordinates =
 video : Id -> List Url -> Coords -> Source
 video id urls coordinates =
     [ ( "type", Json.Encode.string "video" )
-    , ( "urls", Json.Encode.list (List.map Json.Encode.string urls) )
+    , ( "urls", Json.Encode.list Json.Encode.string urls )
     , ( "coordinates", encodeCoordinates coordinates )
     ]
         |> Json.Encode.object

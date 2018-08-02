@@ -2,7 +2,7 @@ module Mapbox.Style exposing (Light, MiscAttr, Style(..), StyleDef, Transition, 
 
 {-| A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a JSON object with specific root level and nested properties. This specification defines and describes these properties.
 
-@docs Style, encode , StyleDef
+@docs Style, encode, StyleDef
 
 
 ### Light
@@ -31,7 +31,7 @@ You can also use one of these predefined styles.
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
 import LngLat exposing (LngLat)
-import Mapbox.Expression exposing (Anchor(Viewport), CameraExpression, Color, Expression, float, floats, rgba)
+import Mapbox.Expression exposing (Anchor(..), CameraExpression, Color, Expression, float, floats, rgba)
 import Mapbox.Helpers exposing (encodeAnchor)
 import Mapbox.Layer exposing (Layer)
 import Mapbox.Source exposing (Source)
@@ -95,7 +95,7 @@ encode style =
             , ( "transition", encodeTransition styleDef.transition )
             , ( "light", encodeLight styleDef.light )
             , ( "sources", Encode.object <| List.map (\source -> ( Mapbox.Source.getId source, Mapbox.Source.encode source )) styleDef.sources )
-            , ( "layers", Encode.list (List.map Mapbox.Layer.encode styleDef.layers) )
+            , ( "layers", Encode.list Mapbox.Layer.encode styleDef.layers )
             ]
                 ++ List.map (\(MiscAttr key value) -> ( key, value )) styleDef.misc
                 |> Encode.object

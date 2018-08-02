@@ -1,18 +1,13 @@
 import mapboxgl from "mapbox-gl";
 
-function wrapElmApplication(elmApp, settings = {}) {
+
+export function registerCustomElement(settings) {
   const options = Object.assign(
     {
-      outgoingPort: "elmMapboxOutgoing",
-      incomingPort: "elmMapboxIncoming",
-      easingFunctions: {
-        linear: t => t
-      },
       onMount() {}
     },
     settings
   );
-
   if (options.token) {
     mapboxgl.accessToken = options.token;
   }
@@ -279,8 +274,21 @@ function wrapElmApplication(elmApp, settings = {}) {
       }
     }
   );
+}
 
-  if (elmApp.ports && elmApp.ports.elmMapboxOutgoing) {
+export function registerPorts(elmApp, settings = {}) {
+  const options = Object.assign(
+    {
+      outgoingPort: "elmMapboxOutgoing",
+      incomingPort: "elmMapboxIncoming",
+      easingFunctions: {
+        linear: t => t
+      }
+    },
+    settings
+  );
+
+  if (elmApp.ports && elmApp.ports[options.outgoingPort]) {
     function processOptions(opts) {
       if (opts.easing) {
         return Object.assign({}, opts, {
@@ -353,11 +361,11 @@ function wrapElmApplication(elmApp, settings = {}) {
           });
       }
     });
+  } else {
+    throw new Error(`Expected Elm App to expose ${elmApp.ports[options.outgoingPort]} port.`);
   }
 
   return elmApp;
 }
 
-wrapElmApplication.supported = mapboxgl.supported;
-
-export default wrapElmApplication;
+export const supported = mapboxgl.supported;
