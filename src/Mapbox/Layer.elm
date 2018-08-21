@@ -299,16 +299,16 @@ encodeAttrs attrs =
     let
         { top, layout, paint } =
             List.foldl
-                (\attr ({ top, layout, paint } as lists) ->
+                (\attr lists ->
                     case attr of
                         Top key val ->
-                            { lists | top = ( key, val ) :: top }
+                            { lists | top = ( key, val ) :: lists.top }
 
                         Paint key val ->
-                            { lists | paint = ( key, val ) :: paint }
+                            { lists | paint = ( key, val ) :: lists.paint }
 
                         Layout key val ->
-                            { lists | layout = ( key, val ) :: layout }
+                            { lists | layout = ( key, val ) :: lists.layout }
                 )
                 { top = [], layout = [], paint = [] }
                 attrs

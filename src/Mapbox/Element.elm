@@ -20,7 +20,7 @@ module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFea
 
 import Html exposing (Attribute, Html, node)
 import Html.Attributes exposing (attribute, property)
-import Html.Events exposing (Options)
+import Html.Events
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 import LngLat exposing (LngLat)
@@ -127,8 +127,7 @@ This needs more design before release.
 -}
 featureState : List ( Value, List ( String, Value ) ) -> MapboxAttr msg
 featureState =
-    List.map (\( feature, state ) -> Encode.list [ feature, Encode.object state ])
-        >> Encode.list
+    Encode.list (\( feature, state ) -> Encode.list identity [ feature, Encode.object state ])
         >> property "featureState"
         >> MapboxAttr
 
@@ -150,7 +149,7 @@ a lot of data. Here you can specify which layers you want to search for intersec
 -}
 eventFeaturesLayers : List String -> MapboxAttr msg
 eventFeaturesLayers =
-    List.map Encode.string >> Encode.list >> property "eventFeaturesLayers" >> MapboxAttr
+    Encode.list Encode.string >> property "eventFeaturesLayers" >> MapboxAttr
 
 
 {-| This allows you to use other events not provided by this libary.
@@ -158,9 +157,9 @@ eventFeaturesLayers =
 See <https://www.mapbox.com/mapbox-gl-js/api/#map.event> for all supported events.
 
 -}
-onWithOptions : String -> Options -> Decoder msg -> MapboxAttr msg
-onWithOptions type_ opts decoder =
-    Html.Events.onWithOptions type_ opts decoder |> MapboxAttr
+on : String -> Decoder msg -> MapboxAttr msg
+on type_ decoder =
+    Html.Events.on type_ decoder |> MapboxAttr
 
 
 {-| `point` is the coordinates in pixels in screen space.
@@ -199,7 +198,7 @@ type alias TouchEvent =
 
 
 decodePoint =
-    Decode.map2 (,) (Decode.field "x" Decode.int) (Decode.field "y" Decode.int)
+    Decode.map2 (\a b -> ( a, b )) (Decode.field "x" Decode.int) (Decode.field "y" Decode.int)
 
 
 decodeEventData =

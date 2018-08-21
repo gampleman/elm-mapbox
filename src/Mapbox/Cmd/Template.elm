@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Template exposing (Id, Outgoing, Option, Supported, panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, stop, fitBounds, resize)
+module Mapbox.Cmd.Template exposing (Id, Option, Outgoing, Supported, easeTo, fitBounds, flyTo, jumpTo, panBy, panTo, resize, rotateTo, stop, zoomIn, zoomOut, zoomTo)
 
 {-| This module has a bunch of essentially imperative commands for your map.
 
@@ -27,9 +27,9 @@ You can of course customize the module you copy into your codebase to support th
 
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value)
+import LngLat exposing (LngLat)
 import Mapbox.Cmd.Internal as Internal exposing (Option(..), Supported)
 import Mapbox.Helpers exposing (encodePair)
-import LngLat exposing (LngLat)
 
 
 {-| The type of a port that you need to provide for this module to work.
@@ -367,30 +367,30 @@ queryRenderedFeatures prt id reqId options =
 
 -}
 queryResults : ((Value -> msg) -> Sub msg) -> (Int -> ( LngLat, LngLat ) -> response) -> (Int -> List Value -> response) -> (String -> response) -> (response -> msg) -> Sub msg
-queryResults prt getBounds queryRenderedFeatures error tagger =
-    prt (decodeResponse getBounds queryRenderedFeatures error >> tagger)
+queryResults prt getBounds_ queryRenderedFeatures_ error_ tagger =
+    prt (decodeResponse getBounds_ queryRenderedFeatures_ error_ >> tagger)
 
 
-responseDecoder getBounds queryRenderedFeatures =
+responseDecoder getBounds_ queryRenderedFeatures_ =
     Decode.field "type" Decode.string
         |> Decode.andThen
             (\s ->
                 case s of
                     "getBounds" ->
-                        Decode.map2 getBounds (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair LngLat.decodeFromPair))
+                        Decode.map2 getBounds_ (Decode.field "id" Decode.int) (Decode.field "bounds" (decodePair LngLat.decodeFromPair))
 
                     "queryRenderedFeatures" ->
-                        Decode.map2 queryRenderedFeatures (Decode.field "id" Decode.int) (Decode.field "features" (Decode.list Decode.value))
+                        Decode.map2 queryRenderedFeatures_ (Decode.field "id" Decode.int) (Decode.field "features" (Decode.list Decode.value))
 
                     _ ->
                         Decode.fail <| "Unrecognized response type: " ++ s
             )
 
 
-decodeResponse getBounds queryRenderedFeatures error value =
-    case Decode.decodeValue (responseDecoder getBounds queryRenderedFeatures) value of
+decodeResponse getBounds_ queryRenderedFeatures_ error_ value =
+    case Decode.decodeValue (responseDecoder getBounds_ queryRenderedFeatures_) value of
         Ok res ->
             res
 
         Err e ->
-            error e
+            error_ (Decode.errorToString e)

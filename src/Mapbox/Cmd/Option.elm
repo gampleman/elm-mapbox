@@ -1,4 +1,4 @@
-module Mapbox.Cmd.Option exposing (duration, easing, offset, animate, curve, minZoom, speed, screenSpeed, maxDuration, center, zoom, bearing, pitch, around, padding, Padding, linear, maxZoom)
+module Mapbox.Cmd.Option exposing (Padding, animate, around, bearing, center, curve, duration, easing, linear, maxDuration, maxZoom, minZoom, offset, padding, pitch, screenSpeed, speed, zoom)
 
 {-|
 
@@ -25,12 +25,11 @@ Options common to `jumpTo`, `easeTo`, and `flyTo`, controlling the desired locat
 
 -}
 
-import Mapbox.Helpers exposing (encodePair)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Cmd.Internal as Internal exposing (Option(..), Supported)
-import Mapbox.Helpers exposing (encodePair)
 import LngLat exposing (LngLat)
+import Mapbox.Cmd.Internal as Internal exposing (Option(..), Supported)
 import Mapbox.Expression exposing (DataExpression, Expression)
+import Mapbox.Helpers exposing (encodePair)
 
 
 {-| The animation's duration, measured in milliseconds.
@@ -176,7 +175,7 @@ maxDuration =
 -}
 layers : List String -> Option { a | layers : Supported }
 layers =
-    List.map Encode.string >> Encode.list >> Option "layers"
+    Encode.list Encode.string >> Option "layers"
 
 
 {-| A filter to limit query results.
@@ -197,4 +196,4 @@ intersectsPoint =
 -}
 intersectsBox : ( LngLat, LngLat ) -> Option { a | query : Supported }
 intersectsBox =
-    encodePair (LngLat.encodeAsPair) >> Option "query"
+    encodePair LngLat.encodeAsPair >> Option "query"

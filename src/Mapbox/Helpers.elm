@@ -15,4 +15,4 @@ encodeAnchor v =
 
 
 encodePair encoder ( a, b ) =
-    Encode.list [ encoder a, encoder b ]
+    Encode.list encoder [ a, b ]

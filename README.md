@@ -25,7 +25,7 @@ install the accompanying npm library:
 Then, when you are instantiating your Elm application, change it from:
 
 ```javascript
-var app = Elm.MyApp.fullscreen();
+var app = Elm.MyApp.init();
 ```
 
 to
@@ -33,17 +33,23 @@ to
 ```javascript
 import elmMapbox from "elm-mapbox";
 
-var app = elmMapbox(Elm.MyApp.fullscreen());
+elmMapbox.registerCustomElement();
+var app = Elm.MyApp.init();
+elmMapbox.registerPorts(app);
 ```
 
-(where `MyApp` is your main module and `fullscreen` can be any way of instantiating an elm application).
+(where `MyApp` is your main module and `init` can be any way of instantiating an elm application).
 
-Additionally, you may pass in your mapbox token as an option to this method:
+It is important that these operations proceed in this order, i.e. the custom element is registered before the application first renders. The ports can only be setup immediately afterwards (as they need a reference to the application).
+
+Additionally, you may pass in your mapbox token as an option through this method:
 
 ```javascript
 import elmMapbox from "elm-mapbox";
 
-var app = elmMapbox(Elm.MyApp.fullscreen(), {token: 'pk45.rejkgnwejk'});
+elmMapbox.registerCustomElement({token: 'pk45.rejkgnwejk'});
+var app = Elm.MyApp.init();
+elmMapbox.registerPorts(app);
 ```
 
 Next, optionally, setup a ports module. The best way to do this is to to copy [this file](examples/MapCommands.elm) into your project.
@@ -150,25 +156,28 @@ has a `supported` function that can be injected via flags:
 ```javascript
 import elmMapbox from "elm-mapbox";
 
-var app = elmMapbox(Elm.MyApp.fullscreen({
+var app = Elm.MyApp.fullscreen({
   mapboxSupported: elmMapbox.supported({
     // If  true , the function will return  false if the performance of
     // Mapbox GL JS would be dramatically worse than expected (e.g. a
     // software WebGL renderer would be used).
     failIfMajorPerformanceCaveat: true
   })
-}));
+});
 ```
 
 ### Customizing the JS side
 
-The `elmMapbox` function accepts an options object that takes the following options:
+The `elmMapbox.registerCustomElement` function accepts an options object that takes the following options:
 
  - `token`: the Mapbox token. If you don't pass it here, you will need to use the `token` Elm attribute.
- - `easingFunctions`: an object whose values are easing functions (i.e. they take a number between 0..1 and return a number between 0..1). You can refer to these with the `easing` option in the Cmd.Option module.
  - `onMount` a callback that gives you access to the mapbox instance whenever a map gets instantiated. Mostly useful for registering [plugins](https://www.mapbox.com/mapbox-gl-js/plugins).
 
-Furthermore, the elm-mapbox element exposes its internal mapboxgl.js reference as a `map` property, which you can use if necessary (although, worth mentioning on slack if you are needing to do this). 
+Furthermore, the elm-mapbox element exposes its internal mapboxgl.js reference as a `map` property, which you can use if necessary (although, worth mentioning on slack if you are needing to do this).
+
+The `elmMapbox.registerPorts` function accepts an option object that takes the following options:
+
+ - `easingFunctions`: an object whose values are easing functions (i.e. they take a number between 0..1 and return a number between 0..1). You can refer to these with the `easing` option in the Cmd.Option module.
 
 ### License
 

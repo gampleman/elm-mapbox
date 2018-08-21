@@ -1,13 +1,13 @@
-module LngLat exposing (LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map)
+module LngLat exposing (LngLat, decodeFromObject, decodeFromPair, encodeAsObject, encodeAsPair, map, toString)
 
 {-| Encodes geographic position.
 
-@docs LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map
+@docs LngLat, encodeAsPair, encodeAsObject, decodeFromPair, decodeFromObject, map, toString
 
 -}
 
-import Json.Encode as Encode exposing (Value)
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode exposing (Value)
 
 
 {-| A LngLat represents a geographic position.
@@ -22,7 +22,7 @@ type alias LngLat =
 -}
 encodeAsPair : LngLat -> Value
 encodeAsPair { lng, lat } =
-    Encode.list [ Encode.float lng, Encode.float lat ]
+    Encode.list Encode.float [ lng, lat ]
 
 
 {-| Most implementations seem to encode these as a 2 member array.
@@ -59,3 +59,34 @@ decodeFromObject =
 map : (Float -> Float) -> LngLat -> LngLat
 map f { lng, lat } =
     { lng = f lng, lat = f lat }
+
+
+toDMS : Float -> String -> String -> String
+toDMS angle pos neg =
+    let
+        absAngle =
+            abs angle
+
+        degrees =
+            truncate absAngle
+
+        minutes =
+            (absAngle - toFloat degrees) * 60
+
+        seconds =
+            (minutes - toFloat (truncate minutes)) * 60 |> round
+
+        prefix =
+            if angle > 0 then
+                pos
+            else
+                neg
+    in
+    String.fromInt degrees ++ "° " ++ String.fromInt (truncate minutes) ++ "' " ++ String.fromInt seconds ++ "\"" ++ prefix
+
+
+{-| Returns a text representation suitable for humans.
+-}
+toString : LngLat -> String
+toString { lng, lat } =
+    toDMS lat "N" "S" ++ " " ++ toDMS lng "E" "W"

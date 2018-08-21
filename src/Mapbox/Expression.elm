@@ -236,7 +236,7 @@ The expressions in this section can be used to add conditional logic to your sty
 
 Strings can be compared with a collator for locale specific comparisons:
 
-@docs isEqualWithCollator, notEqualWithCollator,lessThanWithCollator, lessThanOrEqualWithCollator, greaterThanWithCollator, greaterThanOrEqualWithCollator
+@docs isEqualWithCollator, notEqualWithCollator, lessThanWithCollator, lessThanOrEqualWithCollator, greaterThanWithCollator, greaterThanOrEqualWithCollator
 
 Logical operators:
 
@@ -657,7 +657,7 @@ rasterResamplingNearest =
 {-| -}
 rgba : Float -> Float -> Float -> Float -> Expression exprType Color
 rgba r g b a =
-    Expression (Json.Encode.string ("rgba" ++ Basics.toString ( r, g, b, a )))
+    Expression (Json.Encode.string ("rgba(" ++ String.fromFloat r ++ ", " ++ String.fromFloat g ++ ", " ++ String.fromFloat b ++ ", " ++ String.fromFloat a ++ ")"))
 
 
 {-| -}
@@ -710,7 +710,7 @@ strings =
 
 list : List (Expression exprType a) -> Expression exprType (Array a)
 list =
-    List.map encode >> Json.Encode.list >> Expression >> call1 "literal"
+    Json.Encode.list encode >> Expression >> call1 "literal"
 
 
 {-| Returns a `Collator` for use in locale-dependent comparison operations. The first argument specifies if the comparison should be case sensitive. The second specifies if it is diacritic sensitive. The final locale argument specifies the IETF language tag of the locale to use.
@@ -718,7 +718,7 @@ list =
 collator : Expression e1 Bool -> Expression e2 Bool -> Expression e3 String -> Expression e4 Collator
 collator (Expression caseSensitive) (Expression diacriticSensitive) (Expression locale) =
     Expression
-        (Json.Encode.list
+        (Json.Encode.list identity
             (Json.Encode.string "collator"
                 :: [ Json.Encode.object
                         [ ( "case-sensitive", caseSensitive )
@@ -881,7 +881,7 @@ calln n expressions =
 
 
 call name args =
-    Expression (Json.Encode.list (Json.Encode.string name :: args))
+    Expression (Json.Encode.list identity (Json.Encode.string name :: args))
 
 
 {-| Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. Note that `featureState` can only be used with paint properties that support data-driven styling.
