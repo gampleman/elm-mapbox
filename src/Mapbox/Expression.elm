@@ -1,12 +1,14 @@
 module Mapbox.Expression
     exposing
-        ( Anchor(..)
-        , AnchorAuto
+        ( Anchor
+        , Auto
         , CameraExpression
         , Collator
         , Color
         , DataExpression
         , Expression
+        , FormattedString
+        , FormattedText
         , Interpolation(..)
         , LineCap
         , LineJoin
@@ -20,9 +22,7 @@ module Mapbox.Expression
         , abs
         , acos
         , all
-        , anchorAutoAuto
-        , anchorAutoMap
-        , anchorAutoViewport
+        , anchorAuto
         , anchorMap
         , anchorViewport
         , any
@@ -55,6 +55,9 @@ module Mapbox.Expression
         , float
         , floats
         , floor
+        , fontScaledBy
+        , format
+        , formatted
         , geometryType
         , get
         , getProperty
@@ -144,6 +147,7 @@ module Mapbox.Expression
         , true
         , typeof
         , upcase
+        , withFont
         , zoom
         )
 
@@ -197,7 +201,7 @@ All of the types used as expression results are phantom (i.e. they don't have an
 
 We introduce the following types:
 
-@docs Color, Object, Collator
+@docs Color, Object, Collator, FormattedText
 
 (And also a bunch of Enum types, that will be documented in the Enums section).
 
@@ -257,6 +261,11 @@ Control flow:
 @docs append, downcase, upcase, isSupportedScript, resolvedLocale
 
 
+### Formatted Text
+
+@docs format, FormattedString, formatted, fontScaledBy, withFont
+
+
 ### Color
 
 @docs makeRGBColor, makeRGBAColor, rgbaChannels
@@ -281,7 +290,7 @@ Control flow:
 
 These are required for various layer properties.
 
-@docs Anchor, anchorMap, anchorViewport, AnchorAuto, anchorAutoMap, anchorAutoViewport, anchorAutoAuto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest
+@docs Anchor, anchorMap, anchorViewport, anchorAuto, Auto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest
 
 -}
 
@@ -383,48 +392,40 @@ type Collator
 -- Enums
 
 
-{-| -}
-type Anchor
-    = Map
-    | Viewport
+{-| Encodes the relation to which something is measured or aligned to. The exact details are explained in the docs of each property supporting this. Some properties support the `anchorAuto` value, these have the type `Anchor Auto`, other don't and have the type `Anchor Never`.
+-}
+type Anchor supportsAuto
+    = Anchor
 
 
-{-| -}
-anchorMap : Expression exprType Anchor
+{-| Relativeto the map.
+-}
+anchorMap : Expression exprType (Anchor a)
 anchorMap =
     Expression (Json.Encode.string "map")
 
 
-{-| -}
-anchorViewport : Expression exprType Anchor
+{-| Relative to the viewport.
+-}
+anchorViewport : Expression exprType (Anchor a)
 anchorViewport =
     Expression (Json.Encode.string "viewport")
 
 
 {-| -}
-type AnchorAuto
-    = AnchorAuto
+type Auto
+    = Auto
 
 
-{-| -}
-anchorAutoMap : Expression exprType AnchorAuto
-anchorAutoMap =
-    Expression (Json.Encode.string "map")
-
-
-{-| -}
-anchorAutoViewport : Expression exprType AnchorAuto
-anchorAutoViewport =
-    Expression (Json.Encode.string "viewport")
-
-
-{-| -}
-anchorAutoAuto : Expression exprType AnchorAuto
-anchorAutoAuto =
+{-| Automatic behaviour, that may vary based on circumstance between viewport and map.
+-}
+anchorAuto : Expression exprType (Anchor Auto)
+anchorAuto =
     Expression (Json.Encode.string "auto")
 
 
-{-| -}
+{-| Which part of the object is placed closest to the Anchor.
+-}
 type Position
     = Position
 
@@ -483,76 +484,89 @@ positionBottomRight =
     Expression (Json.Encode.string "bottom-right")
 
 
-{-| -}
+{-| Scaling an icon to fit associated text.
+-}
 type TextFit
     = TextFit
 
 
-{-| -}
+{-| The icon is displayed at its intrinsic aspect ratio.
+-}
 textFitNone : Expression exprType TextFit
 textFitNone =
     Expression (Json.Encode.string "none")
 
 
-{-| -}
+{-| The icon is scaled in the x-dimension to fit the width of the text.
+-}
 textFitWidth : Expression exprType TextFit
 textFitWidth =
     Expression (Json.Encode.string "width")
 
 
-{-| -}
+{-| The icon is scaled in the y-dimension to fit the height of the text.
+-}
 textFitHeight : Expression exprType TextFit
 textFitHeight =
     Expression (Json.Encode.string "height")
 
 
-{-| -}
+{-| The icon is scaled in both x- and y-dimensions.
+-}
 textFitBoth : Expression exprType TextFit
 textFitBoth =
     Expression (Json.Encode.string "both")
 
 
-{-| -}
+{-| Display of line endings.
+-}
 type LineCap
     = LineCap
 
 
-{-| -}
+{-| A cap with a squared-off end which is drawn to the exact endpoint of the line.
+-}
 lineCapButt : Expression exprType LineCap
 lineCapButt =
     Expression (Json.Encode.string "butt")
 
 
-{-| -}
+{-| A cap with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the line's width and centered on the endpoint of the line.
+-}
 lineCapRound : Expression exprType LineCap
 lineCapRound =
     Expression (Json.Encode.string "round")
 
 
-{-| -}
+{-| A cap with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line's width.
+-}
 lineCapSquare : Expression exprType LineCap
 lineCapSquare =
     Expression (Json.Encode.string "square")
 
 
-{-| -}
+{-| Display of lines when joining.
+-}
 type LineJoin
     = LineJoin
 
 
-{-| -}
+{-| A join with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line's width.
+-}
 lineJoinBevel : Expression exprType LineJoin
 lineJoinBevel =
     Expression (Json.Encode.string "bevel")
 
 
-{-| -}
+{-| A join with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the line's width and centered on the endpoint of the line.
+-}
 lineJoinRound : Expression exprType LineJoin
 lineJoinRound =
     Expression (Json.Encode.string "round")
 
 
-{-| -}
+{-| A join with a sharp, angled corner which is drawn with the outer sides beyond the endpoint of the path until they meet.
+-}
 lineJoinMiter : Expression exprType LineJoin
 lineJoinMiter =
     Expression (Json.Encode.string "miter")
@@ -590,42 +604,49 @@ type TextJustify
     = TextJustify
 
 
-{-| -}
+{-| The text is aligned to the left.
+-}
 textJustifyLeft : Expression exprType TextJustify
 textJustifyLeft =
     Expression (Json.Encode.string "left")
 
 
-{-| -}
+{-| The text is centered.
+-}
 textJustifyCenter : Expression exprType TextJustify
 textJustifyCenter =
     Expression (Json.Encode.string "center")
 
 
-{-| -}
+{-| The text is aligned to the right.
+-}
 textJustifyRight : Expression exprType TextJustify
 textJustifyRight =
     Expression (Json.Encode.string "right")
 
 
-{-| -}
+{-| Specifies how to capitalize text.
+-}
 type TextTransform
     = TextTransform
 
 
-{-| -}
+{-| The text is not altered.
+-}
 textTransformNone : Expression exprType TextTransform
 textTransformNone =
     Expression (Json.Encode.string "none")
 
 
-{-| -}
+{-| Forces all letters to be displayed in uppercase.
+-}
 textTransformUppercase : Expression exprType TextTransform
 textTransformUppercase =
     Expression (Json.Encode.string "uppercase")
 
 
-{-| -}
+{-| Forces all letters to be displayed in lowercase.
+-}
 textTransformLowercase : Expression exprType TextTransform
 textTransformLowercase =
     Expression (Json.Encode.string "lowercase")
@@ -743,6 +764,70 @@ therefore allowing for mixed types.
 object : List ( String, Value ) -> Expression exprType Object
 object =
     Json.Encode.object >> Expression >> call1 "literal"
+
+
+{-| Represents a richly formatted string.
+-}
+type FormattedText
+    = FormattedText
+
+
+{-| Returns formatted text containing annotations for use in mixed-format text-field entries.
+
+    Layer.textField <|
+        E.format
+            [ E.getProperty (str "name_en")
+                |> E.formatted
+                |> E.fontScaledBy (float 1.2)
+            , E.formatted (str "\n")
+            , E.getProperty (str "name")
+                |> E.formatted
+                |> E.fontScaledBy (float 0.8)
+                |> E.withFont (E.strings [ "DIN Offc Pro Medium" ])
+
+-}
+format : List FormattedString -> Expression exprType FormattedText
+format =
+    List.concatMap (\(FormattedString strExpr maybeScaleExpr maybeFontStack) -> [ strExpr, encodeFormatArgs maybeScaleExpr maybeFontStack ])
+        >> call "format"
+
+
+encodeFormatArgs maybeScaleExpr maybeFontStack =
+    [ Maybe.map (\scaleExp -> ( "font-scale", scaleExp )) maybeScaleExpr
+    , Maybe.map (\fontStack -> ( "text-font", fontStack )) maybeFontStack
+    ]
+        |> List.filterMap identity
+        |> Json.Encode.object
+
+
+{-| A FormattedText is composed of a list of FormattedString which essentially are a tuple of a string expression and some formatting information that applies to that string.
+-}
+type FormattedString
+    = FormattedString Value (Maybe Value) (Maybe Value)
+
+
+{-| Takes a String Expression and turns it into a FormattedString with default formatting.
+-}
+formatted : Expression exprType String -> FormattedString
+formatted s =
+    FormattedString (encode s) Nothing Nothing
+
+
+{-| Specifies a scaling factor relative to the text-size specified in the root layout properties.
+
+Note: this is indempotent, so calling `str "hi" |> formatted |> fontScaledBy 1.2 |> fontScaledBy 1.2` is equivalent to `str "hi" |> formatted |> fontScaledBy 1.2` rather than `str "hi" |> formatted |> fontScaledBy 1.44`.
+
+-}
+fontScaledBy : Expression exprType Float -> FormattedString -> FormattedString
+fontScaledBy scale (FormattedString s _ fs) =
+    FormattedString s (Just (encode scale)) fs
+
+
+{-| Overrides the font specified by the root layout properties.
+-}
+withFont : Expression exprType (Array String) -> FormattedString -> FormattedString
+withFont stack (FormattedString s scale _) =
+    FormattedString s scale (Just (encode stack))
 
 
 

@@ -1,4 +1,4 @@
-module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFeaturesFilter, eventFeaturesLayers, id, map, maxBounds, maxZoom, minZoom, onClick, onContextMenu, onDblClick, onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onRotate, onRotateEnd, onRotateStart, onTouchCancel, onTouchEnd, onTouchMove, onZoom, onZoomEnd, onZoomStart, renderWorldCopies, token)
+module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFeaturesFilter, eventFeaturesLayers, featureState, id, map, maxBounds, maxZoom, minZoom, onClick, onContextMenu, onDblClick, onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onRotate, onRotateEnd, onRotateStart, onTouchCancel, onTouchEnd, onTouchMove, onZoom, onZoomEnd, onZoomStart, renderWorldCopies, token)
 
 {-| This library wraps a Custom Element that actually renders a map.
 
@@ -7,7 +7,7 @@ module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFea
 
 ### Attributes
 
-@docs token, id, maxZoom, minZoom, maxBounds, renderWorldCopies
+@docs token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
 
 
 ### Events
@@ -67,7 +67,7 @@ You can include the required styles yourself if it fits better with the way you 
 -}
 css : Html msg
 css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).
@@ -112,17 +112,46 @@ renderWorldCopies =
     Encode.bool >> property "renderWorldCopies" >> MapboxAttr
 
 
-{-| This is a declarative API for controlling states on the features.
+{-| Sometimes you need to give certain geographic features some state.
 
-The API takes a bunch of GeoJSON features (these can be returned from the event listeners for example). They should at a minimum have these properties defined:
+The most common is user interaction states like hover, selected, etc.
+
+The feature here is accepted as a `Value`. This is partially due to its flexibility, but in order for this to work, this must be an object with the following **top-level** propreties:
 
   - `source`
   - `sourceLayer` (only for vector sources)
-  - `id` the feature's unique id
+  - `id` the feature's unique id (this must be a positive, non-zero integer).
 
-Then you can give it a `List ( String, Value )` state. You can use this state infromation through the `Mapbox.Expression.featureState` expression.
+You can get these `Value`s from event listeners and pass them straight through. The state is a list of `(key, value)` pairs.
 
-This needs more design before release.
+You can use this state infromation through the `Mapbox.Expression.featureState` expression.
+
+    Layer.fillOpacity <|
+      E.ifElse
+        (E.toBool (E.featureState (str "hover")))
+        (float 0.9)
+        (float 0.1)
+
+Note that this attribute is quite awkward to use directly. I recommend defining some helpers that suite your situation. For example:
+
+    hoveredFeature : Value -> MapboxAttr msg
+    hoveredFeature feat =
+        Element.featureState [ ( feat, [ ( "hover", Json.Encode.bool True ) ] ) ]
+
+or
+
+    dataJoins : List (Int, Float) -> MapboxAttr msg
+    dataJoins =
+        List.map (\(id, population) ->
+          (Json.Encode.object
+            [( "source", Json.Encode.string "postcodes")
+            , ("id", Json.Encode.int id)
+            ]
+          , [ ("population", Json.Encode.float population)]
+          )
+         >> Element.featureState
+
+This will make your view code much neater, by not mixing in JSON encoding directly.
 
 -}
 featureState : List ( Value, List ( String, Value ) ) -> MapboxAttr msg

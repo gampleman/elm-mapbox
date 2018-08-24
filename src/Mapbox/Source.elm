@@ -1,4 +1,4 @@
-module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(..), Source, SourceOption, Url, VectorSource, animatedCanvas, attribution, bounds, buffer, cluster, clusterRadius, encode, geoJSONFromUrl, geoJSONFromValue, getId, image, lineMetrics, maxzoom, minzoom, raster, rasterDEMMapbox, rasterDEMTerrarium, rasterFromUrl, scheme, staticCanvas, tileSize, tolerance, vector, vectorFromUrl, video)
+module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(..), Source, SourceOption, Url, VectorSource, animatedCanvas, attribution, bounds, buffer, cluster, clusterRadius, encode, generateIds, geoJSONFromUrl, geoJSONFromValue, getId, image, lineMetrics, maxzoom, minzoom, raster, rasterDEMMapbox, rasterDEMTerrarium, rasterFromUrl, scheme, staticCanvas, tileSize, tolerance, vector, vectorFromUrl, video)
 
 {-|
 
@@ -27,7 +27,7 @@ module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(.
 
 ### GeoJSON
 
-@docs geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, lineMetrics
+@docs geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, lineMetrics, generateIds
 
 
 ### Image, Video & Canvas
@@ -165,11 +165,19 @@ tolerance float =
     SourceOption "tolerance" (Json.Encode.float float)
 
 
-{-| If the data is a collection of point features, setting this to true clusters the points by radius into groups.
+{-| If the data is a collection of point features, setting this clusters the points by radius into groups.
+
+Cluster groups become new Point features in the source with additional properties:
+
+  - `cluster` Is `True` if the point is a cluster
+  - `cluster_id` A unqiue id for the cluster.
+  - `point_count` Number of original points grouped into this cluster
+  - `point_count_abbreviated` An abbreviated point count
+
 -}
-cluster : Bool -> SourceOption GeoJSONSource
+cluster : SourceOption GeoJSONSource
 cluster =
-    Json.Encode.bool >> SourceOption "cluster"
+    Json.Encode.bool True |> SourceOption "cluster"
 
 
 {-| Radius of each cluster if clustering is enabled. A value of 512 indicates a radius equal to the width of a tile.
@@ -191,6 +199,13 @@ clusterMaxZoom =
 lineMetrics : Bool -> SourceOption GeoJSONSource
 lineMetrics =
     Json.Encode.bool >> SourceOption "lineMetrics"
+
+
+{-| When set, the feature.id property will be auto assigned based on its index in the features array, over-writing any previous values.
+-}
+generateIds : SourceOption GeoJSONSource
+generateIds =
+    Json.Encode.bool True |> SourceOption "generateId"
 
 
 {-| Influences the y direction of the tile coordinates. The global-mercator (aka Spherical Mercator) profile is assumed.

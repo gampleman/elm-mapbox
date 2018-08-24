@@ -36,7 +36,7 @@ type Msg
 update msg model =
     case msg of
         Hover { lngLat, renderedFeatures } ->
-            ( { model | position = lngLat }, Cmd.none )
+            ( { model | position = lngLat, features = renderedFeatures }, Cmd.none )
 
         Click { lngLat, renderedFeatures } ->
             ( { model | position = lngLat, features = renderedFeatures }, MapCommands.fitBounds [ Opt.linear True, Opt.maxZoom 10 ] ( LngLat.map (\a -> a - 0.2) lngLat, LngLat.map (\a -> a + 0.2) lngLat ) )
@@ -49,7 +49,7 @@ geojson =
   "features": [
     {
       "type": "Feature",
-      "id": 0,
+      "id": 1,
       "properties": {
         "name": "Bermuda Triangle",
         "area": 1150180
@@ -71,6 +71,12 @@ geojson =
 """ |> Result.withDefault (Json.Encode.object [])
 
 
+hoveredFeatures : List Json.Encode.Value -> MapboxAttr msg
+hoveredFeatures =
+    List.map (\feat -> ( feat, [ ( "hover", Json.Encode.bool True ) ] ))
+        >> featureState
+
+
 view model =
     { title = "Mapbox Example"
     , body =
@@ -82,6 +88,7 @@ view model =
                 , onClick Click
                 , id "my-map"
                 , eventFeaturesLayers [ "changes" ]
+                , hoveredFeatures model.features
                 ]
                 (Style
                     { transition = Style.defaultTransition
@@ -114,9 +121,31 @@ view model =
                             , Layer.fillColor (E.rgba 227 227 227 1)
                             , Layer.fillOpacity (float 0.6)
                             ]
+                        , Layer.symbol "place-city-lg-n"
+                            "composite"
+                            [ Layer.sourceLayer "place_label"
+                            , Layer.minzoom 1
+                            , Layer.maxzoom 14
+                            , Layer.filter <|
+                                E.all
+                                    [ E.getProperty (str "scalerank") |> E.greaterThan (int 2)
+                                    , E.getProperty (str "type") |> E.isEqual (str "city")
+                                    ]
+                            , Layer.textField <|
+                                E.format
+                                    [ E.getProperty (str "name_en")
+                                        |> E.formatted
+                                        |> E.fontScaledBy (float 1.2)
+                                    , E.formatted (str "\n")
+                                    , E.getProperty (str "name")
+                                        |> E.formatted
+                                        |> E.fontScaledBy (float 0.8)
+                                        |> E.withFont (E.strings [ "DIN Offc Pro Medium" ])
+                                    ]
+                            ]
                         , Layer.fill "changes"
                             "changes"
-                            [ Layer.fillOpacity (E.ifElse (E.toBool (E.featureState (str "hover"))) (float 1) (float 0.3))
+                            [ Layer.fillOpacity (E.ifElse (E.toBool (E.featureState (str "hover"))) (float 0.9) (float 0.1))
                             ]
                         ]
                     }

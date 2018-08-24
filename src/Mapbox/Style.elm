@@ -31,8 +31,7 @@ You can also use one of these predefined styles.
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
 import LngLat exposing (LngLat)
-import Mapbox.Expression exposing (Anchor(..), CameraExpression, Color, Expression, float, floats, rgba)
-import Mapbox.Helpers exposing (encodeAnchor)
+import Mapbox.Expression exposing (Anchor, CameraExpression, Color, Expression, anchorViewport, float, floats, rgba)
 import Mapbox.Layer exposing (Layer)
 import Mapbox.Source exposing (Source)
 
@@ -112,7 +111,7 @@ encodeTransition { duration, delay } =
 encodeLight : Light -> Value
 encodeLight { anchor, position, color, intensity } =
     Encode.object
-        [ ( "anchor", encodeAnchor anchor )
+        [ ( "anchor", Mapbox.Expression.encode anchor )
         , ( "position", Mapbox.Expression.encode position )
         , ( "color", Mapbox.Expression.encode color )
         , ( "intensity", Mapbox.Expression.encode intensity )
@@ -223,7 +222,7 @@ Whether extruded geometries are lit relative to the map or viewport.
 
 ### `position`
 
-Position of the light source relative to lit (extruded) geometries, in `[r radial coordinate, a azimuthal angle, p polar angle]` where `r` indicates the distance from the center of the base of an object to its light, `a` indicates the position of the light relative to 0° (0° when the `anchor` is set to `viewport` corresponds to the top of the viewport, or 0° when `anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and `p` indicates the height of the light (from 0°, directly above, to 180°, directly below).
+Position of the light source relative to lit (extruded) geometries, in `[r radial coordinate, a azimuthal angle, p polar angle]` where `r` indicates the distance from the center of the base of an object to its light, `a` indicates the position of the light relative to 0° (0° when the `anchor` is set to `anchorViewport` corresponds to the top of the viewport, or 0° when `anchor` is set to `anchorMap` corresponds to due north, and degrees proceed clockwise), and `p` indicates the height of the light (from 0°, directly above, to 180°, directly below).
 
 
 ### `color`
@@ -237,7 +236,7 @@ Intensity of lighting (on a scale from 0 to 1). Higher numbers will present as m
 
 -}
 type alias Light =
-    { anchor : Anchor
+    { anchor : Expression CameraExpression (Anchor Never)
     , position : Expression CameraExpression (Array Float)
     , color : Expression CameraExpression Color
     , intensity : Expression CameraExpression Float
@@ -248,7 +247,7 @@ type alias Light =
 -}
 defaultLight : Light
 defaultLight =
-    { anchor = Viewport
+    { anchor = anchorViewport
     , position = floats [ 1.15, 210, 30 ]
     , color = rgba 255 255 255 1
     , intensity = float 0.5

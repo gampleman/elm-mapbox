@@ -202,7 +202,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Raster Attributes
 
-@docs rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterResampling, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterSaturation
+@docs rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterResampling, rasterSaturation
 
 
 ### Hillshade Attributes
@@ -218,7 +218,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, AnchorAuto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform)
+import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, FormattedText, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform)
 
 
 {-| Represents a layer.
@@ -441,9 +441,13 @@ visible vis =
 -- Fill
 
 
-{-| Controls the frame of reference for `fillTranslate`. Paint property. Defaults to `map`. Requires `fillTranslate`.
+{-| Controls the frame of reference for `fillTranslate`. Paint property. Defaults to `anchorMap`. Requires `fillTranslate`.
+
+  - `anchorMap`: The fill is translated relative to the map.
+  - `anchorViewport`: The fill is translated relative to the viewport.
+
 -}
-fillTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr Fill
+fillTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Fill
 fillTranslateAnchor =
     Expression.encode >> Paint "fill-translate-anchor"
 
@@ -509,9 +513,13 @@ lineBlur =
     Expression.encode >> Paint "line-blur"
 
 
-{-| Controls the frame of reference for `lineTranslate`. Paint property. Defaults to `map`. Requires `lineTranslate`.
+{-| Controls the frame of reference for `lineTranslate`. Paint property. Defaults to `anchorMap`. Requires `lineTranslate`.
+
+  - `anchorMap`: The line is translated relative to the map.
+  - `anchorViewport`: The line is translated relative to the viewport.
+
 -}
-lineTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr Line
+lineTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Line
 lineTranslateAnchor =
     Expression.encode >> Paint "line-translate-anchor"
 
@@ -570,14 +578,14 @@ lineColor =
     Expression.encode >> Paint "line-color"
 
 
-{-| The display of line endings. Layout property. Defaults to `butt`.
+{-| The display of line endings. Layout property. Defaults to `lineCapButt`.
 -}
 lineCap : Expression CameraExpression LineCap -> LayerAttr Line
 lineCap =
     Expression.encode >> Layout "line-cap"
 
 
-{-| The display of lines when joining. Layout property. Defaults to `miter`.
+{-| The display of lines when joining. Layout property. Defaults to `lineJoinMiter`.
 -}
 lineJoin : Expression any LineJoin -> LayerAttr Line
 lineJoin =
@@ -646,23 +654,35 @@ circleRadius =
     Expression.encode >> Paint "circle-radius"
 
 
-{-| Controls the frame of reference for `circleTranslate`. Paint property. Defaults to `map`. Requires `circleTranslate`.
+{-| Controls the frame of reference for `circleTranslate`. Paint property. Defaults to `anchorMap`. Requires `circleTranslate`.
+
+  - `anchorMap`: The circle is translated relative to the map.
+  - `anchorViewport`: The circle is translated relative to the viewport.
+
 -}
-circleTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr Circle
+circleTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Circle
 circleTranslateAnchor =
     Expression.encode >> Paint "circle-translate-anchor"
 
 
-{-| Controls the scaling behavior of the circle when the map is pitched. Paint property. Defaults to `map`.
+{-| Controls the scaling behavior of the circle when the map is pitched. Paint property. Defaults to `anchorMap`.
+
+  - `anchorMap`: Circles are scaled according to their apparent distance to the camera.
+  - `anchorViewport`: Circles are not scaled.
+
 -}
-circlePitchScale : Expression CameraExpression Anchor -> LayerAttr Circle
+circlePitchScale : Expression CameraExpression (Anchor Never) -> LayerAttr Circle
 circlePitchScale =
     Expression.encode >> Paint "circle-pitch-scale"
 
 
-{-| Orientation of circle when map is pitched. Paint property. Defaults to `viewport`.
+{-| Orientation of circle when map is pitched. Paint property. Defaults to `anchorViewport`.
+
+  - `anchorMap`: The circle is aligned to the plane of the map.
+  - `anchorViewport`: The circle is aligned to the plane of the viewport.
+
 -}
-circlePitchAlignment : Expression CameraExpression Anchor -> LayerAttr Circle
+circlePitchAlignment : Expression CameraExpression (Anchor Never) -> LayerAttr Circle
 circlePitchAlignment =
     Expression.encode >> Paint "circle-pitch-alignment"
 
@@ -734,7 +754,17 @@ heatmapWeight =
     Expression.encode >> Paint "heatmap-weight"
 
 
-{-| Defines the color of each pixel based on its density value in a heatmap. Should be an expression that uses `["heatmap-density"]` as input. Paint property. Defaults to `interpolate,linear,heatmap-density,0,rgba(0, 0, 255, 0),0.1,royalblue,0.3,cyan,0.5,lime,0.7,yellow,1,red`.
+{-| Defines the color of each pixel based on its density value in a heatmap. The value should be an Expression that uses `heatmapDensity` as input. Defaults to:
+
+      E.heatmapDensity
+      |> E.interpolate E.Linear
+        [ (0.0, rgba 0 0 255 0)
+        , (0.1, rgba 65 105 225 1)
+        , (0.3, rgba 0 255 255 1)
+        , (0.5, rgba 0 255 0 1)
+        , (0.7, rgba 255 255 0 1)
+        , (1.0, rgba 255 0 0 1)] Paint property.
+
 -}
 heatmapColor : Expression CameraExpression Color -> LayerAttr Heatmap
 heatmapColor =
@@ -776,9 +806,13 @@ heatmapOpacity =
 -- FillExtrusion
 
 
-{-| Controls the frame of reference for `fillExtrusionTranslate`. Paint property. Defaults to `map`. Requires `fillExtrusionTranslate`.
+{-| Controls the frame of reference for `fillExtrusionTranslate`. Paint property. Defaults to `anchorMap`. Requires `fillExtrusionTranslate`.
+
+  - `anchorMap`: The fill extrusion is translated relative to the map.
+  - `anchorViewport`: The fill extrusion is translated relative to the viewport.
+
 -}
-fillExtrusionTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr FillExtrusion
+fillExtrusionTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr FillExtrusion
 fillExtrusionTranslateAnchor =
     Expression.encode >> Paint "fill-extrusion-translate-anchor"
 
@@ -841,16 +875,24 @@ fillExtrusionOpacity =
 -- Symbol
 
 
-{-| Controls the frame of reference for `iconTranslate`. Paint property. Defaults to `map`. Requires `iconImage`. Requires `iconTranslate`.
+{-| Controls the frame of reference for `iconTranslate`. Paint property. Defaults to `anchorMap`. Requires `iconImage`. Requires `iconTranslate`.
+
+  - `anchorMap`: Icons are translated relative to the map.
+  - `anchorViewport`: Icons are translated relative to the viewport.
+
 -}
-iconTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr Symbol
+iconTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Symbol
 iconTranslateAnchor =
     Expression.encode >> Paint "icon-translate-anchor"
 
 
-{-| Controls the frame of reference for `textTranslate`. Paint property. Defaults to `map`. Requires `textField`. Requires `textTranslate`.
+{-| Controls the frame of reference for `textTranslate`. Paint property. Defaults to `anchorMap`. Requires `textField`. Requires `textTranslate`.
+
+  - `anchorMap`: The text is translated relative to the map.
+  - `anchorViewport`: The text is translated relative to the viewport.
+
 -}
-textTranslateAnchor : Expression CameraExpression Anchor -> LayerAttr Symbol
+textTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Symbol
 textTranslateAnchor =
     Expression.encode >> Paint "text-translate-anchor"
 
@@ -926,7 +968,7 @@ textSize =
     Expression.encode >> Layout "text-size"
 
 
-{-| Font stack to use for displaying text. Layout property. Defaults to `Open Sans Regular,Arial Unicode MS Regular`. Requires `textField`.
+{-| Font stack to use for displaying text. Layout property. Requires `textField`.
 -}
 textFont : Expression any (Array String) -> LayerAttr Symbol
 textFont =
@@ -961,7 +1003,7 @@ iconOptional =
     Expression.encode >> Layout "icon-optional"
 
 
-{-| If true, the icon may be flipped to prevent it from being rendered upside-down. Layout property. Defaults to `false`. Requires `iconImage`. Requires `iconRotationAlignment` to be `map`. Requires `symbolPlacement` to be `line`.
+{-| If true, the icon may be flipped to prevent it from being rendered upside-down. Layout property. Defaults to `false`. Requires `iconImage`. Requires `iconRotationAlignment` to be `map`. Requires `symbolPlacement` to be `symbolPlacementLine`, or `symbolPlacementLineCenter`.
 -}
 iconKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol
 iconKeepUpright =
@@ -982,7 +1024,7 @@ symbolAvoidEdges =
     Expression.encode >> Layout "symbol-avoid-edges"
 
 
-{-| If true, the text may be flipped vertically to prevent it from being rendered upside-down. Layout property. Defaults to `true`. Requires `textField`. Requires `textRotationAlignment` to be `map`. Requires `symbolPlacement` to be `line`.
+{-| If true, the text may be flipped vertically to prevent it from being rendered upside-down. Layout property. Defaults to `true`. Requires `textField`. Requires `textRotationAlignment` to be `map`. Requires `symbolPlacement` to be `symbolPlacementLine`, or `symbolPlacementLineCenter`.
 -}
 textKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol
 textKeepUpright =
@@ -996,21 +1038,31 @@ textAllowOverlap =
     Expression.encode >> Layout "text-allow-overlap"
 
 
-{-| In combination with `symbolPlacement`, determines the rotation behavior of icons. Layout property. Defaults to `auto`. Requires `iconImage`.
+{-| In combination with `symbolPlacement`, determines the rotation behavior of icons. Layout property. Defaults to `anchorAuto`. Requires `iconImage`.
+
+  - `anchorMap`: When `symbolPlacement` is set to `symbolPlacementPoint`, aligns icons east-west. When `symbolPlacement` is set to `symbolPlacementLine` or `symbolPlacementLineCenter`, aligns icon x-axes with the line.
+  - `anchorViewport`: Produces icons whose x-axes are aligned with the x-axis of the viewport, regardless of the value of `symbolPlacement`.
+  - `anchorAuto`: When `symbolPlacement` is set to `symbolPlacementPoint`, this is equivalent to `anchorViewport`. When `symbolPlacement` is set to `symbolPlacementLine` or `symbolPlacementLineCenter`, this is equivalent to `anchorMap`.
+
 -}
-iconRotationAlignment : Expression CameraExpression AnchorAuto -> LayerAttr Symbol
+iconRotationAlignment : Expression CameraExpression (Anchor Auto) -> LayerAttr Symbol
 iconRotationAlignment =
     Expression.encode >> Layout "icon-rotation-alignment"
 
 
-{-| In combination with `symbolPlacement`, determines the rotation behavior of the individual glyphs forming the text. Layout property. Defaults to `auto`. Requires `textField`.
+{-| In combination with `symbolPlacement`, determines the rotation behavior of the individual glyphs forming the text. Layout property. Defaults to `anchorAuto`. Requires `textField`.
+
+  - `anchorMap`: When `symbolPlacement` is set to `symbolPlacementPoint`, aligns text east-west. When `symbolPlacement` is set to `symbolPlacementLine` or `symbolPlacementLineCenter`, aligns text x-axes with the line.
+  - `anchorViewport`: Produces glyphs whose x-axes are aligned with the x-axis of the viewport, regardless of the value of `symbolPlacement`.
+  - `anchorAuto`: When `symbolPlacement` is set to `symbolPlacementPoint`, this is equivalent to `anchorViewport`. When `symbolPlacement` is set to `symbolPlacementLine` or `symbolPlacementLineCenter`, this is equivalent to `anchorMap`.
+
 -}
-textRotationAlignment : Expression CameraExpression AnchorAuto -> LayerAttr Symbol
+textRotationAlignment : Expression CameraExpression (Anchor Auto) -> LayerAttr Symbol
 textRotationAlignment =
     Expression.encode >> Layout "text-rotation-alignment"
 
 
-{-| Label placement relative to its geometry. Layout property. Defaults to `point`.
+{-| Label placement relative to its geometry. Layout property. Defaults to `symbolPlacementPoint`.
 -}
 symbolPlacement : Expression CameraExpression SymbolPlacement -> LayerAttr Symbol
 symbolPlacement =
@@ -1018,7 +1070,7 @@ symbolPlacement =
 
 
 {-| Maximum angle change between adjacent characters. Layout property.
-Units in degrees. Defaults to `45`. Requires `textField`. Requires `symbolPlacement` to be `line`.
+Units in degrees. Defaults to `45`. Requires `textField`. Requires `symbolPlacement` to be `symbolPlacementLine`, or `symbolPlacementLineCenter`.
 -}
 textMaxAngle : Expression CameraExpression Float -> LayerAttr Symbol
 textMaxAngle =
@@ -1047,28 +1099,38 @@ textOffset =
     Expression.encode >> Layout "text-offset"
 
 
-{-| Orientation of icon when map is pitched. Layout property. Defaults to `auto`. Requires `iconImage`.
+{-| Orientation of icon when map is pitched. Layout property. Defaults to `anchorAuto`. Requires `iconImage`.
+
+  - `anchorMap`: The icon is aligned to the plane of the map.
+  - `anchorViewport`: The icon is aligned to the plane of the viewport.
+  - `anchorAuto`: Automatically matches the value of `iconRotationAlignment`.
+
 -}
-iconPitchAlignment : Expression CameraExpression AnchorAuto -> LayerAttr Symbol
+iconPitchAlignment : Expression CameraExpression (Anchor Auto) -> LayerAttr Symbol
 iconPitchAlignment =
     Expression.encode >> Layout "icon-pitch-alignment"
 
 
-{-| Orientation of text when map is pitched. Layout property. Defaults to `auto`. Requires `textField`.
+{-| Orientation of text when map is pitched. Layout property. Defaults to `anchorAuto`. Requires `textField`.
+
+  - `anchorMap`: The text is aligned to the plane of the map.
+  - `anchorViewport`: The text is aligned to the plane of the viewport.
+  - `anchorAuto`: Automatically matches the value of `textRotationAlignment`.
+
 -}
-textPitchAlignment : Expression CameraExpression AnchorAuto -> LayerAttr Symbol
+textPitchAlignment : Expression CameraExpression (Anchor Auto) -> LayerAttr Symbol
 textPitchAlignment =
     Expression.encode >> Layout "text-pitch-alignment"
 
 
-{-| Part of the icon placed closest to the anchor. Layout property. Defaults to `center`. Requires `iconImage`.
+{-| Part of the icon placed closest to the anchor. Layout property. Defaults to `positionCenter`. Requires `iconImage`.
 -}
 iconAnchor : Expression any Position -> LayerAttr Symbol
 iconAnchor =
     Expression.encode >> Layout "icon-anchor"
 
 
-{-| Part of the text placed closest to the anchor. Layout property. Defaults to `center`. Requires `textField`.
+{-| Part of the text placed closest to the anchor. Layout property. Defaults to `positionCenter`. Requires `textField`.
 -}
 textAnchor : Expression any Position -> LayerAttr Symbol
 textAnchor =
@@ -1091,7 +1153,7 @@ textRotate =
     Expression.encode >> Layout "text-rotate"
 
 
-{-| Scales the icon to fit around the associated text. Layout property. Defaults to `none`. Requires `iconImage`. Requires `textField`.
+{-| Scales the icon to fit around the associated text. Layout property. Defaults to `textFitNone`. Requires `iconImage`. Requires `textField`.
 -}
 iconTextFit : Expression CameraExpression TextFit -> LayerAttr Symbol
 iconTextFit =
@@ -1110,7 +1172,7 @@ iconSize =
 
 
 {-| Size of the additional area added to dimensions determined by `iconTextFit`, in clockwise order: top, right, bottom, left. Layout property.
-Units in pixels. Defaults to `0,0,0,0`. Requires `iconImage`. Requires `textField`. Requires `iconTextFit` to be both,, or ,width,, or ,height.
+Units in pixels. Defaults to `0,0,0,0`. Requires `iconImage`. Requires `textField`. Requires `iconTextFit` to be `textFitBoth`, or `textFitWidth`, or `textFitHeight`.
 -}
 iconTextFitPadding : Expression CameraExpression (Array Float) -> LayerAttr Symbol
 iconTextFitPadding =
@@ -1139,14 +1201,14 @@ textPadding =
     Expression.encode >> Layout "text-padding"
 
 
-{-| Specifies how to capitalize text, similar to the CSS `textTransform` property. Layout property. Defaults to `none`. Requires `textField`.
+{-| Specifies how to capitalize text, similar to the CSS `textTransform` property. Layout property. Defaults to `textTransformNone`. Requires `textField`.
 -}
 textTransform : Expression any TextTransform -> LayerAttr Symbol
 textTransform =
     Expression.encode >> Layout "text-transform"
 
 
-{-| Text justification options. Layout property. Defaults to `center`. Requires `textField`.
+{-| Text justification options. Layout property. Defaults to `textJustifyCenter`. Requires `textField`.
 -}
 textJustify : Expression any TextJustify -> LayerAttr Symbol
 textJustify =
@@ -1169,7 +1231,7 @@ textLetterSpacing =
     Expression.encode >> Layout "text-letter-spacing"
 
 
-{-| The color of the icon's halo. Icon halos can only be used with SDF icons. Paint property. Defaults to `rgba(0, 0, 0, 0)`. Requires `iconImage`.
+{-| The color of the icon's halo. Icon halos can only be used with SDF icons. Paint property. Defaults to `rgba 0 0 0 0`. Requires `iconImage`.
 -}
 iconHaloColor : Expression any Color -> LayerAttr Symbol
 iconHaloColor =
@@ -1183,7 +1245,7 @@ iconColor =
     Expression.encode >> Paint "icon-color"
 
 
-{-| The color of the text's halo, which helps it stand out from backgrounds. Paint property. Defaults to `rgba(0, 0, 0, 0)`. Requires `textField`.
+{-| The color of the text's halo, which helps it stand out from backgrounds. Paint property. Defaults to `rgba 0 0 0 0`. Requires `textField`.
 -}
 textHaloColor : Expression any Color -> LayerAttr Symbol
 textHaloColor =
@@ -1241,7 +1303,7 @@ textOpacity =
 
 {-| Value to use for a text label. Layout property. Defaults to ``.
 -}
-textField : Expression any String -> LayerAttr Symbol
+textField : Expression any FormattedText -> LayerAttr Symbol
 textField =
     Expression.encode >> Layout "text-field"
 
@@ -1291,16 +1353,6 @@ rasterContrast =
     Expression.encode >> Paint "raster-contrast"
 
 
-{-| The resampling/interpolation method to use for overscaling, also known as texture magnification filter.
-
-Defaults to `rasterResamplingLinear`.
-
--}
-rasterResampling : Expression CameraExpression RasterResampling -> LayerAttr Raster
-rasterResampling =
-    Expression.encode >> Paint "raster-resampling"
-
-
 {-| Increase or reduce the saturation of the image. Paint property.
 
 Should be between `-1` and `1` inclusive. Defaults to `0`.
@@ -1329,13 +1381,24 @@ rasterOpacity =
     Expression.encode >> Paint "raster-opacity"
 
 
+{-| The resampling/interpolation method to use for overscaling, also known as texture magnification filter Paint property. Defaults to `rasterResamplingLinear`.
+-}
+rasterResampling : Expression CameraExpression RasterResampling -> LayerAttr Raster
+rasterResampling =
+    Expression.encode >> Paint "raster-resampling"
+
+
 
 -- Hillshade
 
 
-{-| Direction of light source when map is rotated. Paint property. Defaults to `viewport`.
+{-| Direction of light source when map is rotated. Paint property. Defaults to `anchorViewport`.
+
+  - `anchorMap`: The hillshade illumination is relative to the north direction.
+  - `anchorViewport`: The hillshade illumination is relative to the top of the viewport.
+
 -}
-hillshadeIlluminationAnchor : Expression CameraExpression Anchor -> LayerAttr Hillshade
+hillshadeIlluminationAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Hillshade
 hillshadeIlluminationAnchor =
     Expression.encode >> Paint "hillshade-illumination-anchor"
 
@@ -1350,7 +1413,7 @@ hillshadeExaggeration =
     Expression.encode >> Paint "hillshade-exaggeration"
 
 
-{-| The direction of the light source used to generate the hillshading with 0 as the top of the viewport if `hillshadeIlluminationAnchor` is set to `viewport` and due north if `hillshadeIlluminationAnchor` is set to `map`. Paint property.
+{-| The direction of the light source used to generate the hillshading with 0 as the top of the viewport if `hillshadeIlluminationAnchor` is set to `anchorViewport` and due north if `hillshadeIlluminationAnchor` is set to `anchorMap`. Paint property.
 
 Should be between `0` and `359` inclusive. Defaults to `335`.
 
