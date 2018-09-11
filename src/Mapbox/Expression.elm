@@ -1196,7 +1196,7 @@ matchesStr options (Expression default) (Expression input) =
 {-| Selects the output whose label value matches the input value, or the fallback value if no match is found.
 
     getProperty (str "size")
-      |> matchesStr
+      |> matchesFloat
           [ (1, str "icon-hospital")
           , (2, str "icon-medical")
           ]
@@ -1263,7 +1263,7 @@ interpolate interpolation stops (Expression input) =
         |> Layer.circleRadius
 
 -}
-step : Expression exprType2 Float -> List ( Float, Expression exprType1 output ) -> Expression exprType1 output -> Expression exprType2 output
+step : Expression exprType1 output -> List ( Float, Expression exprType1 output ) -> Expression exprType2 Float -> Expression exprType2 output
 step (Expression default) stops (Expression input) =
     call "step" <| input :: default :: List.concatMap (\( stop, Expression res ) -> [ Json.Encode.float stop, res ]) stops
 
