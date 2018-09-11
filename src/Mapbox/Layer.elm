@@ -454,7 +454,7 @@ fillTranslateAnchor =
 
 {-| Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-fillPattern : Expression CameraExpression String -> LayerAttr Fill
+fillPattern : Expression any String -> LayerAttr Fill
 fillPattern =
     Expression.encode >> Paint "fill-pattern"
 
@@ -544,7 +544,7 @@ lineGapWidth =
 
 {-| Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-linePattern : Expression CameraExpression String -> LayerAttr Line
+linePattern : Expression any String -> LayerAttr Line
 linePattern =
     Expression.encode >> Paint "line-pattern"
 
@@ -819,7 +819,7 @@ fillExtrusionTranslateAnchor =
 
 {-| Name of image in sprite to use for drawing images on extruded fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-fillExtrusionPattern : Expression CameraExpression String -> LayerAttr FillExtrusion
+fillExtrusionPattern : Expression any String -> LayerAttr FillExtrusion
 fillExtrusionPattern =
     Expression.encode >> Paint "fill-extrusion-pattern"
 
@@ -1450,7 +1450,7 @@ hillshadeAccentColor =
 
 {-| Name of image in sprite to use for drawing an image background. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-backgroundPattern : Expression CameraExpression String -> LayerAttr Background
+backgroundPattern : Expression any String -> LayerAttr Background
 backgroundPattern =
     Expression.encode >> Paint "background-pattern"
 
