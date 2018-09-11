@@ -147,6 +147,10 @@ view model =
         , div [ style [ ( "position", "absolute" ), ( "bottom", "20px" ), ( "left", "20px" ) ] ] [ text (toString model.position) ]
         ]
 ```
+### [Generating the Elm Style Code](https://code.gampleman.eu/elm-mapbox/style-generator/)
+
+There is a very rough version of a [tool that can help generate styles](https://code.gampleman.eu/elm-mapbox/style-generator/) for this library. It is very alpha at the moment, so please be tolerant with its failures.
+
 
 ### Support
 
