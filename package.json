@@ -1,6 +1,6 @@
 {
   "name": "elm-mapbox",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "A custom element designed for use with elm-mapbox",
   "main": "dist/elm-mapbox.cjs.js",
   "module": "dist/elm-mapbox.esm.js",
