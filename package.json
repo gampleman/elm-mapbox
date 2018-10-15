@@ -12,7 +12,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "node test/test.js",
-    "pretest": "npm run build"
+    "pretest": "npm run build",
+    "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/master/src/style-spec/reference/v8.json | node generate-elm.js > src/Mapbox/Layer.elm"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,6 @@
     "rollup-plugin-node-resolve": "^3.3.0"
   },
   "dependencies": {
-    "mapbox-gl": "^0.48.0"
+    "mapbox-gl": "^0.50.0"
   }
 }

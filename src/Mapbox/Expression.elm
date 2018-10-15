@@ -16,6 +16,7 @@ module Mapbox.Expression
         , Position
         , RasterResampling
         , SymbolPlacement
+        , SymbolZOrder
         , TextFit
         , TextJustify
         , TextTransform
@@ -102,6 +103,8 @@ module Mapbox.Expression
         , notEqual
         , notEqualWithCollator
         , object
+        , orderSource
+        , orderViewportY
         , pi
         , plus
         , positionBottom
@@ -290,7 +293,7 @@ Control flow:
 
 These are required for various layer properties.
 
-@docs Anchor, anchorMap, anchorViewport, anchorAuto, Auto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest
+@docs Anchor, anchorMap, anchorViewport, anchorAuto, Auto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest, SymbolZOrder, orderViewportY, orderSource
 
 -}
 
@@ -669,6 +672,26 @@ rasterResamplingLinear =
 rasterResamplingNearest : Expression exprType RasterResampling
 rasterResamplingNearest =
     Expression (Json.Encode.string "nearest")
+
+
+{-| Specifies the order in which overlapping symbols in the same layer are rendered
+-}
+type SymbolZOrder
+    = SymbolZOrder
+
+
+{-| Symbols will be sorted by their y-position relative to the viewport.
+-}
+orderViewportY : Expression exprType SymbolZOrder
+orderViewportY =
+    Expression (Json.Encode.string "viewport-y")
+
+
+{-| Symbols will be rendered in the same order as the source data with no sorting applied.
+-}
+orderSource : Expression exprType SymbolZOrder
+orderSource =
+    Expression (Json.Encode.string "source")
 
 
 

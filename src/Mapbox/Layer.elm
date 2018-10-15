@@ -40,6 +40,7 @@ module Mapbox.Layer
         , fillExtrusionPattern
         , fillExtrusionTranslate
         , fillExtrusionTranslateAnchor
+        , fillExtrusionVerticalGradient
         , fillOpacity
         , fillOutlineColor
         , fillPattern
@@ -113,6 +114,7 @@ module Mapbox.Layer
         , symbolAvoidEdges
         , symbolPlacement
         , symbolSpacing
+        , symbolZOrder
         , textAllowOverlap
         , textAnchor
         , textColor
@@ -192,12 +194,12 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### FillExtrusion Attributes
 
-@docs fillExtrusionBase, fillExtrusionColor, fillExtrusionHeight, fillExtrusionOpacity, fillExtrusionPattern, fillExtrusionTranslate, fillExtrusionTranslateAnchor
+@docs fillExtrusionBase, fillExtrusionColor, fillExtrusionHeight, fillExtrusionOpacity, fillExtrusionPattern, fillExtrusionTranslate, fillExtrusionTranslateAnchor, fillExtrusionVerticalGradient
 
 
 ### Symbol Attributes
 
-@docs iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSpacing, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor
+@docs iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSpacing, symbolZOrder, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor
 
 
 ### Raster Attributes
@@ -218,7 +220,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, FormattedText, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform)
+import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, FormattedText, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, SymbolZOrder, TextFit, TextJustify, TextTransform)
 
 
 {-| Represents a layer.
@@ -871,6 +873,13 @@ fillExtrusionOpacity =
     Expression.encode >> Paint "fill-extrusion-opacity"
 
 
+{-| Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down. Paint property. Defaults to `true`.
+-}
+fillExtrusionVerticalGradient : Expression CameraExpression Bool -> LayerAttr FillExtrusion
+fillExtrusionVerticalGradient =
+    Expression.encode >> Paint "fill-extrusion-vertical-gradient"
+
+
 
 -- Symbol
 
@@ -895,6 +904,13 @@ iconTranslateAnchor =
 textTranslateAnchor : Expression CameraExpression (Anchor Never) -> LayerAttr Symbol
 textTranslateAnchor =
     Expression.encode >> Paint "text-translate-anchor"
+
+
+{-| Controls the order in which overlapping symbols in the same layer are rendered Layout property. Defaults to `orderViewportY`.
+-}
+symbolZOrder : Expression CameraExpression SymbolZOrder -> LayerAttr Symbol
+symbolZOrder =
+    Expression.encode >> Layout "symbol-z-order"
 
 
 {-| Distance between two symbol anchors. Layout property.
@@ -1450,7 +1466,7 @@ hillshadeAccentColor =
 
 {-| Name of image in sprite to use for drawing an image background. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-backgroundPattern : Expression any String -> LayerAttr Background
+backgroundPattern : Expression CameraExpression String -> LayerAttr Background
 backgroundPattern =
     Expression.encode >> Paint "background-pattern"
 

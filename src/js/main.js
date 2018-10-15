@@ -362,7 +362,7 @@ export function registerPorts(elmApp, settings = {}) {
       }
     });
   } else {
-    throw new Error(`Expected Elm App to expose ${elmApp.ports[options.outgoingPort]} port.`);
+    throw new Error(`Expected Elm App to expose ${options.outgoingPort} port. Please add https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm to your project and import it from your Main file.`);
   }
 
   return elmApp;

@@ -22,6 +22,21 @@ install the accompanying npm library:
 
     npm install --save elm-mapbox
 
+Then include the library into your page. If you don't have any JS build system setup,
+probably the easiest is to add:
+
+```html
+<script src="node_modules/elm-mapbox/dist/elm-mapbox.umd.js"></script>
+```
+
+If you are running a module bundler, you should be able to
+
+```javascript
+import elmMapbox from "elm-mapbox";
+```
+
+instead.
+
 Then, when you are instantiating your Elm application, change it from:
 
 ```javascript
@@ -31,8 +46,6 @@ var app = Elm.MyApp.init();
 to
 
 ```javascript
-import elmMapbox from "elm-mapbox";
-
 elmMapbox.registerCustomElement();
 var app = Elm.MyApp.init();
 elmMapbox.registerPorts(app);
@@ -52,7 +65,7 @@ var app = Elm.MyApp.init();
 elmMapbox.registerPorts(app);
 ```
 
-Next, optionally, setup a ports module. The best way to do this is to to copy [this file](examples/MapCommands.elm) into your project.
+Next, optionally, setup a ports module. The best way to do this is to to copy [this file](https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm) into your project.
 
 This will allow you to easily use the commands to control parts of your map interactions imperatively.
 

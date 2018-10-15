@@ -17,7 +17,7 @@ module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(.
 
 ### Raster
 
-@docs raster, tileSize, rasterFromUrl, RasterSource, scheme, Scheme
+@docs raster, tileSize, rasterFromUrl, RasterSource
 
 
 ### Raster DEM
@@ -39,7 +39,7 @@ module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(.
 
 Tiled sources can also take the following attributes:
 
-@docs bounds, minzoom, maxzoom, attribution
+@docs bounds, minzoom, maxzoom, attribution, scheme, Scheme
 
 
 ### Working with sources
@@ -120,7 +120,7 @@ getId (Source k _) =
 -}
 bounds : LngLat -> LngLat -> SourceOption any
 bounds sw ne =
-    SourceOption "bounds" (Json.Encode.list Json.Encode.float [ sw.lng, sw.lat, sw.lng, sw.lat ])
+    SourceOption "bounds" (Json.Encode.list Json.Encode.float [ sw.lng, sw.lat, ne.lng, ne.lat ])
 
 
 {-| Minimum zoom level for which tiles are available, as in the TileJSON spec.
@@ -210,7 +210,7 @@ generateIds =
 
 {-| Influences the y direction of the tile coordinates. The global-mercator (aka Spherical Mercator) profile is assumed.
 -}
-scheme : Scheme -> SourceOption RasterSource
+scheme : Scheme -> SourceOption any
 scheme s =
     case s of
         XYZ ->

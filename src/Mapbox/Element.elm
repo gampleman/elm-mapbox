@@ -59,7 +59,7 @@ map attrs style =
 {-| This is literally:
 
     <link
-      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css'
+      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css'
       rel='stylesheet' />
 
 You can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.
@@ -67,7 +67,7 @@ You can include the required styles yourself if it fits better with the way you 
 -}
 css : Html msg
 css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).

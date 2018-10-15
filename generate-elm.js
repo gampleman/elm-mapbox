@@ -79,7 +79,7 @@ ${Object.entries(docs)
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform, FormattedText)
+import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform, FormattedText, SymbolZOrder)
 
 {-| Represents a layer. -}
 type Layer
@@ -333,7 +333,8 @@ const enumMap = {
   "bevel | round | miter": "LineJoin",
   "point | line | line-center": "SymbolPlacement",
   "none | uppercase | lowercase": "TextTransform",
-  "linear | nearest": "RasterResampling"
+  "linear | nearest": "RasterResampling",
+  "viewport-y | source" : "SymbolZOrder"
 };
 
 const flatEnumMap = Object.assign(Object.entries(enumMap).reduce((res, [values, tipe]) => values.split(' | ').reduce((obj, value) => Object.assign({}, obj, {[value]: tipe}), res), {}), {
@@ -408,9 +409,11 @@ function titleCase(str) {
 }
 
 function camelCase(str, type) {
-  if (type && reverseEnumMap[type]) {
+  if (type &&  type === 'SymbolZOrder') {
+    str = 'order ' + str;
+  } else if (type && reverseEnumMap[type]) {
     str = type + ' ' + str;
-  } else if (flatEnumMap[str]) {
+  } else if (flatEnumMap[str] && str !== 'source') {
     str = flatEnumMap[str] + ' ' + str;
   } else if (str === "rgba(0, 0, 0, 0)") {
     return "rgba 0 0 0 0"
