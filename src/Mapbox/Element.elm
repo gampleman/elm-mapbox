@@ -1,4 +1,9 @@
-module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFeaturesFilter, eventFeaturesLayers, featureState, id, map, maxBounds, maxZoom, minZoom, onClick, onContextMenu, onDblClick, onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onRotate, onRotateEnd, onRotateStart, onTouchCancel, onTouchEnd, onTouchMove, onZoom, onZoomEnd, onZoomStart, renderWorldCopies, token)
+module Mapbox.Element exposing
+    ( map, css, MapboxAttr
+    , token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
+    , EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers
+    , onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, on
+    )
 
 {-| This library wraps a Custom Element that actually renders a map.
 
@@ -14,7 +19,7 @@ module Mapbox.Element exposing (EventData, MapboxAttr, TouchEvent, css, eventFea
 
 @docs EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers
 
-@docs onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel
+@docs onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, on
 
 -}
 
@@ -59,7 +64,7 @@ map attrs style =
 {-| This is literally:
 
     <link
-      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css'
+      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css'
       rel='stylesheet' />
 
 You can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.
@@ -67,7 +72,7 @@ You can include the required styles yourself if it fits better with the way you 
 -}
 css : Html msg
 css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).
@@ -127,10 +132,10 @@ You can get these `Value`s from event listeners and pass them straight through. 
 You can use this state infromation through the `Mapbox.Expression.featureState` expression.
 
     Layer.fillOpacity <|
-      E.ifElse
-        (E.toBool (E.featureState (str "hover")))
-        (float 0.9)
-        (float 0.1)
+        E.ifElse
+            (E.toBool (E.featureState (str "hover")))
+            (float 0.9)
+            (float 0.1)
 
 Note that this attribute is quite awkward to use directly. I recommend defining some helpers that suite your situation. For example:
 
@@ -181,7 +186,7 @@ eventFeaturesLayers =
     Encode.list Encode.string >> property "eventFeaturesLayers" >> MapboxAttr
 
 
-{-| This allows you to use other events not provided by this libary.
+{-| This allows you to use other events not provided by this libary, or decode more or different data.
 
 See <https://www.mapbox.com/mapbox-gl-js/api/#map.event> for all supported events.
 
