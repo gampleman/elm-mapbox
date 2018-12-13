@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "test": "node test/test.js",
+    "test": "elm make --output=/dev/null src/**/*.elm && cd examples && elm make --output=/dev/null ./*.elm",
     "pretest": "npm run build",
     "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/master/src/style-spec/reference/v8.json | node generate-elm.js > src/Mapbox/Layer.elm"
   },
