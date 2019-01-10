@@ -1,5 +1,6 @@
 import mapboxgl from "mapbox-gl";
 
+var commandRegistry = {};
 
 export function registerCustomElement(settings) {
   const options = Object.assign(
@@ -103,13 +104,17 @@ export function registerCustomElement(settings) {
         return this._featureState;
       }
       set featureState(value) {
-
         // TODO: Clean this up
-        function makeId({id, source, sourceLayer}) {
+        function makeId({ id, source, sourceLayer }) {
           return `${id}::${source}::${sourceLayer}`;
         }
         if (this._map) {
-          const map = new Map(this._featureState.map(([feature, state]) => [makeId(feature), {feature, state}]));
+          const map = new Map(
+            this._featureState.map(([feature, state]) => [
+              makeId(feature),
+              { feature, state }
+            ])
+          );
           value.forEach(([feature, state]) => {
             const id = makeId(feature);
             if (map.has(id)) {
@@ -117,7 +122,7 @@ export function registerCustomElement(settings) {
               const keys = Object.keys(prevValue);
               let newValue = {};
               keys.forEach(k => {
-                if (state[k] === undefined ) {
+                if (state[k] === undefined) {
                   newValue[k] = undefined;
                 }
               });
@@ -131,7 +136,7 @@ export function registerCustomElement(settings) {
             map.delete(id);
           });
 
-          map.forEach(({feature, state}) => {
+          map.forEach(({ feature, state }) => {
             const keys = Object.keys(state);
             let newValue = {};
             keys.forEach(k => {
@@ -166,24 +171,18 @@ export function registerCustomElement(settings) {
             ].includes(type)
           ) {
             wrapped = e => {
-              e.features = this._map.queryRenderedFeatures(
-                e.point,
-                {
-                  layers: this.eventFeaturesLayers,
-                  filter: this.eventFeaturesFilter
-                }
-              );
+              e.features = this._map.queryRenderedFeatures(e.point, {
+                layers: this.eventFeaturesLayers,
+                filter: this.eventFeaturesFilter
+              });
               return fn(e);
             };
           } else if (["touchend", "touchmove", "touchcancel"].includes(type)) {
             wrapped = e => {
-              e.features = this._map.queryRenderedFeatures(
-                [e.point],
-                {
-                  layers: this.eventFeaturesLayers,
-                  filter: this.eventFeaturesFilter
-                }
-              );
+              e.features = this._map.queryRenderedFeatures([e.point], {
+                layers: this.eventFeaturesLayers,
+                filter: this.eventFeaturesFilter
+              });
               e.perPointFeatures = e.points.map(point =>
                 this._map.queryRenderedFeatures(point, {
                   layers: this.eventFeaturesLayers,
@@ -255,6 +254,14 @@ export function registerCustomElement(settings) {
         );
         this._eventRegistrationQueue = {};
         options.onMount(this._map, this);
+        if (commandRegistry[this.id]) {
+          this._map.on("load", () => {
+            var cmd;
+            while ((cmd = commandRegistry[this.id].shift())) {
+              cmd(this._map);
+            }
+          });
+        }
         return this._map;
       }
 
@@ -298,71 +305,86 @@ export function registerPorts(elmApp, settings = {}) {
       return opts;
     }
 
+    function waitForMap(target, cb) {
+      const el = document.getElementById(event.target);
+      if (el) {
+        cb(el.map);
+      } else {
+        var queue = commandRegistry[target];
+        if (!queue) queue = commandRegistry[target] = [];
+        queue.push(cb);
+      }
+    }
+
     elmApp.ports[options.outgoingPort].subscribe(event => {
-      var map = document.getElementById(event.target).map;
-      switch (event.command) {
-        case "resize":
-          return map.resize();
+      waitForMap(event.target, function(map) {
+        switch (event.command) {
+          case "resize":
+            return map.resize();
 
-        case "fitBounds":
-          return map.fitBounds(event.bounds, processOptions(event.options));
+          case "fitBounds":
+            return map.fitBounds(event.bounds, processOptions(event.options));
 
-        case "panBy":
-          return map.panBy(event.offset, processOptions(event.options));
+          case "panBy":
+            return map.panBy(event.offset, processOptions(event.options));
 
-        case "panTo":
-          return map.panTo(event.location, processOptions(event.options));
+          case "panTo":
+            return map.panTo(event.location, processOptions(event.options));
 
-        case "zoomTo":
-          return map.zoomTo(event.zoom, processOptions(event.options));
+          case "zoomTo":
+            return map.zoomTo(event.zoom, processOptions(event.options));
 
-        case "zoomIn":
-          return map.zoomIn(processOptions(event.options));
+          case "zoomIn":
+            return map.zoomIn(processOptions(event.options));
 
-        case "zoomOut":
-          return map.zoomOut(processOptions(event.options));
+          case "zoomOut":
+            return map.zoomOut(processOptions(event.options));
 
-        case "rotateTo":
-          return map.rotateTo(event.bearing, processOptions(event.options));
+          case "rotateTo":
+            return map.rotateTo(event.bearing, processOptions(event.options));
 
-        case "jumpTo":
-          return map.jumpTo(processOptions(event.options));
+          case "jumpTo":
+            return map.jumpTo(processOptions(event.options));
 
-        case "easeTo":
-          return map.easeTo(processOptions(event.options));
+          case "easeTo":
+            return map.easeTo(processOptions(event.options));
 
-        case "flyTo":
-          return map.flyTo(processOptions(event.options));
+          case "flyTo":
+            return map.flyTo(processOptions(event.options));
 
-        case "stop":
-          return map.stop();
+          case "stop":
+            return map.stop();
 
-        case "setRTLTextPlugin":
-          return map.setRTLTextPlugin(event.url);
+          case "setRTLTextPlugin":
+            return map.setRTLTextPlugin(event.url);
 
-        case "getBounds":
-          return elmApp.ports[options.incomingPort].send({
-            type: "getBounds",
-            id: event.requestId,
-            bounds: map.getBounds().toArray()
-          });
+          case "getBounds":
+            return elmApp.ports[options.incomingPort].send({
+              type: "getBounds",
+              id: event.requestId,
+              bounds: map.getBounds().toArray()
+            });
 
-        case "queryRenderedFeatures":
-          return elmApp.ports[options.incomingPort].send({
-            type: "queryRenderedFeatures",
-            id: event.requestId,
-            features:
-              event.query
+          case "queryRenderedFeatures":
+            return elmApp.ports[options.incomingPort].send({
+              type: "queryRenderedFeatures",
+              id: event.requestId,
+              features: event.query
                 ? map.queryRenderedFeatures(processOptions(event.options))
                 : map.queryRenderedFeatures(
                     event.query,
                     processOptions(event.options)
                   )
-          });
-      }
+            });
+        }
+      });
     });
   } else {
-    throw new Error(`Expected Elm App to expose ${options.outgoingPort} port. Please add https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm to your project and import it from your Main file.`);
+    throw new Error(
+      `Expected Elm App to expose ${
+        options.outgoingPort
+      } port. Please add https://github.com/gampleman/elm-mapbox/blob/master/examples/MapCommands.elm to your project and import it from your Main file.`
+    );
   }
 
   return elmApp;
