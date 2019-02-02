@@ -94,15 +94,15 @@ view model =
                     { transition = Style.defaultTransition
                     , light = Style.defaultLight
                     , sources =
-                        [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7,astrosat.07pz1g3y"
+                        [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7"
                         , Source.geoJSONFromValue "changes" [] geojson
                         ]
                     , misc =
                         [ Style.name "light"
                         , Style.defaultCenter <| LngLat 20.39789404164037 43.22523201923144
                         , Style.defaultZoomLevel 1.5967483759772743
-                        , Style.sprite "mapbox://sprites/astrosat/cjht22eqw0lfc2ro6z0qhlm29"
-                        , Style.glyphs "mapbox://fonts/astrosat/{fontstack}/{range}.pbf"
+                        , Style.sprite "mapbox://sprites/mapbox/streets-v7"
+                        , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
                         ]
                     , layers =
                         [ Layer.background "background"
