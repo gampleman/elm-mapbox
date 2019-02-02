@@ -72,7 +72,7 @@ You can include the required styles yourself if it fits better with the way you 
 -}
 css : Html msg
 css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).
