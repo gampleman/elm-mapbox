@@ -306,7 +306,7 @@ export function registerPorts(elmApp, settings = {}) {
     }
 
     function waitForMap(target, cb) {
-      const el = document.getElementById(event.target);
+      const el = document.getElementById(target);
       if (el) {
         cb(el.map);
       } else {
