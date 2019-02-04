@@ -232,7 +232,7 @@ type alias TouchEvent =
 
 
 decodePoint =
-    Decode.map2 (\a b -> ( a, b )) (Decode.field "x" Decode.int) (Decode.field "y" Decode.int)
+    Decode.map2 (\a b -> ( round a, round b )) (Decode.field "x" Decode.float) (Decode.field "y" Decode.float)
 
 
 decodeEventData =
