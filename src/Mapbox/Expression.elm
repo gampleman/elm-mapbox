@@ -327,7 +327,7 @@ type Expression exprType resultType
     = Expression Value
 
 
-{-| A camera expression is any expression that uses the zoom operator. Such expressions allow the the appearance of a layer
+{-| A camera expression is any expression that uses the zoom operator. Such expressions allow the appearance of a layer
 to change with the map's zoom level. Camera expressions can be used to create the appearance of depth and to control data density.
 
     zoom
@@ -1310,7 +1310,7 @@ downcase =
     call1 "downcase"
 
 
-{-| Returns true if the input string is expected to render legibly. Returns false if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the the mapbox-gl-rtl-text plugin is not in use in Mapbox GL JS).
+{-| Returns true if the input string is expected to render legibly. Returns false if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the mapbox-gl-rtl-text plugin is not in use in Mapbox GL JS).
 -}
 isSupportedScript : Expression exprType String -> Expression exprType Bool
 isSupportedScript =
