@@ -31,14 +31,13 @@ main =
 
 
 init () =
-    ( { styleUrl = "https://api.mapbox.com/styles/v1/mapbox/outdoors-v9"
-      , token = "pk.eyJ1IjoiYXN0cm9zYXQiLCJhIjoiY2o3YWtjNnJzMGR6ajM3b2FidmNwaDNsaSJ9.lwWi7kOiejlT0RbD7RxtmA"
+    ( { styleUrl = ""
+      , token = ""
       , style = Nothing
       , error = Nothing
       , code = Nothing
       }
     , Cmd.none
-      -- , fetchStyle "https://api.mapbox.com/styles/v1/astrosat/cjl6ljcr80vwg2rmgep7t3dtl" "pk.eyJ1IjoiYXN0cm9zYXQiLCJhIjoiY2o3YWtjNnJzMGR6ajM3b2FidmNwaDNsaSJ9.lwWi7kOiejlT0RbD7RxtmA"
     )
 
 
