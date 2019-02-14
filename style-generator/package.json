@@ -6,7 +6,7 @@
   "scripts": {
     "test": "elm-test",
     "start": "parcel index.html",
-    "build": "parcel build index.html --out-dir ../docs/style-generator"
+    "build": "parcel build index.html --out-dir ../docs/style-generator --public-url ."
   },
   "keywords": [
     "mapbox",
