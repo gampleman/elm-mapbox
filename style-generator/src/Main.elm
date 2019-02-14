@@ -160,7 +160,7 @@ codeEditor props =
             case props.onChange of
                 Just tagger ->
                     Html.Events.on "editorChanged" <|
-                        Json.Decode.map (Debug.log "change" >> tagger) <|
+                        Json.Decode.map tagger <|
                             Json.Decode.at [ "detail" ]
                                 Json.Decode.string
 

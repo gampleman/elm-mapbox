@@ -70,7 +70,7 @@ filter =
                         operator "notEqual"
 
                     ">" ->
-                        D.map (Debug.log ">") <| operator "greaterThan"
+                        operator "greaterThan"
 
                     ">=" ->
                         operator "greaterThanOrEqual"
@@ -106,5 +106,5 @@ filter =
                             decodeVals
 
                     _ ->
-                        D.fail <| Debug.log "failed " "not actually a legacy filter"
+                        D.fail "not actually a legacy filter"
             )
