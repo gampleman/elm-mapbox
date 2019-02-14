@@ -1,0 +1,20 @@
+{
+  "name": "elm-mapbox-examples",
+  "version": "1.0.0",
+  "description": "Examples for the elm-mapbox package",
+  "main": "index.js",
+  "scripts": {
+    "test": "parcel test",
+    "start": "parcel index.html"
+  },
+  "author": "Jakub Hampl",
+  "license": "MIT",
+  "devDependencies": {
+    "elm-hot": "^1.0.1",
+    "parcel-bundler": "^1.11.0"
+  },
+  "dependencies": {
+    "elm-mapbox": "^3.1.1",
+    "mapbox-gl": "^0.53.0"
+  }
+}

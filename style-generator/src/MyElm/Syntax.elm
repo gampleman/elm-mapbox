@@ -1,9 +1,9 @@
 module MyElm.Syntax exposing
-    ( local, valueName, typeName, constructorName
-    , string, float, int, list, pair, triple, call0, call1, call2, call3, call4, calln
-    , type0, type1, type2, typen, recordType, functionType, pairType, tripleType, typeVar
-    , variable, fun1, customType, typeAlias
-    , consolidateImports, consolidateTuples, expressionImports, extractImports, extractVariables, iden2str, isLocal, removeDefaults, toTupleRep, typeImports, unique, write
+    ( QualifiedName, local, valueName, typeName, constructorName
+    , Expression, string, float, int, list, pair, triple, call0, call1, call2, call3, call4, calln, pipe, record
+    , Type, type0, type1, type2, typen, recordType, functionType, pairType, tripleType, typeVar
+    , Declaration, variable, fun1, customType, typeAlias
+    , build, Exposing, opaque, withConstructors, exposeFn
     )
 
 {-| This module is intended for autogenerating elm code with
@@ -25,32 +25,39 @@ The simplifcations made here are:
 
 ### Naming things
 
-The simplest thing you will need to do is keep track of what things in the program are called and where they come from.
-
-@docs local, valueName, typeName, constructorName
+@docs QualifiedName, local, valueName, typeName, constructorName
 
 
 ### Expressions
 
-The heart of an elm program are the expressions that implement the computations.
-
-@docs string, float, int, list, pair, triple, call0, call1, call2, call3, call4, calln
+@docs Expression, string, float, int, list, pair, triple, call0, call1, call2, call3, call4, calln, pipe, record
 
 
 ### Type signatures
 
-@docs type0, type1, type2, typen, recordType, functionType, pairType, tripleType, typeVar
+@docs Type, type0, type1, type2, typen, recordType, functionType, pairType, tripleType, typeVar
 
 
 ### Declarations
 
-@docs variable, fun1, customType, typeAlias
+@docs Declaration, variable, fun1, customType, typeAlias
+
+
+### Modules
+
+@docs build, Exposing, opaque, withConstructors, exposeFn
 
 -}
 
 import MyElm.Stringify
 import MyElm.Types exposing (..)
 import Set
+
+
+{-| The simplest thing you will need to do is keep track of what things in the program are called and where they come from.
+-}
+type alias QualifiedName =
+    MyElm.Types.QualifiedName
 
 
 {-| This is a value (i.e. variable or function, but not type or constructor) from a module whose path is the first argument.
@@ -95,14 +102,16 @@ isLocal qualifiedName =
             False
 
 
-write :
+{-| Create a module and return it as a pretty printed string.
+-}
+build :
     { name : List String
     , exposes : List Exposing
     , doc : Maybe String
     , declarations : List Declaration
     }
     -> String
-write m =
+build m =
     Module
         { name = String.join "." m.name
         , exposes = m.exposes
@@ -111,6 +120,38 @@ write m =
         , declarations = m.declarations
         }
         |> MyElm.Stringify.module2string
+
+
+{-| What you would like to expose from a module.
+-}
+type alias Exposing =
+    MyElm.Types.Exposing
+
+
+{-| Expose a custom type, but leave the constructors hidden.
+-}
+opaque : String -> Exposing
+opaque =
+    TypeExposed
+
+
+{-| Expose a custom type and all its constructors.
+-}
+withConstructors : String -> Exposing
+withConstructors =
+    TypeAndConstructors
+
+
+{-| Expose a function or value.
+-}
+exposeFn : String -> Exposing
+exposeFn =
+    ValueExposed
+
+
+{-| -}
+type alias Declaration =
+    MyElm.Types.Declaration
 
 
 {-| This will do automatic type variable extraction for you in order of appearance in the type declaration.
@@ -136,6 +177,8 @@ customType name variants =
     CustomType name (List.concatMap (Tuple.second >> List.concatMap extractVariables) variants |> unique) variants
 
 
+{-| Declare a type alias. Also does automatic type variable extraction.
+-}
 typeAlias : String -> Type -> Declaration
 typeAlias name type_ =
     TypeAlias name (extractVariables type_ |> unique) type_
@@ -165,28 +208,33 @@ extractVariables tp =
             [ variable_ ]
 
 
-variable : String -> Maybe Type -> Expression -> Declaration
+{-| Declare a top level variable.
+-}
+variable : String -> Type -> Expression -> Declaration
 variable name typeAnno expression =
-    case typeAnno of
-        Just anno ->
-            Annotated name [ anno ] (Variable name expression)
-
-        Nothing ->
-            Variable name expression
+    ValueDeclaration name [ typeAnno ] [] expression
 
 
-fun1 : String -> Maybe ( Type, Type ) -> String -> (QualifiedName -> Expression) -> Declaration
-fun1 name typeAnno arg f =
-    let
-        fun =
-            FunctionDeclaration name [ Argument arg ] (f (local arg))
-    in
-    case typeAnno of
-        Just ( anno1, anno2 ) ->
-            Annotated name [ anno1, anno2 ] fun
+{-| Declare a top level function with a single argument.
 
-        Nothing ->
-            fun
+    fun1 "identity" (typeVar "a") (typeVar "a") "a" call0
+
+would be turned into:
+
+    identity : a -> a
+    identity a =
+        a
+
+-}
+fun1 : String -> Type -> Type -> String -> (QualifiedName -> Expression) -> Declaration
+fun1 name fromTp toTp arg f =
+    ValueDeclaration name [ fromTp, toTp ] [ Argument arg ] (f (local arg))
+
+
+{-| The heart of an elm program are the expressions that implement the computations.
+-}
+type alias Expression =
+    MyElm.Types.Expression
 
 
 {-| Reference a variable by name.
@@ -231,11 +279,32 @@ calln name args =
     Call name args
 
 
+{-| A convenience helper for construcing pipelines.
+
+    string "foo"
+        |> pipe (valueName [ "String" ] "concat") [ string "bar" ]
+
+would generate:
+
+    "foo"
+        |> String.concat "bar"
+
+This is just a helper for:
+
+    pipe name args subject =
+        call2 (valueName [ "Basics" ] "|>") subject (calln name args)
+
+-}
+pipe : QualifiedName -> List Expression -> Expression -> Expression
+pipe name args subject =
+    Call (valueName [ "Basics" ] "|>") [ subject, Call name args ]
+
+
 {-| A string literal.
 -}
 string : String -> Expression
 string s =
-    Literal ("\"" ++ s ++ "\"")
+    Literal ("\"" ++ String.replace "\"" "\\\"" s ++ "\"")
 
 
 {-| A float literal.
@@ -271,6 +340,19 @@ pair a b =
 triple : Expression -> Expression -> Expression -> Expression
 triple a b c =
     Tuple [ a, b, c ]
+
+
+{-| A record literal expression.
+-}
+record : List ( String, Expression ) -> Expression
+record =
+    Record
+
+
+{-| A representation of a type as in a type annotation context.
+-}
+type alias Type =
+    MyElm.Types.Type
 
 
 {-| A simple type, like `Int`.
@@ -365,14 +447,11 @@ extractImports =
                 TypeAlias _ _ aliased ->
                     typeImports aliased
 
-                Annotated _ signature declaration ->
-                    List.concatMap typeImports signature ++ extractImports [ declaration ]
+                Comment _ ->
+                    []
 
-                Variable _ value ->
-                    expressionImports value
-
-                FunctionDeclaration _ _ expression ->
-                    expressionImports expression
+                ValueDeclaration _ signature _ expression ->
+                    List.concatMap typeImports signature ++ expressionImports expression
         )
 
 
@@ -409,6 +488,9 @@ expressionImports expression =
 
         Tuple expressionList ->
             List.concatMap expressionImports expressionList
+
+        Record branches ->
+            List.concatMap (Tuple.second >> expressionImports) branches
 
 
 consolidateImports : List QualifiedName -> List String
@@ -448,8 +530,18 @@ consolidateTuples : List ( String, String, List String ) -> List ( String, Strin
 consolidateTuples tuples =
     case tuples of
         ( xm, xa, xl ) :: ( ym, ya, yl ) :: rest ->
-            if xm == ym && xa == ya then
-                consolidateTuples (( xm, xa, xl ++ yl ) :: rest)
+            if xm == ym && (xa == ya || xa == "" || ya == "") then
+                consolidateTuples
+                    (( xm
+                     , if xa == "" then
+                        ya
+
+                       else
+                        xa
+                     , xl ++ yl
+                     )
+                        :: rest
+                    )
 
             else
                 ( xm, xa, xl ) :: consolidateTuples (( ym, ya, yl ) :: rest)

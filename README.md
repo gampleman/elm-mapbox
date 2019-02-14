@@ -32,7 +32,7 @@ probably the easiest is to add:
 If you are running a module bundler, you should be able to
 
 ```javascript
-import elmMapbox from "elm-mapbox";
+import {registerCustomElement, registerPorts} from "elm-mapbox";
 ```
 
 instead.
@@ -58,8 +58,6 @@ It is important that these operations proceed in this order, i.e. the custom ele
 Additionally, you may pass in your mapbox token as an option through this method:
 
 ```javascript
-import elmMapbox from "elm-mapbox";
-
 elmMapbox.registerCustomElement({token: 'pk45.rejkgnwejk'});
 var app = Elm.MyApp.init();
 elmMapbox.registerPorts(app);
@@ -162,7 +160,9 @@ view model =
 ```
 ### [Generating the Elm Style Code](https://code.gampleman.eu/elm-mapbox/style-generator/)
 
-There is a very rough version of a [tool that can help generate styles](https://code.gampleman.eu/elm-mapbox/style-generator/) for this library. It is very alpha at the moment, so please be tolerant with its failures.
+There is a very rough version of a [tool that can help generate styles](https://code.gampleman.eu/elm-mapbox/style-generator/) for this library.
+
+The [examples/Styles](https://github.com/gampleman/elm-mapbox/tree/master/examples/Styles) folder has the default Mapbox styles as code, which you can use to start of your project.
 
 
 ### Support
@@ -198,6 +198,6 @@ The `elmMapbox.registerPorts` function accepts an option object that takes the f
 
 ### License
 
-(c) Jakub Hampl 2018
+(c) Jakub Hampl 2018, 2019
 
 MIT License

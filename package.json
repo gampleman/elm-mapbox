@@ -31,6 +31,8 @@
   },
   "homepage": "https://github.com/gampleman/elm-mapbox#readme",
   "devDependencies": {
+    "elm": "^0.19.0-bugfix2",
+    "elm-test": "^0.19.0-rev3",
     "prettier": "^1.13.5",
     "rollup": "^0.60.7",
     "rollup-plugin-buble": "^0.19.2",
@@ -41,6 +43,6 @@
     "mapbox-gl": "^0.52.0"
   },
   "prettier": {
-      "tabWidth": 2
+    "tabWidth": 2
   }
 }

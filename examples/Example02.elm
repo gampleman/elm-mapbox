@@ -2,11 +2,11 @@ module Example02 exposing (main)
 
 import Browser
 import Html exposing (div)
-import Html.Attributes exposing (style)
+import Html.Attributes
 import Mapbox.Element exposing (..)
-import Outdoors
+import Styles.SatelliteStreets exposing (style)
 
 
 main =
-    div [ style "height" "100vh" ]
-        [ map [] Outdoors.style ]
+    div [ Html.Attributes.style "height" "100vh" ]
+        [ map [] style ]

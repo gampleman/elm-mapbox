@@ -13,6 +13,7 @@
             "elm/json": "1.0.0",
             "elm/parser": "1.1.0",
             "elm-community/list-extra": "8.0.0",
+            "mdgriffith/elm-ui": "1.1.0",
             "stil4m/elm-syntax": "6.1.0",
             "stil4m/structured-writer": "1.0.2",
             "the-sett/elm-string-case": "1.0.2"

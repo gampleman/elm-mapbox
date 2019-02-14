@@ -3,3 +3,5 @@ elm-stuff/
 examples/example01.js
 node_modules/
 dist/
+.cache
+.env

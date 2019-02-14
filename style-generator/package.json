@@ -1,0 +1,25 @@
+{
+  "name": "elm-mapbox-style-generator",
+  "version": "1.0.0",
+  "description": "Generate styles",
+  "main": "index.js",
+  "scripts": {
+    "test": "elm-test",
+    "start": "parcel index.html",
+    "build": "parcel build index.html --out-dir ../docs/style-generator"
+  },
+  "keywords": [
+    "mapbox",
+    "style-spec"
+  ],
+  "author": "Jakub Hampl kopomir@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "@mapbox/mapbox-gl-style-spec": "^13.5.0",
+    "codemirror": "^5.42.2"
+  },
+  "devDependencies": {
+    "elm-hot": "^1.0.1",
+    "parcel-bundler": "^1.11.0"
+  }
+}

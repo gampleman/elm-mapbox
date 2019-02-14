@@ -40,9 +40,8 @@ type Type
 type Declaration
     = CustomType String (List String) (List ( String, List Type ))
     | TypeAlias String (List String) Type
-    | Annotated String (List Type) Declaration
-    | Variable String Expression
-    | FunctionDeclaration String (List Argument) Expression
+    | ValueDeclaration String (List Type) (List Argument) Expression
+    | Comment String
 
 
 type Expression
@@ -50,6 +49,7 @@ type Expression
     | Literal String
     | ListExpr (List Expression)
     | Tuple (List Expression)
+    | Record (List ( String, Expression ))
 
 
 type Argument
