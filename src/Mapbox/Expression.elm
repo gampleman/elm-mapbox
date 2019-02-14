@@ -146,6 +146,7 @@ module Mapbox.Expression
         , toBool
         , toColor
         , toFloat
+        , toFormattedText
         , toString
         , true
         , typeof
@@ -220,7 +221,7 @@ if the type is wrong:
 
 You can also use these functions to explicitly cast to a particular type:
 
-@docs toBool, toColor, toFloat, toString
+@docs toBool, toColor, toFloat, toString, toFormattedText
 
 @docs typeof
 
@@ -950,6 +951,13 @@ toFloat fallback input =
 -}
 toString : Expression exprType any -> Expression exprType String
 toString =
+    call1 "to-string"
+
+
+{-| Just like `toString`, but outputs a formatted string useable for displaying to users.
+-}
+toFormattedText : Expression exprType any -> Expression exprType FormattedText
+toFormattedText =
     call1 "to-string"
 
 

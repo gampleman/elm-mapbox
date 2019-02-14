@@ -13,11 +13,109 @@ parser =
     oneOf
         [ keywords
         , hsla
-
-        -- , rgba
-        -- , hex
+        , rgba
+        , hex
         ]
         |. end
+
+
+hexNumber =
+    Parser.number
+        { int = Nothing
+        , hex = Just identity
+        , octal = Nothing
+        , binary = Nothing
+        , float = Nothing
+        }
+
+
+hexDigit : Parser Int
+hexDigit =
+    oneOf
+        [ succeed 0 |. symbol "0"
+        , succeed 1 |. symbol "1"
+        , succeed 2 |. symbol "2"
+        , succeed 3 |. symbol "3"
+        , succeed 4 |. symbol "4"
+        , succeed 5 |. symbol "5"
+        , succeed 6 |. symbol "6"
+        , succeed 7 |. symbol "7"
+        , succeed 8 |. symbol "8"
+        , succeed 9 |. symbol "9"
+        , succeed 10 |. symbol "A"
+        , succeed 11 |. symbol "B"
+        , succeed 12 |. symbol "C"
+        , succeed 13 |. symbol "D"
+        , succeed 14 |. symbol "E"
+        , succeed 15 |. symbol "F"
+        , succeed 10 |. symbol "a"
+        , succeed 11 |. symbol "b"
+        , succeed 12 |. symbol "c"
+        , succeed 13 |. symbol "d"
+        , succeed 14 |. symbol "e"
+        , succeed 15 |. symbol "f"
+        ]
+
+
+twoDigits : Int -> Int -> Int
+twoDigits a b =
+    Bitwise.shiftLeftBy 4 a + b
+
+
+hex : Parser Color
+hex =
+    succeed
+        (\a b c maybe ->
+            case maybe of
+                Just ( d, e, f ) ->
+                    { r = twoDigits a b
+                    , g = twoDigits c d
+                    , b = twoDigits e f
+                    , a = 1
+                    }
+
+                Nothing ->
+                    { r = twoDigits a a
+                    , g = twoDigits b b
+                    , b = twoDigits c c
+                    , a = 1
+                    }
+        )
+        |. symbol "#"
+        |= hexDigit
+        |= hexDigit
+        |= hexDigit
+        |= oneOf
+            [ succeed (\a b c -> Just ( a, b, c ))
+                |= hexDigit
+                |= hexDigit
+                |= hexDigit
+            , succeed Nothing
+            ]
+
+
+rgba : Parser Color
+rgba =
+    succeed Color
+        |. oneOf [ keyword "rgba", keyword "rgb" ]
+        |. symbol "("
+        |= Parser.int
+        |. spaces
+        |. symbol ","
+        |. spaces
+        |= Parser.int
+        |. spaces
+        |. symbol ","
+        |. spaces
+        |= Parser.int
+        |= oneOf
+            [ succeed identity
+                |. symbol ","
+                |. spaces
+                |= Parser.float
+            , succeed 1
+            ]
+        |. symbol ")"
 
 
 fromHSLA hue sat light alpha =
