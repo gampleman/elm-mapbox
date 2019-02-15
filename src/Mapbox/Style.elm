@@ -1,4 +1,10 @@
-module Mapbox.Style exposing (Light, MiscAttr, Style(..), StyleDef, Transition, dark, defaultBearing, defaultCenter, defaultLight, defaultPitch, defaultTransition, defaultZoomLevel, encode, glyphs, light, metadata, name, outdoors, satellite, satelliteStreets, sprite, streets)
+module Mapbox.Style exposing
+    ( Style(..), encode, StyleDef
+    , Light, defaultLight
+    , Transition, defaultTransition
+    , MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata
+    , streets, outdoors, light, dark, satellite, satelliteStreets
+    )
 
 {-| A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a JSON object with specific root level and nested properties. This specification defines and describes these properties.
 
@@ -29,9 +35,10 @@ You can also use one of these predefined styles.
 -}
 
 import Array exposing (Array)
+import Internal exposing (Supported)
 import Json.Encode as Encode exposing (Value)
 import LngLat exposing (LngLat)
-import Mapbox.Expression exposing (Anchor, CameraExpression, Color, Expression, anchorViewport, float, floats, rgba)
+import Mapbox.Expression exposing (CameraExpression, Color, Expression, float, floats, rgba, viewport)
 import Mapbox.Layer exposing (Layer)
 import Mapbox.Source exposing (Source)
 
@@ -222,7 +229,7 @@ Whether extruded geometries are lit relative to the map or viewport.
 
 ### `position`
 
-Position of the light source relative to lit (extruded) geometries, in `[r radial coordinate, a azimuthal angle, p polar angle]` where `r` indicates the distance from the center of the base of an object to its light, `a` indicates the position of the light relative to 0° (0° when the `anchor` is set to `anchorViewport` corresponds to the top of the viewport, or 0° when `anchor` is set to `anchorMap` corresponds to due north, and degrees proceed clockwise), and `p` indicates the height of the light (from 0°, directly above, to 180°, directly below).
+Position of the light source relative to lit (extruded) geometries, in `[r radial coordinate, a azimuthal angle, p polar angle]` where `r` indicates the distance from the center of the base of an object to its light, `a` indicates the position of the light relative to 0° (0° when the `anchor` is set to `viewport` corresponds to the top of the viewport, or 0° when `anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and `p` indicates the height of the light (from 0°, directly above, to 180°, directly below).
 
 
 ### `color`
@@ -236,7 +243,7 @@ Intensity of lighting (on a scale from 0 to 1). Higher numbers will present as m
 
 -}
 type alias Light =
-    { anchor : Expression CameraExpression (Anchor Never)
+    { anchor : Expression CameraExpression { map : Supported, viewport : Supported }
     , position : Expression CameraExpression (Array Float)
     , color : Expression CameraExpression Color
     , intensity : Expression CameraExpression Float
@@ -247,7 +254,7 @@ type alias Light =
 -}
 defaultLight : Light
 defaultLight =
-    { anchor = anchorViewport
+    { anchor = viewport
     , position = floats [ 1.15, 210, 30 ]
     , color = rgba 255 255 255 1
     , intensity = float 0.5

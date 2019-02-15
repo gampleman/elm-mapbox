@@ -142,6 +142,7 @@ view model =
                                         |> E.fontScaledBy (float 0.8)
                                         |> E.withFont (E.strings [ "DIN Offc Pro Medium" ])
                                     ]
+                            , Layer.textTransform <| E.ifElse (E.getProperty (str "name_en") |> E.isEqual (str "Vienna")) E.uppercase E.textTransformNone
                             ]
                         , Layer.fill "changes"
                             "changes"

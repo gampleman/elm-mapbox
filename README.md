@@ -175,8 +175,8 @@ view model =
                         [ Style.name "light"
                         , Style.defaultCenter <| LngLat 20.39789404164037 43.22523201923144
                         , Style.defaultZoomLevel 1.5967483759772743
-                        , Style.sprite "mapbox://sprites/astrosat/cjht22eqw0lfc2ro6z0qhlm29"
-                        , Style.glyphs "mapbox://fonts/astrosat/{fontstack}/{range}.pbf"
+                        , Style.sprite "mapbox://sprites/mapbox/light"
+                        , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
                         ]
                     , layers =
                         [ Layer.background "background"
@@ -249,7 +249,7 @@ var app = Elm.MyApp.fullscreen({
     // If  true , the function will return  false if the performance of
     // Mapbox GL JS would be dramatically worse than expected (e.g. a
     // software WebGL renderer would be used).
-    failIfMajorPerformanceCaveat: true
+    failIfMajorPerformanceCaveat: trueelm
   })
 });
 ```

@@ -13,7 +13,7 @@
     "dev": "rollup -c -w",
     "test": "elm make --output=/dev/null src/**/*.elm && cd examples && elm make --output=/dev/null ./*.elm",
     "pretest": "npm run build",
-    "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/master/src/style-spec/reference/v8.json | node generate-elm.js > src/Mapbox/Layer.elm"
+    "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/v0.53.0/src/style-spec/reference/v8.json | node generate-elm.js | elm-format --stdin --output src/Mapbox/Layer.elm"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,8 @@
   },
   "homepage": "https://github.com/gampleman/elm-mapbox#readme",
   "devDependencies": {
-    "elm": "^0.19.0-bugfix2",
+    "elm": "^0.19.0-bugfix6",
+    "elm-format": "^0.8.1",
     "elm-test": "^0.19.0-rev3",
     "prettier": "^1.13.5",
     "rollup": "^0.60.7",
@@ -40,7 +41,7 @@
     "rollup-plugin-node-resolve": "^3.3.0"
   },
   "dependencies": {
-    "mapbox-gl": "^0.52.0"
+    "mapbox-gl": "^0.53.0"
   },
   "prettier": {
     "tabWidth": 2
