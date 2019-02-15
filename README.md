@@ -249,7 +249,7 @@ var app = Elm.MyApp.fullscreen({
     // If  true , the function will return  false if the performance of
     // Mapbox GL JS would be dramatically worse than expected (e.g. a
     // software WebGL renderer would be used).
-    failIfMajorPerformanceCaveat: trueelm
+    failIfMajorPerformanceCaveat: true
   })
 });
 ```

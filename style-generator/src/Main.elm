@@ -203,10 +203,6 @@ results attrs model =
                     , Element.paragraph [] [ Element.text "In Studio, hit the share button. This will give you the style url and token. This tool will attempt to generate an elm-mapbox style for you. It is not perfect, but should give a nice head-start. Try to compile the file and see if you get any errors." ]
                     , Element.paragraph []
                         [ text "There are a few common limitations that are relatively easy to fix with some grepping. For example, "
-                        , code "Layer.lineJoin E.rounded"
-                        , text " should be replaced by "
-                        , code "Layer.lineJoin E.rounded"
-                        , text ". Also "
                         , code "Layer.textField"
                         , text " is often followed by "
                         , code "E.toString"

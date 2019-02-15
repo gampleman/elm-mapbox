@@ -301,7 +301,7 @@ export function registerCustomElement(settings) {
       }
     }
   );
-
+}
 
 export function registerPorts(elmApp, settings = {}) {
   const options = Object.assign(
