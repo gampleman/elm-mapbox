@@ -14,7 +14,7 @@ export function registerCustomElement(settings) {
   }
   window.customElements.define(
     "elm-mapbox-map",
-    class MapboxMap extends window.HTMLElement {
+    class MapboxMap extends HTMLElement {
       constructor() {
         super();
         this._refreshExpiredTiles = true;
@@ -272,7 +272,27 @@ export function registerCustomElement(settings) {
         this.style.display = "block";
         this.style.width = "100%";
         this.style.height = "100%";
+
+        this._upgradeProperty("mapboxStyle");
+        this._upgradeProperty("minZoom");
+        this._upgradeProperty("maxZoom");
+        this._upgradeProperty("maxBounds");
+        this._upgradeProperty("renderWorldCopies");
+        this._upgradeProperty("center");
+        this._upgradeProperty("zoom");
+        this._upgradeProperty("bearing");
+        this._upgradeProperty("pitch");
+        this._upgradeProperty("featureState");
+
         this._map = this._createMapInstance();
+      }
+
+      _upgradeProperty(prop) {
+        if (this.hasOwnProperty(prop)) {
+          let value = this[prop];
+          delete this[prop];
+          this[prop] = value;
+        }
       }
 
       disconnectedCallback() {
@@ -281,7 +301,7 @@ export function registerCustomElement(settings) {
       }
     }
   );
-}
+
 
 export function registerPorts(elmApp, settings = {}) {
   const options = Object.assign(
