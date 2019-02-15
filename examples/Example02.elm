@@ -4,7 +4,7 @@ import Browser
 import Html exposing (div)
 import Html.Attributes
 import Mapbox.Element exposing (..)
-import Styles.SatelliteStreets exposing (style)
+import Styles.Dark exposing (style)
 
 
 main =

@@ -158,15 +158,15 @@ style =
                 , Layer.lineColor (E.rgba 24 25 26 1)
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.3) [ ( 8.5, float 0.1 ), ( 20, float 8 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 8, float 0 ), ( 8.5, float 1 ) ])
-                , Layer.lineCap (E.zoom |> E.step E.lineCapButt [ ( 11, E.lineCapRound ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap (E.zoom |> E.step E.butt [ ( 11, E.rounded ) ])
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.fill "water shadow"
                 "composite"
                 [ Layer.sourceLayer "water"
                 , Layer.fillColor (E.rgba 12 13 13 1)
                 , Layer.fillTranslate (E.zoom |> E.interpolate (E.Exponential 1.2) [ ( 7, E.floats [ 0, 0 ] ), ( 16, E.floats [ -1, -1 ] ) ])
-                , Layer.fillTranslateAnchor E.anchorViewport
+                , Layer.fillTranslateAnchor E.viewport
                 , Layer.fillOpacity (float 1)
                 ]
             , Layer.fill "water" "composite" [ Layer.sourceLayer "water", Layer.fillColor (E.rgba 24 25 26 1) ]
@@ -183,7 +183,7 @@ style =
                 , Layer.filter (E.all [ E.geometryType |> E.isEqual (str "LineString"), E.getProperty (str "class") |> E.isEqual (str "land") ])
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.99) [ ( 14, float 0.75 ), ( 20, float 40 ) ])
                 , Layer.lineColor (E.rgba 51 51 50 1)
-                , Layer.lineCap E.lineCapRound
+                , Layer.lineCap E.rounded
                 ]
             , Layer.fill "aeroway-polygon"
                 "composite"
@@ -247,8 +247,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11.5, float 0 ), ( 12, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-street_limited-low"
                 "composite"
@@ -269,8 +269,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11.5, float 0 ), ( 12, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-service-link-track-case"
                 "composite"
@@ -291,8 +291,8 @@ style =
                 , Layer.lineColor (E.rgba 72 75 75 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-street_limited-case"
                 "composite"
@@ -312,8 +312,8 @@ style =
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-street-case"
                 "composite"
@@ -333,8 +333,8 @@ style =
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-secondary-tertiary-case"
                 "composite"
@@ -352,8 +352,8 @@ style =
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 8.5, float 0.5 ), ( 10, float 0.75 ), ( 18, float 26 ) ])
                 , Layer.lineColor (E.rgba 72 75 75 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-primary-case"
                 "composite"
@@ -371,8 +371,8 @@ style =
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 72 75 75 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-trunk_link-case"
                 "composite"
@@ -391,8 +391,8 @@ style =
                 , Layer.lineColor (E.rgba 72 75 75 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-motorway_link-case"
                 "composite"
@@ -411,8 +411,8 @@ style =
                 , Layer.lineColor (E.rgba 72 75 75 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-trunk-case"
                 "composite"
@@ -431,8 +431,8 @@ style =
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-motorway-case"
                 "composite"
@@ -451,8 +451,8 @@ style =
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 3, 3 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-construction"
                 "composite"
@@ -479,7 +479,7 @@ style =
                             , ( 18, E.floats [ 0.15, 0.15 ] )
                             ]
                     )
-                , Layer.lineJoin E.lineJoinMiter
+                , Layer.lineJoin E.miter
                 ]
             , Layer.line "tunnel-path"
                 "composite"
@@ -501,7 +501,7 @@ style =
                     )
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-steps"
                 "composite"
@@ -522,7 +522,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 0.3, 0.3 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-trunk_link"
                 "composite"
@@ -541,8 +541,8 @@ style =
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-motorway_link"
                 "composite"
@@ -561,8 +561,8 @@ style =
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-pedestrian"
                 "composite"
@@ -581,7 +581,7 @@ style =
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.zoom |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.5, 0.4 ] ), ( 16, E.floats [ 1, 0.2 ] ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-service-link-track"
                 "composite"
@@ -601,8 +601,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-street_limited"
                 "composite"
@@ -620,8 +620,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-street"
                 "composite"
@@ -639,8 +639,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-secondary-tertiary"
                 "composite"
@@ -659,8 +659,8 @@ style =
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
                 , Layer.lineBlur (float 0)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-primary"
                 "composite"
@@ -679,8 +679,8 @@ style =
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
                 , Layer.lineBlur (float 0)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-trunk"
                 "composite"
@@ -696,8 +696,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 37 38 39 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "tunnel-motorway"
                 "composite"
@@ -716,8 +716,8 @@ style =
                 , Layer.lineOpacity (float 1)
                 , Layer.lineColor (E.rgba 37 38 39 1)
                 , Layer.lineBlur (float 0)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-pedestrian-case"
                 "composite"
@@ -728,7 +728,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "pedestrian")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -736,7 +736,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (float 0)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.9, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street-low"
                 "composite"
@@ -747,7 +747,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -757,8 +757,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11, float 0 ), ( 11.25, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street_limited-low"
                 "composite"
@@ -769,7 +769,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street_limited")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -779,8 +779,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11, float 0 ), ( 11.25, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-service-link-track-case"
                 "composite"
@@ -801,7 +801,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.9, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street_limited-case"
                 "composite"
@@ -812,7 +812,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street_limited")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -820,8 +820,8 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.9, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street-case"
                 "composite"
@@ -832,7 +832,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -840,8 +840,8 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.9, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-main-case"
                 "composite"
@@ -862,8 +862,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 6, float 0 ), ( 7, float 0.4 ), ( 9, float 0.5 ), ( 10, float 1 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-primary-case"
                 "composite"
@@ -884,8 +884,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 6, float 0 ), ( 7, float 0.4 ), ( 9, float 0.5 ), ( 10, float 1 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-motorway_link-case"
                 "composite"
@@ -907,8 +907,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 6, float 0 ), ( 7, float 0.4 ), ( 9, float 0.5 ), ( 10, float 1 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-trunk_link-case"
                 "composite"
@@ -930,8 +930,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 6, float 0 ), ( 7, float 0.4 ), ( 9, float 0.5 ), ( 10, float 1 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-trunk-case"
                 "composite"
@@ -950,8 +950,8 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.5 ), ( 9, float 1.4 ), ( 18, float 32 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 6, float 0 ), ( 6.1, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-motorway-case"
                 "composite"
@@ -969,8 +969,8 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineOpacity (float 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-construction"
                 "composite"
@@ -981,7 +981,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "construction")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -997,7 +997,7 @@ style =
                             , ( 18, E.floats [ 0.15, 0.15 ] )
                             ]
                     )
-                , Layer.lineJoin E.lineJoinMiter
+                , Layer.lineJoin E.miter
                 ]
             , Layer.line "road-sidewalks"
                 "composite"
@@ -1019,7 +1019,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 1, 0.5 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 16, float 0 ), ( 16.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-path"
                 "composite"
@@ -1042,7 +1042,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 1, 0.5 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-steps"
                 "composite"
@@ -1063,7 +1063,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 0.3, 0.3 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-trunk_link"
                 "composite"
@@ -1081,8 +1081,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-motorway_link"
                 "composite"
@@ -1100,8 +1100,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-pedestrian"
                 "composite"
@@ -1112,7 +1112,7 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "pedestrian")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
@@ -1120,7 +1120,7 @@ style =
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.zoom |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.5, 0.4 ] ), ( 16, E.floats [ 1, 0.2 ] ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-service-link-track"
                 "composite"
@@ -1139,8 +1139,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street_limited"
                 "composite"
@@ -1151,15 +1151,15 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street_limited")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-street"
                 "composite"
@@ -1170,15 +1170,15 @@ style =
                         [ E.geometryType |> E.isEqual (str "LineString")
                         , E.all
                             [ E.getProperty (str "class") |> E.isEqual (str "street")
-                            , E.getProperty (str "structure") |> E.isEqual E.textFitNone
+                            , E.getProperty (str "structure") |> E.isEqual E.none
                             ]
                         ]
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-secondary-tertiary"
                 "composite"
@@ -1195,8 +1195,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 8.5, float 0.5 ), ( 10, float 0.75 ), ( 18, float 26 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1.2) [ ( 5, float 0 ), ( 5.5, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-primary"
                 "composite"
@@ -1213,8 +1213,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1.2) [ ( 5, float 0 ), ( 5.5, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-trunk"
                 "composite"
@@ -1232,8 +1232,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.5 ), ( 9, float 1.4 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-motorway"
                 "composite"
@@ -1250,8 +1250,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "road-rail"
                 "composite"
@@ -1268,7 +1268,7 @@ style =
                     )
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0.75 ), ( 20, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-pedestrian-case"
                 "composite"
@@ -1287,7 +1287,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (float 0)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street-low"
                 "composite"
@@ -1308,8 +1308,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11.5, float 0 ), ( 12, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street_limited-low"
                 "composite"
@@ -1330,8 +1330,8 @@ style =
                     (E.zoom
                         |> E.interpolate (E.Exponential 1) [ ( 11.5, float 0 ), ( 12, float 1 ), ( 14, float 1 ), ( 14.01, float 0 ) ]
                     )
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-service-link-track-case"
                 "composite"
@@ -1351,7 +1351,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.75 ), ( 20, float 2 ) ])
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street_limited-case"
                 "composite"
@@ -1369,7 +1369,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.75 ), ( 20, float 2 ) ])
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street-case"
                 "composite"
@@ -1388,7 +1388,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 13, float 0 ), ( 14, float 2 ), ( 18, float 18 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-secondary-tertiary-case"
                 "composite"
@@ -1406,7 +1406,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 8.5, float 0.5 ), ( 10, float 0.75 ), ( 18, float 26 ) ])
                 , Layer.lineTranslate (E.floats [ 0, 0 ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-primary-case"
                 "composite"
@@ -1424,7 +1424,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineTranslate (E.floats [ 0, 0 ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk_link-case"
                 "composite"
@@ -1443,7 +1443,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 10.99, float 0 ), ( 11, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway_link-case"
                 "composite"
@@ -1463,7 +1463,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (float 1)
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk-case"
                 "composite"
@@ -1480,7 +1480,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 10, float 1 ), ( 16, float 2 ) ])
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway-case"
                 "composite"
@@ -1497,7 +1497,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 7, float 0.5 ), ( 10, float 1 ), ( 16, float 2 ) ])
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-construction"
                 "composite"
@@ -1524,7 +1524,7 @@ style =
                             , ( 18, E.floats [ 0.15, 0.15 ] )
                             ]
                     )
-                , Layer.lineJoin E.lineJoinMiter
+                , Layer.lineJoin E.miter
                 ]
             , Layer.line "bridge-path"
                 "composite"
@@ -1546,7 +1546,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 1, 0.5 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-steps"
                 "composite"
@@ -1567,7 +1567,7 @@ style =
                         |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.75, 1 ] ), ( 16, E.floats [ 1, 0.75 ] ), ( 17, E.floats [ 0.3, 0.3 ] ) ]
                     )
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0 ), ( 14.25, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk_link"
                 "composite"
@@ -1586,8 +1586,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway_link"
                 "composite"
@@ -1606,8 +1606,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-pedestrian"
                 "composite"
@@ -1626,7 +1626,7 @@ style =
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (float 1)
                 , Layer.lineDasharray (E.zoom |> E.step (E.floats [ 1, 0 ]) [ ( 15, E.floats [ 1.5, 0.4 ] ), ( 16, E.floats [ 1, 0.2 ] ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-service-link-track"
                 "composite"
@@ -1645,8 +1645,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 14, float 0.5 ), ( 18, float 12 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street_limited"
                 "composite"
@@ -1664,8 +1664,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-street"
                 "composite"
@@ -1683,8 +1683,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12.5, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13.99, float 0 ), ( 14, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-secondary-tertiary"
                 "composite"
@@ -1701,8 +1701,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 8.5, float 0.5 ), ( 10, float 0.75 ), ( 18, float 26 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1.2) [ ( 5, float 0 ), ( 5.5, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-primary"
                 "composite"
@@ -1719,8 +1719,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1.2) [ ( 5, float 0 ), ( 5.5, float 1 ) ])
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk"
                 "composite"
@@ -1738,8 +1738,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway"
                 "composite"
@@ -1757,8 +1757,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-rail"
                 "composite"
@@ -1775,7 +1775,7 @@ style =
                     )
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1) [ ( 14, float 0.75 ), ( 20, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk_link-2-case"
                 "composite"
@@ -1795,7 +1795,7 @@ style =
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 10.99, float 0 ), ( 11, float 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway_link-2-case"
                 "composite"
@@ -1815,7 +1815,7 @@ style =
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineOpacity (float 1)
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk-2-case"
                 "composite"
@@ -1833,7 +1833,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 10, float 1 ), ( 16, float 2 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway-2-case"
                 "composite"
@@ -1851,7 +1851,7 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 7, float 0.5 ), ( 10, float 1 ), ( 16, float 2 ) ])
                 , Layer.lineColor (E.rgba 43 43 43 1)
                 , Layer.lineGapWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk_link-2"
                 "composite"
@@ -1869,8 +1869,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway_link-2"
                 "composite"
@@ -1888,8 +1888,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 12, float 0.5 ), ( 14, float 2 ), ( 18, float 18 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-trunk-2"
                 "composite"
@@ -1906,8 +1906,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "bridge-motorway-2"
                 "composite"
@@ -1924,8 +1924,8 @@ style =
                     )
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1.5) [ ( 5, float 0.75 ), ( 18, float 32 ) ])
                 , Layer.lineColor (E.rgba 68 68 68 1)
-                , Layer.lineCap E.lineCapRound
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineCap E.rounded
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.line "admin-3-4-boundaries-bg"
                 "composite"
@@ -1942,7 +1942,7 @@ style =
                 , Layer.lineDasharray (E.floats [ 1, 0 ])
                 , Layer.lineTranslate (E.floats [ 0, 0 ])
                 , Layer.lineBlur (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 0 ), ( 8, float 3 ) ])
-                , Layer.lineJoin E.lineJoinBevel
+                , Layer.lineJoin E.bevel
                 ]
             , Layer.line "admin-2-boundaries-bg"
                 "composite"
@@ -1959,7 +1959,7 @@ style =
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 0 ), ( 4, float 0.5 ) ])
                 , Layer.lineTranslate (E.floats [ 0, 0 ])
                 , Layer.lineBlur (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 0 ), ( 10, float 2 ) ])
-                , Layer.lineJoin E.lineJoinMiter
+                , Layer.lineJoin E.miter
                 ]
             , Layer.line "admin-3-4-boundaries"
                 "composite"
@@ -1974,8 +1974,8 @@ style =
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7, float 0.75 ), ( 12, float 1.5 ) ])
                 , Layer.lineOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 2, float 0 ), ( 3, float 1 ) ])
                 , Layer.lineColor (E.zoom |> E.interpolate (E.Exponential 1) [ ( 4, E.rgba 68 68 68 1 ), ( 5, E.rgba 89 89 89 1 ) ])
-                , Layer.lineJoin E.lineJoinRound
-                , Layer.lineCap E.lineCapRound
+                , Layer.lineJoin E.rounded
+                , Layer.lineCap E.rounded
                 ]
             , Layer.line "admin-2-boundaries"
                 "composite"
@@ -1990,8 +1990,8 @@ style =
                     )
                 , Layer.lineColor (E.rgba 109 109 109 1)
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 0.5 ), ( 10, float 2 ) ])
-                , Layer.lineJoin E.lineJoinRound
-                , Layer.lineCap E.lineCapRound
+                , Layer.lineJoin E.rounded
+                , Layer.lineCap E.rounded
                 ]
             , Layer.line "admin-2-boundaries-dispute"
                 "composite"
@@ -2007,7 +2007,7 @@ style =
                 , Layer.lineDasharray (E.floats [ 1.5, 1.5 ])
                 , Layer.lineColor (E.rgba 35 35 35 1)
                 , Layer.lineWidth (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 0.5 ), ( 10, float 2 ) ])
-                , Layer.lineJoin E.lineJoinRound
+                , Layer.lineJoin E.rounded
                 ]
             , Layer.symbol "waterway-label"
                 "composite"
@@ -2019,8 +2019,8 @@ style =
                 , Layer.textColor (E.rgba 81 81 81 1)
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textFont (E.strings [ "DIN Offc Pro Italic", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.symbolPlacement E.line
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textMaxAngle (float 30)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 13, float 12 ), ( 18, float 16 ) ])
                 ]
@@ -2130,10 +2130,10 @@ style =
                 , Layer.textMaxAngle (float 30)
                 , Layer.symbolSpacing (float 500)
                 , Layer.textFont (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
+                , Layer.symbolPlacement E.line
                 , Layer.textPadding (float 1)
-                , Layer.textRotationAlignment E.anchorMap
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.textRotationAlignment E.map
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textLetterSpacing (float 0.01)
                 ]
@@ -2156,10 +2156,10 @@ style =
                 , Layer.textMaxAngle (float 30)
                 , Layer.symbolSpacing (float 500)
                 , Layer.textFont (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
+                , Layer.symbolPlacement E.line
                 , Layer.textPadding (float 1)
-                , Layer.textRotationAlignment E.anchorMap
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.textRotationAlignment E.map
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textLetterSpacing (float 0.01)
                 ]
@@ -2179,10 +2179,10 @@ style =
                 , Layer.textMaxAngle (float 30)
                 , Layer.symbolSpacing (float 400)
                 , Layer.textFont (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
+                , Layer.symbolPlacement E.line
                 , Layer.textPadding (float 1)
-                , Layer.textRotationAlignment E.anchorMap
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.textRotationAlignment E.map
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textLetterSpacing (float 0.01)
                 ]
@@ -2361,7 +2361,7 @@ style =
                 , Layer.textFont (E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ])
                 , Layer.textPadding (float 2)
                 , Layer.textOffset (E.floats [ 0, 0.75 ])
-                , Layer.textAnchor E.positionTop
+                , Layer.textAnchor E.top
                 , Layer.textField
                     (E.zoom
                         |> E.step (E.toFormattedText (E.getProperty (str "ref"))) [ ( 14, E.toFormattedText (E.getProperty (str "name_en")) ) ]
@@ -2403,7 +2403,7 @@ style =
                 , Layer.textColor (E.rgba 178 178 178 1)
                 , Layer.textHaloBlur (float 0)
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
-                , Layer.textTransform E.textTransformUppercase
+                , Layer.textTransform E.uppercase
                 , Layer.textLetterSpacing (float 0.1)
                 , Layer.textMaxWidth (float 7)
                 , Layer.textFont (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ])
@@ -2421,7 +2421,7 @@ style =
                 , Layer.textColor (E.rgba 178 178 178 1)
                 , Layer.textHaloBlur (float 0)
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
-                , Layer.textTransform E.textTransformUppercase
+                , Layer.textTransform E.uppercase
                 , Layer.textFont (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ])
                 , Layer.textLetterSpacing (float 0.15)
                 , Layer.textMaxWidth (float 7)
@@ -2542,7 +2542,7 @@ style =
                 , Layer.iconOpacity (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7.99, float 1 ), ( 8, float 0 ) ])
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 0.9) [ ( 5, float 12 ), ( 12, float 22 ) ])
-                , Layer.textAnchor E.positionTop
+                , Layer.textAnchor E.top
                 , Layer.textOffset (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7.99, E.floats [ 0, 0.1 ] ), ( 8, E.floats [ 0, 0 ] ) ])
                 , Layer.textFont
                     (E.zoom
@@ -2573,7 +2573,7 @@ style =
                         |> E.step (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ]) [ ( 8, E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ] ) ]
                     )
                 , Layer.textOffset (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7.99, E.floats [ 0, -0.25 ] ), ( 8, E.floats [ 0, 0 ] ) ])
-                , Layer.textAnchor E.positionBottom
+                , Layer.textAnchor E.bottom
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textMaxWidth (float 7)
                 , Layer.iconImage (str "dot-10")
@@ -2602,7 +2602,7 @@ style =
                         |> E.step (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ]) [ ( 8, E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ] ) ]
                     )
                 , Layer.textOffset (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7.99, E.floats [ 0, 0.15 ] ), ( 8, E.floats [ 0, 0 ] ) ])
-                , Layer.textAnchor (E.zoom |> E.step E.positionTop [ ( 8, E.positionCenter ) ])
+                , Layer.textAnchor (E.zoom |> E.step E.top [ ( 8, E.center ) ])
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textMaxWidth (float 7)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 0.9) [ ( 4, float 12 ), ( 10, float 22 ) ])
@@ -2632,7 +2632,7 @@ style =
                         |> E.step (E.strings [ "DIN Offc Pro Regular", "Arial Unicode MS Regular" ]) [ ( 8, E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ] ) ]
                     )
                 , Layer.textOffset (E.zoom |> E.interpolate (E.Exponential 1) [ ( 7.99, E.floats [ 0, -0.25 ] ), ( 8, E.floats [ 0, 0 ] ) ])
-                , Layer.textAnchor (E.zoom |> E.step E.positionBottom [ ( 8, E.positionCenter ) ])
+                , Layer.textAnchor (E.zoom |> E.step E.bottom [ ( 8, E.center ) ])
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textMaxWidth (float 7)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 0.9) [ ( 4, float 12 ), ( 10, float 22 ) ])
@@ -2655,8 +2655,8 @@ style =
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 3, float 12 ), ( 6, float 16 ) ])
                 , Layer.symbolSpacing (E.zoom |> E.interpolate (E.Exponential 1) [ ( 4, float 100 ), ( 6, float 400 ) ])
                 , Layer.textFont (E.strings [ "DIN Offc Pro Italic", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.symbolPlacement E.line
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textLetterSpacing (float 0.1)
                 , Layer.textMaxWidth (float 5)
@@ -2700,8 +2700,8 @@ style =
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1.1) [ ( 2, float 12 ), ( 5, float 20 ) ])
                 , Layer.symbolSpacing (float 250)
                 , Layer.textFont (E.strings [ "DIN Offc Pro Italic", "Arial Unicode MS Regular" ])
-                , Layer.symbolPlacement E.symbolPlacementLine
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.symbolPlacement E.line
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textField (E.toFormattedText (E.getProperty (str "name_en")))
                 , Layer.textLetterSpacing (float 0.15)
                 , Layer.textMaxWidth (float 5)
@@ -2740,8 +2740,8 @@ style =
                 , Layer.textMaxWidth (float 4)
                 , Layer.textLetterSpacing (float 0.25)
                 , Layer.textLineHeight (float 1.1)
-                , Layer.symbolPlacement E.symbolPlacementLine
-                , Layer.textPitchAlignment E.anchorViewport
+                , Layer.symbolPlacement E.line
+                , Layer.textPitchAlignment E.viewport
                 , Layer.textFont (E.strings [ "DIN Offc Pro Italic", "Arial Unicode MS Regular" ])
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 1, float 14 ), ( 4, float 30 ) ])
                 ]
@@ -2773,7 +2773,7 @@ style =
                 , Layer.textHaloWidth (float 1)
                 , Layer.textHaloBlur (float 0)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 6, float 10 ), ( 9, float 14 ) ])
-                , Layer.textTransform E.textTransformUppercase
+                , Layer.textTransform E.uppercase
                 , Layer.textFont (E.strings [ "DIN Offc Pro Bold", "Arial Unicode MS Bold" ])
                 , Layer.textField
                     (E.zoom
@@ -2799,7 +2799,7 @@ style =
                 , Layer.textHaloWidth (float 1)
                 , Layer.textHaloBlur (float 0)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 5, float 10 ), ( 8, float 16 ) ])
-                , Layer.textTransform E.textTransformUppercase
+                , Layer.textTransform E.uppercase
                 , Layer.textFont (E.strings [ "DIN Offc Pro Bold", "Arial Unicode MS Bold" ])
                 , Layer.textField
                     (E.zoom
@@ -2820,7 +2820,7 @@ style =
                 , Layer.textHaloWidth (float 1)
                 , Layer.textHaloBlur (float 0)
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 4, float 10 ), ( 7, float 18 ) ])
-                , Layer.textTransform E.textTransformUppercase
+                , Layer.textTransform E.uppercase
                 , Layer.textFont (E.strings [ "DIN Offc Pro Bold", "Arial Unicode MS Bold" ])
                 , Layer.textPadding (float 1)
                 , Layer.textField

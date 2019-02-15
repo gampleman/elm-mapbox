@@ -1,159 +1,26 @@
-module Mapbox.Expression
-    exposing
-        ( Anchor
-        , Auto
-        , CameraExpression
-        , Collator
-        , Color
-        , DataExpression
-        , Expression
-        , FormattedString
-        , FormattedText
-        , Interpolation(..)
-        , LineCap
-        , LineJoin
-        , Object
-        , Position
-        , RasterResampling
-        , SymbolPlacement
-        , SymbolZOrder
-        , TextFit
-        , TextJustify
-        , TextTransform
-        , abs
-        , acos
-        , all
-        , anchorAuto
-        , anchorMap
-        , anchorViewport
-        , any
-        , append
-        , asin
-        , assertArray
-        , assertArrayOfBools
-        , assertArrayOfFloats
-        , assertArrayOfStrings
-        , assertBool
-        , assertFloat
-        , assertObject
-        , assertString
-        , at
-        , atan
-        , bool
-        , ceil
-        , coalesce
-        , collator
-        , conditionally
-        , cos
-        , count
-        , defaultCollator
-        , divideBy
-        , downcase
-        , e
-        , encode
-        , false
-        , featureState
-        , float
-        , floats
-        , floor
-        , fontScaledBy
-        , format
-        , formatted
-        , geometryType
-        , get
-        , getProperty
-        , greaterThan
-        , greaterThanOrEqual
-        , greaterThanOrEqualWithCollator
-        , greaterThanWithCollator
-        , has
-        , hasProperty
-        , heatmapDensity
-        , id
-        , ifElse
-        , int
-        , interpolate
-        , isEqual
-        , isEqualWithCollator
-        , isSupportedScript
-        , length
-        , lessThan
-        , lessThanOrEqual
-        , lessThanOrEqualWithCollator
-        , lessThanWithCollator
-        , lineCapButt
-        , lineCapRound
-        , lineCapSquare
-        , lineJoinBevel
-        , lineJoinMiter
-        , lineJoinRound
-        , lineProgress
-        , ln
-        , ln2
-        , log10
-        , log2
-        , makeRGBAColor
-        , makeRGBColor
-        , matchesFloat
-        , matchesStr
-        , minus
-        , modBy
-        , multiply
-        , not
-        , notEqual
-        , notEqualWithCollator
-        , object
-        , orderSource
-        , orderViewportY
-        , pi
-        , plus
-        , positionBottom
-        , positionBottomLeft
-        , positionBottomRight
-        , positionCenter
-        , positionLeft
-        , positionRight
-        , positionTop
-        , positionTopLeft
-        , positionTopRight
-        , properties
-        , raiseBy
-        , rasterResamplingLinear
-        , rasterResamplingNearest
-        , resolvedLocale
-        , rgba
-        , rgbaChannels
-        , round
-        , sin
-        , sqrt
-        , step
-        , str
-        , strings
-        , symbolPlacementLine
-        , symbolPlacementLineCenter
-        , symbolPlacementPoint
-        , tan
-        , textFitBoth
-        , textFitHeight
-        , textFitNone
-        , textFitWidth
-        , textJustifyCenter
-        , textJustifyLeft
-        , textJustifyRight
-        , textTransformLowercase
-        , textTransformNone
-        , textTransformUppercase
-        , toBool
-        , toColor
-        , toFloat
-        , toFormattedText
-        , toString
-        , true
-        , typeof
-        , upcase
-        , withFont
-        , zoom
-        )
+module Mapbox.Expression exposing
+    ( Expression, DataExpression, CameraExpression
+    , encode
+    , Color, Object, Collator, FormattedText
+    , true, false, bool, int, float, str, rgba, floats, strings, object, collator, defaultCollator
+    , assertArray, assertArrayOfStrings, assertArrayOfFloats, assertArrayOfBools, assertBool, assertFloat, assertObject, assertString
+    , toBool, toColor, toFloat, toString, toFormattedText
+    , formatNumber, NumberFormatOption, locale, currency, minFractionDigits, maxFractionDigits
+    , typeof
+    , at, get, has, count, length
+    , featureState, geometryType, id, properties, getProperty, hasProperty
+    , isEqual, notEqual, lessThan, lessThanOrEqual, greaterThan, greaterThanOrEqual
+    , isEqualWithCollator, notEqualWithCollator, lessThanWithCollator, lessThanOrEqualWithCollator, greaterThanWithCollator, greaterThanOrEqualWithCollator
+    , not, all, any
+    , ifElse, conditionally, matchesStr, matchesFloat, coalesce
+    , interpolate, Interpolation(..), step
+    , append, downcase, upcase, isSupportedScript, resolvedLocale
+    , format, FormattedString, formatted, fontScaledBy, withFont
+    , makeRGBColor, makeRGBAColor, rgbaChannels
+    , minus, multiply, divideBy, modBy, plus, raiseBy, sqrt, abs, ceil, floor, round, cos, sin, tan, acos, asin, atan, e, pi, ln, ln2, log10, log2
+    , zoom, heatmapDensity, lineProgress
+    , map, viewport, auto, center, left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, none, width, height, both, butt, rounded, square, bevel, miter, point, lineCenter, line, uppercase, lowercase, linear, nearest, viewportY, source
+    )
 
 {-| Expressions form a little language that can be used to compute values for various layer properties.
 
@@ -184,6 +51,21 @@ In the expression language you can do this in a similar fassion:
                 [ ( 0, int 9 )
                 , ( 1000, int 20 )
                 ]
+
+
+### Table of contents
+
+  - [Types](#types)
+  - [Lookup](#lookup)
+  - [Feature data](#feature-data)
+  - [Decision](#decision)
+  - [Ramps, scales, curves](#ramps-scales-curves)
+  - [String](#string)
+  - [Formatted Text](#formatted-text)
+  - [Color](#color)
+  - [Math](#math)
+  - [Misx](#misc)
+  - [Enums](#enums)
 
 **Note**: If you are familiar with the JS version of the style spec,
 we have made a few changes. Argument order has been switched for many functions to support using pipeline style more naturally. Some functions use overloading in the original, these have been renamed to
@@ -222,6 +104,8 @@ if the type is wrong:
 You can also use these functions to explicitly cast to a particular type:
 
 @docs toBool, toColor, toFloat, toString, toFormattedText
+
+@docs formatNumber, NumberFormatOption, locale, currency, minFractionDigits, maxFractionDigits
 
 @docs typeof
 
@@ -280,25 +164,24 @@ Control flow:
 @docs minus, multiply, divideBy, modBy, plus, raiseBy, sqrt, abs, ceil, floor, round, cos, sin, tan, acos, asin, atan, e, pi, ln, ln2, log10, log2
 
 
-### Zoom
+### Misc
 
-@docs zoom
-
-
-### Heatmap
-
-@docs heatmapDensity, lineProgress
+@docs zoom, heatmapDensity, lineProgress
 
 
 ### Enums
 
-These are required for various layer properties.
+These are required for various layer properties. They are not documented here as they are overloaded - you will find descriptions
+of their effects at the relevant layer property.
 
-@docs Anchor, anchorMap, anchorViewport, anchorAuto, Auto, Position, positionCenter, positionLeft, positionRight, positionTop, positionBottom, positionTopLeft, positionTopRight, positionBottomLeft, positionBottomRight, TextFit, textFitNone, textFitWidth, textFitHeight, textFitBoth, LineCap, lineCapButt, lineCapRound, lineCapSquare, LineJoin, lineJoinBevel, lineJoinRound, lineJoinMiter, SymbolPlacement, symbolPlacementPoint, symbolPlacementLine, symbolPlacementLineCenter, TextJustify, textJustifyLeft, textJustifyCenter, textJustifyRight, TextTransform, textTransformNone, textTransformUppercase, textTransformLowercase, RasterResampling, rasterResamplingLinear, rasterResamplingNearest, SymbolZOrder, orderViewportY, orderSource
+**Note:** You may notice that these have slightly odd types. These types allow them to be overloaded for multiple properties, but still remain type safe. Don't worry about these too much!
+
+@docs map, viewport, auto, center, left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, none, width, height, both, butt, rounded, square, bevel, miter, point, lineCenter, line, uppercase, lowercase, linear, nearest, viewportY, source
 
 -}
 
 import Array exposing (Array)
+import Internal exposing (..)
 import Json.Encode exposing (Value)
 
 
@@ -324,8 +207,8 @@ The `exprType` can be:
 The intent is to help you not break your style by using a DataExpression (for example) where it isn't supported. However, this isn't entirely foolproof, so some caution is advised.
 
 -}
-type Expression exprType resultType
-    = Expression Value
+type alias Expression exprType resultType =
+    Internal.Expression exprType resultType
 
 
 {-| A camera expression is any expression that uses the zoom operator. Such expressions allow the appearance of a layer
@@ -396,302 +279,183 @@ type Collator
 -- Enums
 
 
-{-| Encodes the relation to which something is measured or aligned to. The exact details are explained in the docs of each property supporting this. Some properties support the `anchorAuto` value, these have the type `Anchor Auto`, other don't and have the type `Anchor Never`.
--}
-type Anchor supportsAuto
-    = Anchor
-
-
-{-| Relativeto the map.
--}
-anchorMap : Expression exprType (Anchor a)
-anchorMap =
+{-| -}
+map : Expression exprType { a | map : Supported }
+map =
     Expression (Json.Encode.string "map")
 
 
-{-| Relative to the viewport.
--}
-anchorViewport : Expression exprType (Anchor a)
-anchorViewport =
+{-| -}
+viewport : Expression exprType { a | viewport : Supported }
+viewport =
     Expression (Json.Encode.string "viewport")
 
 
 {-| -}
-type Auto
-    = Auto
-
-
-{-| Automatic behaviour, that may vary based on circumstance between viewport and map.
--}
-anchorAuto : Expression exprType (Anchor Auto)
-anchorAuto =
+auto : Expression exprType { a | auto : Supported }
+auto =
     Expression (Json.Encode.string "auto")
 
 
-{-| Which part of the object is placed closest to the Anchor.
--}
-type Position
-    = Position
-
-
 {-| -}
-positionCenter : Expression exprType Position
-positionCenter =
+center : Expression exprType { a | center : Supported }
+center =
     Expression (Json.Encode.string "center")
 
 
 {-| -}
-positionLeft : Expression exprType Position
-positionLeft =
+left : Expression exprType { a | left : Supported }
+left =
     Expression (Json.Encode.string "left")
 
 
 {-| -}
-positionRight : Expression exprType Position
-positionRight =
+right : Expression exprType { a | right : Supported }
+right =
     Expression (Json.Encode.string "right")
 
 
 {-| -}
-positionTop : Expression exprType Position
-positionTop =
+top : Expression exprType { a | top : Supported }
+top =
     Expression (Json.Encode.string "top")
 
 
 {-| -}
-positionBottom : Expression exprType Position
-positionBottom =
+bottom : Expression exprType { a | bottom : Supported }
+bottom =
     Expression (Json.Encode.string "bottom")
 
 
 {-| -}
-positionTopLeft : Expression exprType Position
-positionTopLeft =
+topLeft : Expression exprType { a | topLeft : Supported }
+topLeft =
     Expression (Json.Encode.string "top-left")
 
 
 {-| -}
-positionTopRight : Expression exprType Position
-positionTopRight =
+topRight : Expression exprType { a | topRight : Supported }
+topRight =
     Expression (Json.Encode.string "top-right")
 
 
 {-| -}
-positionBottomLeft : Expression exprType Position
-positionBottomLeft =
+bottomLeft : Expression exprType { a | bottomLeft : Supported }
+bottomLeft =
     Expression (Json.Encode.string "bottom-left")
 
 
 {-| -}
-positionBottomRight : Expression exprType Position
-positionBottomRight =
+bottomRight : Expression exprType { a | bottomRight : Supported }
+bottomRight =
     Expression (Json.Encode.string "bottom-right")
 
 
-{-| Scaling an icon to fit associated text.
--}
-type TextFit
-    = TextFit
-
-
-{-| The icon is displayed at its intrinsic aspect ratio.
--}
-textFitNone : Expression exprType TextFit
-textFitNone =
+{-| -}
+none : Expression exprType { a | none : Supported }
+none =
     Expression (Json.Encode.string "none")
 
 
-{-| The icon is scaled in the x-dimension to fit the width of the text.
--}
-textFitWidth : Expression exprType TextFit
-textFitWidth =
+{-| -}
+width : Expression exprType { a | width : Supported }
+width =
     Expression (Json.Encode.string "width")
 
 
-{-| The icon is scaled in the y-dimension to fit the height of the text.
--}
-textFitHeight : Expression exprType TextFit
-textFitHeight =
+{-| -}
+height : Expression exprType { a | height : Supported }
+height =
     Expression (Json.Encode.string "height")
 
 
-{-| The icon is scaled in both x- and y-dimensions.
--}
-textFitBoth : Expression exprType TextFit
-textFitBoth =
+{-| -}
+both : Expression exprType { a | both : Supported }
+both =
     Expression (Json.Encode.string "both")
 
 
-{-| Display of line endings.
--}
-type LineCap
-    = LineCap
-
-
-{-| A cap with a squared-off end which is drawn to the exact endpoint of the line.
--}
-lineCapButt : Expression exprType LineCap
-lineCapButt =
+{-| -}
+butt : Expression exprType { a | butt : Supported }
+butt =
     Expression (Json.Encode.string "butt")
 
 
-{-| A cap with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the line's width and centered on the endpoint of the line.
--}
-lineCapRound : Expression exprType LineCap
-lineCapRound =
+{-| -}
+rounded : Expression exprType { a | rounded : Supported }
+rounded =
     Expression (Json.Encode.string "round")
 
 
-{-| A cap with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line's width.
--}
-lineCapSquare : Expression exprType LineCap
-lineCapSquare =
+{-| -}
+square : Expression exprType { a | square : Supported }
+square =
     Expression (Json.Encode.string "square")
 
 
-{-| Display of lines when joining.
--}
-type LineJoin
-    = LineJoin
-
-
-{-| A join with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line's width.
--}
-lineJoinBevel : Expression exprType LineJoin
-lineJoinBevel =
+{-| -}
+bevel : Expression exprType { a | bevel : Supported }
+bevel =
     Expression (Json.Encode.string "bevel")
 
 
-{-| A join with a rounded end which is drawn beyond the endpoint of the line at a radius of one-half of the line's width and centered on the endpoint of the line.
--}
-lineJoinRound : Expression exprType LineJoin
-lineJoinRound =
-    Expression (Json.Encode.string "round")
-
-
-{-| A join with a sharp, angled corner which is drawn with the outer sides beyond the endpoint of the path until they meet.
--}
-lineJoinMiter : Expression exprType LineJoin
-lineJoinMiter =
+{-| -}
+miter : Expression exprType { a | miter : Supported }
+miter =
     Expression (Json.Encode.string "miter")
 
 
-{-| Label placement relative to its geometry.
--}
-type SymbolPlacement
-    = SymbolPlacement
-
-
-{-| The label is placed at the point where the geometry is located.
--}
-symbolPlacementPoint : Expression exprType SymbolPlacement
-symbolPlacementPoint =
+{-| -}
+point : Expression exprType { a | point : Supported }
+point =
     Expression (Json.Encode.string "point")
 
 
-{-| The label is placed at the center of the line of the geometry. Can only be used on LineString and Polygon geometries. Note that a single feature in a vector tile may contain multiple line geometries.
--}
-symbolPlacementLineCenter : Expression exprType SymbolPlacement
-symbolPlacementLineCenter =
+{-| -}
+lineCenter : Expression exprType { a | lineCenter : Supported }
+lineCenter =
     Expression (Json.Encode.string "line-center")
 
 
-{-| The label is placed along the line of the geometry. Can only be used on LineString and Polygon geometries.
--}
-symbolPlacementLine : Expression exprType SymbolPlacement
-symbolPlacementLine =
+{-| -}
+line : Expression exprType { a | line : Supported }
+line =
     Expression (Json.Encode.string "line")
 
 
 {-| -}
-type TextJustify
-    = TextJustify
-
-
-{-| The text is aligned to the left.
--}
-textJustifyLeft : Expression exprType TextJustify
-textJustifyLeft =
-    Expression (Json.Encode.string "left")
-
-
-{-| The text is centered.
--}
-textJustifyCenter : Expression exprType TextJustify
-textJustifyCenter =
-    Expression (Json.Encode.string "center")
-
-
-{-| The text is aligned to the right.
--}
-textJustifyRight : Expression exprType TextJustify
-textJustifyRight =
-    Expression (Json.Encode.string "right")
-
-
-{-| Specifies how to capitalize text.
--}
-type TextTransform
-    = TextTransform
-
-
-{-| The text is not altered.
--}
-textTransformNone : Expression exprType TextTransform
-textTransformNone =
-    Expression (Json.Encode.string "none")
-
-
-{-| Forces all letters to be displayed in uppercase.
--}
-textTransformUppercase : Expression exprType TextTransform
-textTransformUppercase =
+uppercase : Expression exprType { a | uppercase : Supported }
+uppercase =
     Expression (Json.Encode.string "uppercase")
 
 
-{-| Forces all letters to be displayed in lowercase.
--}
-textTransformLowercase : Expression exprType TextTransform
-textTransformLowercase =
+{-| -}
+lowercase : Expression exprType { a | lowercase : Supported }
+lowercase =
     Expression (Json.Encode.string "lowercase")
 
 
 {-| -}
-type RasterResampling
-    = RasterResampling
-
-
-{-| (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled.
--}
-rasterResamplingLinear : Expression exprType RasterResampling
-rasterResamplingLinear =
+linear : Expression exprType { a | linear : Supported }
+linear =
     Expression (Json.Encode.string "linear")
 
 
-{-| Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled.
--}
-rasterResamplingNearest : Expression exprType RasterResampling
-rasterResamplingNearest =
+{-| -}
+nearest : Expression exprType { a | nearest : Supported }
+nearest =
     Expression (Json.Encode.string "nearest")
 
 
-{-| Specifies the order in which overlapping symbols in the same layer are rendered
--}
-type SymbolZOrder
-    = SymbolZOrder
-
-
-{-| Symbols will be sorted by their y-position relative to the viewport.
--}
-orderViewportY : Expression exprType SymbolZOrder
-orderViewportY =
+{-| -}
+viewportY : Expression exprType { a | viewportY : Supported }
+viewportY =
     Expression (Json.Encode.string "viewport-y")
 
 
-{-| Symbols will be rendered in the same order as the source data with no sorting applied.
--}
-orderSource : Expression exprType SymbolZOrder
-orderSource =
+{-| -}
+source : Expression exprType { a | source : Supported }
+source =
     Expression (Json.Encode.string "source")
 
 
@@ -758,17 +522,64 @@ list =
     Json.Encode.list encode >> Expression >> call1 "literal"
 
 
+{-| -}
+type NumberFormatOption
+    = NFOption String Value
+
+
+{-| Specifies the locale to use as a BCP 47 language tag. Defaults to the current locale.
+-}
+locale : Expression exprType String -> NumberFormatOption
+locale =
+    encode >> NFOption "locale"
+
+
+{-| If set, will include a currency symbol in the resulting number (such as "JP¥" or "€"). Should be a ISO 4217 currency code.
+-}
+currency : Expression exprType String -> NumberFormatOption
+currency =
+    encode >> NFOption "currency"
+
+
+{-| Formatter will include at least this many digits after the decimal point. Defaults to 0.
+-}
+minFractionDigits : Expression exprType Float -> NumberFormatOption
+minFractionDigits =
+    encode >> NFOption "min-fraction-digits"
+
+
+{-| Formatter will include at most this many digits after the decimal point. Defaults to 3.
+-}
+maxFractionDigits : Expression exprType Float -> NumberFormatOption
+maxFractionDigits =
+    encode >> NFOption "max-fraction-digits"
+
+
+{-| Converts the input number into a string representation following locale dependent formatting rules.
+-}
+formatNumber : List NumberFormatOption -> Expression exprType Float -> Expression exprType String
+formatNumber options number =
+    Expression
+        (Json.Encode.list identity
+            (Json.Encode.string "number-format"
+                :: encode number
+                :: [ Json.Encode.object (List.map (\(NFOption k v) -> ( k, v )) options)
+                   ]
+            )
+        )
+
+
 {-| Returns a `Collator` for use in locale-dependent comparison operations. The first argument specifies if the comparison should be case sensitive. The second specifies if it is diacritic sensitive. The final locale argument specifies the IETF language tag of the locale to use.
 -}
 collator : Expression e1 Bool -> Expression e2 Bool -> Expression e3 String -> Expression e4 Collator
-collator (Expression caseSensitive) (Expression diacriticSensitive) (Expression locale) =
+collator (Expression caseSensitive) (Expression diacriticSensitive) (Expression lcle) =
     Expression
         (Json.Encode.list identity
             (Json.Encode.string "collator"
                 :: [ Json.Encode.object
                         [ ( "case-sensitive", caseSensitive )
                         , ( "diacritic-sensitive", diacriticSensitive )
-                        , ( "locale", locale )
+                        , ( "locale", lcle )
                         ]
                    ]
             )
@@ -1186,10 +997,10 @@ coalesce =
 {-| The ternary operator:
 
     Layer.iconImage <|
-      ifElse
-        (greaterThan (getProperty (str "size")) (float 30))
-        (str "hospital-32")
-        (str "clinic-32")
+        ifElse
+            (greaterThan (getProperty (str "size")) (float 30))
+            (str "hospital-32")
+            (str "clinic-32")
 
 -}
 ifElse : Expression exprType1 Bool -> Expression exprType2 output -> Expression exprType3 output -> Expression exprType1 output
@@ -1207,12 +1018,13 @@ conditionally vals (Expression default) =
 {-| Selects the output whose label value matches the input value, or the fallback value if no match is found.
 
     getProperty (str "type")
-      |> matchesStr
-          [ ("hospital", str "icon-hospital")
-          , ("clinic", str "icon-medical")
-          ]
-          (str "icon-generic") -- fallback value
-      |> Layer.iconImage
+        |> matchesStr
+            [ ( "hospital", str "icon-hospital" )
+            , ( "clinic", str "icon-medical" )
+            ]
+            (str "icon-generic")
+        -- fallback value
+        |> Layer.iconImage
 
 -}
 matchesStr : List ( String, Expression exprType2 output ) -> Expression exprType1 output -> Expression exprType3 String -> Expression exprType3 output
@@ -1227,12 +1039,13 @@ matchesStr options (Expression default) (Expression input) =
 {-| Selects the output whose label value matches the input value, or the fallback value if no match is found.
 
     getProperty (str "size")
-      |> matchesFloat
-          [ (1, str "icon-hospital")
-          , (2, str "icon-medical")
-          ]
-          (str "icon-generic") -- fallback value
-      |> Layer.iconImage
+        |> matchesFloat
+            [ ( 1, str "icon-hospital" )
+            , ( 2, str "icon-medical" )
+            ]
+            (str "icon-generic")
+        -- fallback value
+        |> Layer.iconImage
 
 -}
 matchesFloat : List ( Float, Expression exprType2 output ) -> Expression exprType1 output -> Expression exprType3 Float -> Expression exprType3 output

@@ -1,4 +1,14 @@
-module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(..), Source, SourceOption, Url, VectorSource, animatedCanvas, attribution, bounds, buffer, cluster, clusterRadius, encode, generateIds, geoJSONFromUrl, geoJSONFromValue, getId, image, lineMetrics, maxzoom, minzoom, raster, rasterDEMMapbox, rasterDEMTerrarium, rasterFromUrl, scheme, staticCanvas, tileSize, tolerance, vector, vectorFromUrl, video)
+module Mapbox.Source exposing
+    ( Source, SourceOption
+    , Id, Url
+    , vector, vectorFromUrl, VectorSource
+    , raster, tileSize, rasterFromUrl, RasterSource
+    , rasterDEMMapbox, rasterDEMTerrarium
+    , geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, clusterProperties, lineMetrics, generateIds
+    , Coords, image, video, staticCanvas, animatedCanvas
+    , bounds, minzoom, maxzoom, attribution, scheme, Scheme(..)
+    , encode, getId
+    )
 
 {-|
 
@@ -27,7 +37,7 @@ module Mapbox.Source exposing (Coords, GeoJSONSource, Id, RasterSource, Scheme(.
 
 ### GeoJSON
 
-@docs geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, lineMetrics, generateIds
+@docs geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, clusterProperties, lineMetrics, generateIds
 
 
 ### Image, Video & Canvas
@@ -48,8 +58,10 @@ Tiled sources can also take the following attributes:
 
 -}
 
+import Internal
 import Json.Encode exposing (Value)
 import LngLat exposing (LngLat)
+import Mapbox.Expression as Expression exposing (DataExpression, Expression)
 
 
 {-| Every layer is identified by an id.
@@ -192,6 +204,31 @@ clusterRadius =
 clusterMaxZoom : Float -> SourceOption GeoJSONSource
 clusterMaxZoom =
     Json.Encode.float >> SourceOption "clusterMaxZoom"
+
+
+{-| When clustering, you may want to aggregate values from the points included in the cluster. This function allows you to associate a name that will be the property name with a fold that computes the aggregation. For example:
+
+    clusterProperties
+        [ ( "sum", E.plus, E.getProperty (str "scalerank") )
+        , ( "max", \point aggregate -> E.max aggregate point, E.getProperty (str "scalerank") )
+        ]
+
+Would produce clusters with two additional properties: `sum` and `max`, which you could then further use in data driven styling.
+
+-}
+clusterProperties : List ( String, Expression DataExpression a -> Expression DataExpression b -> Expression DataExpression b, Expression DataExpression a ) -> SourceOption GeoJSONSource
+clusterProperties =
+    List.map
+        (\( name, fold, map ) ->
+            ( name
+            , Json.Encode.list identity
+                [ Expression.encode <| fold (Expression.getProperty (Expression.str name)) (Internal.Expression (Json.Encode.list Json.Encode.string [ "accumulated" ]))
+                , Expression.encode <| map
+                ]
+            )
+        )
+        >> Json.Encode.object
+        >> SourceOption "clusterProperties"
 
 
 {-| Whether to calculate line distance metrics. This is required for line layers that specify `lineGradient` values.

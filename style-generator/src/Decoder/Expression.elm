@@ -35,88 +35,94 @@ decodeLiteral =
 makeConstant s =
     case s of
         "map" ->
-            Lib.eValue "anchorMap"
+            Lib.eValue "map"
 
         "viewport" ->
-            Lib.eValue "anchorViewport"
+            Lib.eValue "viewport"
 
         "auto" ->
-            Lib.eValue "anchorAuto"
+            Lib.eValue "auto"
 
         "center" ->
-            Lib.eValue "positionCenter"
+            Lib.eValue "center"
 
         "left" ->
-            Lib.eValue "positionLeft"
+            Lib.eValue "left"
 
         "right" ->
-            Lib.eValue "positionRight"
+            Lib.eValue "right"
 
         "top" ->
-            Lib.eValue "positionTop"
+            Lib.eValue "top"
 
         "bottom" ->
-            Lib.eValue "positionBottom"
+            Lib.eValue "bottom"
 
-        "topRight" ->
-            Lib.eValue "positionTopRight"
+        "top-left" ->
+            Lib.eValue "topLeft"
 
-        "topLeft" ->
-            Lib.eValue "positionTopLeft"
+        "top-right" ->
+            Lib.eValue "topRight"
 
-        "bottomLeft" ->
-            Lib.eValue "positionBottomLeft"
+        "bottom-left" ->
+            Lib.eValue "bottomLeft"
 
-        "bottomRight" ->
-            Lib.eValue "positionBottomRight"
+        "bottom-right" ->
+            Lib.eValue "bottomRight"
 
         "none" ->
-            Lib.eValue "textFitNone"
+            Lib.eValue "none"
 
         "width" ->
-            Lib.eValue "textFitWidth"
+            Lib.eValue "width"
 
         "height" ->
-            Lib.eValue "textFitHeight"
+            Lib.eValue "height"
 
         "both" ->
-            Lib.eValue "textFitBoth"
+            Lib.eValue "both"
 
         "butt" ->
-            Lib.eValue "lineCapButt"
+            Lib.eValue "butt"
 
         "round" ->
-            Lib.eValue "lineCapRound"
+            Lib.eValue "rounded"
 
         "square" ->
-            Lib.eValue "lineCapSquare"
+            Lib.eValue "square"
 
         "bevel" ->
-            Lib.eValue "lineJoinBevel"
+            Lib.eValue "bevel"
 
         "miter" ->
-            Lib.eValue "lineJoinMiter"
+            Lib.eValue "miter"
 
         "point" ->
-            Lib.eValue "symbolPlacementPoint"
+            Lib.eValue "point"
 
         "line-center" ->
-            Lib.eValue "symbolPlacementLineCenter"
+            Lib.eValue "lineCenter"
 
         "line" ->
-            Lib.eValue "symbolPlacementLine"
+            Lib.eValue "line"
 
         "uppercase" ->
-            Lib.eValue "textTransformUppercase"
+            Lib.eValue "uppercase"
 
         "lowercase" ->
-            Lib.eValue "textTransformLowercase"
+            Lib.eValue "lowercase"
 
         "linear" ->
-            Lib.eValue "rasterResamplingLinear"
+            Lib.eValue "linear"
 
         "nearest" ->
-            Lib.eValue "rasterResamplingNearest"
+            Lib.eValue "nearest"
+
+        "viewport-y" ->
+            Lib.eValue "viewportY"
+
+        "source" ->
+            Lib.eValue "source"
 
         _ ->
             case Color.parse s of

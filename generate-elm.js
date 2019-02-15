@@ -54,6 +54,16 @@ Layout properties are applied early in the rendering process and define how data
 
 Paint properties are applied later in the rendering process. Changes to a paint property are cheap and happen synchronously.
 
+#### Skip to:
+
+${Object.keys(docs)
+    .map(
+      (section) =>
+        `- [${section} Attributes](#${section.toLowerCase()}-attibutes)`
+    )
+    .join("\n")}
+
+
 
 ### Working with layers
 
@@ -79,7 +89,8 @@ ${Object.entries(docs)
 
 import Array exposing (Array)
 import Json.Encode as Encode exposing (Value)
-import Mapbox.Expression as Expression exposing (Anchor, Auto, CameraExpression, Color, DataExpression, Expression, LineCap, LineJoin, Position, RasterResampling, SymbolPlacement, TextFit, TextJustify, TextTransform, FormattedText, SymbolZOrder)
+import Mapbox.Expression as Expression exposing (CameraExpression, Color, DataExpression, Expression, FormattedText)
+import Internal exposing (Supported)
 
 {-| Represents a layer. -}
 type Layer
@@ -290,7 +301,7 @@ function generateElmProperty(name, prop, layerType, position) {
     prop["sdk-support"]["data-driven styling"].js
       ? "any"
       : "CameraExpression";
-  const exprType = getElmType(prop);
+  const exprType = getElmType(prop, name);
   let bounds = "";
   if ("minimum" in prop && "maximum" in prop) {
     bounds = `\n\nShould be between \`${prop.minimum}\` and \`${
@@ -302,7 +313,7 @@ function generateElmProperty(name, prop, layerType, position) {
     bounds = `\n\nShould be less than or equal to \`${prop.maximum}\`. `;
   }
   let valueHelp = "";
-  if (exprType == "(Anchor Never)" || exprType == "(Anchor Auto)") {
+  if (prop.values) {
     valueHelp = Object.entries(prop.values)
       .map(
         ([value, { doc }]) =>
@@ -322,30 +333,7 @@ ${elmName} =
     Expression.encode >> ${position} "${name}"`;
 }
 
-const enumMap = {
-  "map | viewport | auto": "(Anchor Auto)",
-  "map | viewport": "(Anchor Never)",
-  "left | center | right": "TextJustify",
-  "center | left | right | top | bottom | top-left | top-right | bottom-left | bottom-right":
-    "Position",
-  "none | width | height | both": "TextFit",
-  "butt | round | square": "LineCap",
-  "bevel | round | miter": "LineJoin",
-  "point | line | line-center": "SymbolPlacement",
-  "none | uppercase | lowercase": "TextTransform",
-  "linear | nearest": "RasterResampling",
-  "viewport-y | source" : "SymbolZOrder"
-};
 
-const flatEnumMap = Object.assign(Object.entries(enumMap).reduce((res, [values, tipe]) => values.split(' | ').reduce((obj, value) => Object.assign({}, obj, {[value]: tipe}), res), {}), {
-  map: 'Anchor',
-  viewport: 'Anchor',
-  auto: "Anchor"
-});
-
-const reverseEnumMap = Object.entries(enumMap).reduce((res, [values, tipe]) => tipe ==="(Anchor Auto)" || tipe === "(Anchor Never)" ? res : Object.assign({}, res, {[tipe]: values.split(' | ')}), {})
-
-console.error(reverseEnumMap)
 
 function docify(str, name) {
   switch (name) {
@@ -373,7 +361,9 @@ function docify(str, name) {
     )
 }
 
-function getElmType({ type, value, values }) {
+const enums = `map, viewport, auto, center, left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, none, width, height, both, butt, rounded, square, bevel, miter, point, lineCenter, line, uppercase, lowercase, linear, nearest, viewportY, source`.split(', ');
+
+function getElmType({ type, value, values }, name) {
   switch (type) {
     case "number":
       return "Float";
@@ -393,10 +383,16 @@ function getElmType({ type, value, values }) {
     case "formatted":
       return "FormattedText";
     case "enum":
-      const res = enumMap[Object.keys(values).join(" | ")];
-      if (res) return res;
+      return '{' + Object.keys(values).map(val => {
+          val = camelCase(val);
+          if (enums.includes(val)) {
+              return `${val} : Supported`;
+          }
+          throw `Unknown enum value ${val} for property ${name}`;
+      }).join(', ') + '}';
+
   }
-  throw `Unknown type ${type}, ${value}, ${values && Object.keys(values)}`;
+  throw `Unknown type ${type} for ${name}, ${value}, ${values && Object.keys(values)}`;
 }
 
 function titleCase(str) {
@@ -409,15 +405,13 @@ function titleCase(str) {
 }
 
 function camelCase(str, type) {
-  if (type &&  type === 'SymbolZOrder') {
-    str = 'order ' + str;
-  } else if (type && reverseEnumMap[type]) {
-    str = type + ' ' + str;
-  } else if (flatEnumMap[str] && str !== 'source') {
-    str = flatEnumMap[str] + ' ' + str;
+  if (str === 'round') {
+    return 'rounded';
   } else if (str === "rgba(0, 0, 0, 0)") {
     return "rgba 0 0 0 0"
-  }
+} else if (str === '') {
+    return '""';
+}
   return str
     .replace(/(?:^\w|[A-Z]|\b\w|\-\w)/g, function(letter, index) {
       return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
