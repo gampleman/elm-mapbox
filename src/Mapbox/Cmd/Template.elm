@@ -361,7 +361,7 @@ queryRenderedFeatures prt id reqId options =
         ]
 
 
-{-| Wraps an incoming port so that you can get nicer subscritions:
+{-| Wraps an incoming port so that you can get nicer subscriptions:
 
     port elmMapboxIncoming : (Value -> msg) -> Sub msg
 
