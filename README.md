@@ -22,6 +22,9 @@ install the accompanying npm library:
 
     npm install --save elm-mapbox
 
+Microsoft Edge you will needs a polyfill to use custom elements. The polyfill provides by
+webcomponents.org is known to work https://github.com/webcomponents/custom-elements
+
 Then include the library into your page. If you don't have any JS build system setup,
 probably the easiest is to add:
 
