@@ -307,7 +307,6 @@ rasterDEMMapbox id =
         (Json.Encode.object
             [ ( "type", Json.Encode.string "raster-dem" )
             , ( "url", Json.Encode.string "mapbox://mapbox.terrain-rgb" )
-            , ( "encoding", Json.Encode.string "mapbox" )
             ]
         )
 
