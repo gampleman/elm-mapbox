@@ -1,6 +1,6 @@
 {
   "name": "elm-mapbox",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "A custom element designed for use with elm-mapbox",
   "main": "dist/elm-mapbox.cjs.js",
   "module": "dist/elm-mapbox.esm.js",
@@ -13,7 +13,7 @@
     "dev": "rollup -c -w",
     "test": "elm make --output=/dev/null src/**/*.elm && cd examples && elm make --output=/dev/null ./*.elm",
     "pretest": "npm run build",
-    "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/v0.53.0/src/style-spec/reference/v8.json | node generate-elm.js | elm-format --stdin --output src/Mapbox/Layer.elm"
+    "generate": "curl https://raw.githubusercontent.com/mapbox/mapbox-gl-js/v0.54.0/src/style-spec/reference/v8.json | node generate-elm.js | elm-format --stdin --output src/Mapbox/Layer.elm"
   },
   "repository": {
     "type": "git",

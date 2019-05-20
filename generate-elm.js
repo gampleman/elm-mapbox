@@ -59,7 +59,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 ${Object.keys(docs)
     .map(
       (section) =>
-        `- [${section} Attributes](#${section.toLowerCase()}-attibutes)`
+        `- [${section} Attributes](#${section.toLowerCase()}-attributes)`
     )
     .join("\n")}
 
@@ -297,6 +297,7 @@ function generateElmProperty(name, prop, layerType, position) {
     throw "Constant property type not supported";
   const elmName = camelCase(name);
   const exprKind =
+    prop["sdk-support"] &&
     prop["sdk-support"]["data-driven styling"] &&
     prop["sdk-support"]["data-driven styling"].js
       ? "any"

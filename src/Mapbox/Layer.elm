@@ -9,7 +9,7 @@ module Mapbox.Layer exposing
     , circleBlur, circleColor, circleOpacity, circlePitchAlignment, circlePitchScale, circleRadius, circleStrokeColor, circleStrokeOpacity, circleStrokeWidth, circleTranslate, circleTranslateAnchor
     , heatmapColor, heatmapIntensity, heatmapOpacity, heatmapRadius, heatmapWeight
     , fillExtrusionBase, fillExtrusionColor, fillExtrusionHeight, fillExtrusionOpacity, fillExtrusionPattern, fillExtrusionTranslate, fillExtrusionTranslateAnchor, fillExtrusionVerticalGradient
-    , iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSortKey, symbolSpacing, symbolZOrder, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor
+    , iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSortKey, symbolSpacing, symbolZOrder, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRadialOffset, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor, textVariableAnchor
     , rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterResampling, rasterSaturation
     , hillshadeAccentColor, hillshadeExaggeration, hillshadeHighlightColor, hillshadeIlluminationAnchor, hillshadeIlluminationDirection, hillshadeShadowColor
     , backgroundColor, backgroundOpacity, backgroundPattern
@@ -28,15 +28,15 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 #### Skip to:
 
-  - [Fill Attributes](#fill-attibutes)
-  - [Line Attributes](#line-attibutes)
-  - [Circle Attributes](#circle-attibutes)
-  - [Heatmap Attributes](#heatmap-attibutes)
-  - [FillExtrusion Attributes](#fillextrusion-attibutes)
-  - [Symbol Attributes](#symbol-attibutes)
-  - [Raster Attributes](#raster-attibutes)
-  - [Hillshade Attributes](#hillshade-attibutes)
-  - [Background Attributes](#background-attibutes)
+  - [Fill Attributes](#fill-attributes)
+  - [Line Attributes](#line-attributes)
+  - [Circle Attributes](#circle-attributes)
+  - [Heatmap Attributes](#heatmap-attributes)
+  - [FillExtrusion Attributes](#fillextrusion-attributes)
+  - [Symbol Attributes](#symbol-attributes)
+  - [Raster Attributes](#raster-attributes)
+  - [Hillshade Attributes](#hillshade-attributes)
+  - [Background Attributes](#background-attributes)
 
 
 ### Working with layers
@@ -83,7 +83,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Symbol Attributes
 
-@docs iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSortKey, symbolSpacing, symbolZOrder, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor
+@docs iconAllowOverlap, iconAnchor, iconColor, iconHaloBlur, iconHaloColor, iconHaloWidth, iconIgnorePlacement, iconImage, iconKeepUpright, iconOffset, iconOpacity, iconOptional, iconPadding, iconPitchAlignment, iconRotate, iconRotationAlignment, iconSize, iconTextFit, iconTextFitPadding, iconTranslate, iconTranslateAnchor, symbolAvoidEdges, symbolPlacement, symbolSortKey, symbolSpacing, symbolZOrder, textAllowOverlap, textAnchor, textColor, textField, textFont, textHaloBlur, textHaloColor, textHaloWidth, textIgnorePlacement, textJustify, textKeepUpright, textLetterSpacing, textLineHeight, textMaxAngle, textMaxWidth, textOffset, textOpacity, textOptional, textPadding, textPitchAlignment, textRadialOffset, textRotate, textRotationAlignment, textSize, textTransform, textTranslate, textTranslateAnchor, textVariableAnchor
 
 
 ### Raster Attributes
@@ -1013,7 +1013,7 @@ iconOffset =
 
 
 {-| Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up. Layout property.
-Units in ems. Defaults to `0,0`. Requires `textField`.
+Units in ems. Defaults to `0,0`. Requires `textField`. Disabled by `textRadialOffset`.
 -}
 textOffset : Expression any (Array Float) -> LayerAttr Symbol
 textOffset =
@@ -1078,6 +1078,14 @@ iconAnchor =
 textAnchor : Expression any { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported } -> LayerAttr Symbol
 textAnchor =
     Expression.encode >> Layout "text-anchor"
+
+
+{-| Radial offset of text, in the direction of the symbol's anchor. Useful in combination with `textVariableAnchor`, which doesn't support the two-dimensional `textOffset`. Layout property.
+Units in ems. Defaults to `0`. Disabled by `textOffset`.
+-}
+textRadialOffset : Expression CameraExpression Float -> LayerAttr Symbol
+textRadialOffset =
+    Expression.encode >> Layout "text-radial-offset"
 
 
 {-| Rotates the icon clockwise. Layout property.
@@ -1150,7 +1158,7 @@ textPadding =
     Expression.encode >> Layout "text-padding"
 
 
-{-| Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key wehn they overlap. Features with a lower sort key will have priority over other features when doing placement. Layout property.
+{-| Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement. Layout property.
 -}
 symbolSortKey : Expression CameraExpression Float -> LayerAttr Symbol
 symbolSortKey =
@@ -1265,6 +1273,24 @@ Should be between `0` and `1` inclusive. Defaults to `1`. Requires `textField`.
 textOpacity : Expression any Float -> LayerAttr Symbol
 textOpacity =
     Expression.encode >> Paint "text-opacity"
+
+
+{-| To increase the chance of placing high-priority labels on the map, you can provide an array of `textAnchor` locations: the render will attempt to place the label at each location, in order, before moving onto the next label. Use `textJustify:Auto` to choose justification based on anchor position. To apply an offset, use the `textRadialOffset` instead of the two-dimensional `textOffset`. Layout property. Disabled by `textAnchor`. Disabled by `textOffset`. Requires `symbolPlacement` to be `point`.
+
+  - `center`: The center of the text is placed closest to the anchor.
+  - `left`: The left side of the text is placed closest to the anchor.
+  - `right`: The right side of the text is placed closest to the anchor.
+  - `top`: The top of the text is placed closest to the anchor.
+  - `bottom`: The bottom of the text is placed closest to the anchor.
+  - `topLeft`: The top left corner of the text is placed closest to the anchor.
+  - `topRight`: The top right corner of the text is placed closest to the anchor.
+  - `bottomLeft`: The bottom left corner of the text is placed closest to the anchor.
+  - `bottomRight`: The bottom right corner of the text is placed closest to the anchor.
+
+-}
+textVariableAnchor : Expression any (Array { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported }) -> LayerAttr Symbol
+textVariableAnchor =
+    Expression.encode >> Layout "text-variable-anchor"
 
 
 {-| Value to use for a text label. Layout property. Defaults to `""`.
