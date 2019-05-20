@@ -56,7 +56,7 @@ export function registerCustomElement(settings) {
         return this._maxBounds;
       }
       set maxBounds(value) {
-        if (this._map) this._map.setBounds(value);
+        if (this._map) this._map.setMaxBounds(value);
         this._maxBounds = value;
       }
 
