@@ -41,7 +41,7 @@
     "rollup-plugin-node-resolve": "^4.1.0"
   },
   "dependencies": {
-    "mapbox-gl": "^0.54.0"
+    "mapbox-gl": "^1.0.0"
   },
   "prettier": {
     "tabWidth": 2
