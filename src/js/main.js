@@ -151,49 +151,49 @@ export function registerCustomElement(settings) {
 
       addEventListener(type, fn, ...args) {
         if (this._map) {
-          var wrapped;
-          if (
-            [
-              "mousedown",
-              "mouseup",
-              "mouseover",
-              "mousemove",
-              "click",
-              "dblclick",
-              "mouseout",
-              "contextmenu",
-              "zoom",
-              "zoomstart",
-              "zoomend",
-              "rotate",
-              "rotatestart",
-              "rotateend"
-            ].includes(type)
-          ) {
-            wrapped = e => {
-              e.features = this._map.queryRenderedFeatures(e.point, {
-                layers: this.eventFeaturesLayers,
-                filter: this.eventFeaturesFilter
-              });
-              return fn(e);
-            };
-          } else if (["touchend", "touchmove", "touchcancel"].includes(type)) {
-            wrapped = e => {
-              e.features = this._map.queryRenderedFeatures([e.point], {
-                layers: this.eventFeaturesLayers,
-                filter: this.eventFeaturesFilter
-              });
-              e.perPointFeatures = e.points.map(point =>
-                this._map.queryRenderedFeatures(point, {
-                  layers: this.eventFeaturesLayers,
-                  filter: this.eventFeaturesFilter
-                })
-              );
-              return fn(e);
-            };
-          } else {
-            wrapped = fn;
-          }
+          const wrapped = e =>
+            fn(
+              new Proxy(e, {
+                has: (obj, prop) =>
+                    prop in obj ||
+                    (prop === "features" && obj.point) ||
+                    (prop === "perPointFeatures" && obj.points) ||
+                    (
+                      (prop.slice(0, 2) === "is" || prop.slice(0, 3) === "get") &&
+                      prop in this._map &&
+                      typeof this._map[prop] === "function"
+                    )
+                ,
+                get: (obj, prop) => {
+                  if (prop in obj) {
+                    return obj[prop];
+                  } else if (prop === "features" && obj.point) {
+                    return this._map.queryRenderedFeatures(obj.point, {
+                      layers: this.eventFeaturesLayers,
+                      filter: this.eventFeaturesFilter
+                    });
+                  } else if (prop === "perPointFeatures" && obj.points) {
+                    return obj.points.map(point =>
+                      this._map.queryRenderedFeatures(point, {
+                        layers: this.eventFeaturesLayers,
+                        filter: this.eventFeaturesFilter
+                      })
+                    );
+                  } else if (
+                    (prop.slice(0, 2) === "is" || prop.slice(0, 3) === "get") &&
+                    prop in this._map &&
+                    typeof this._map[prop] === "function"
+                  ) {
+                    try {
+                      return this._map[prop]();
+                    } catch (_) {
+                      return undefined;
+                    }
+                  }
+                  return undefined;
+                }
+              })
+            );
           this._eventListenerMap.set(fn, wrapped);
           return this._map.on(type, wrapped);
         } else {
