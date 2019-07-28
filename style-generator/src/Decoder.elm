@@ -43,6 +43,16 @@ layerName nm =
         }
 
 
+sourceName nm =
+    Advanced.aliasedName
+        { modulePath = layerNs
+        , aliasName =
+            "Source"
+        , name = nm
+        , typeName = Nothing
+        }
+
+
 styleCode : Decoder String
 styleCode =
     D.map file style
@@ -211,14 +221,30 @@ decodeSource =
             (\t ->
                 case t of
                     "vector" ->
-                        D.field "url" D.string
-                            |> D.map
-                                (\url ->
+                        D.oneOf
+                            [ D.field "url" D.string
+                                |> D.map
+                                    (\url ->
+                                        \id ->
+                                            call2 (Advanced.aliasedName { modulePath = sourceNs, aliasName = "Source", name = "vectorFromUrl", typeName = Nothing })
+                                                (string id)
+                                                (string url)
+                                    )
+                            , D.map6
+                                (\tiles bounds minzoom maxzoom attribution scheme ->
                                     \id ->
-                                        call2 (Advanced.aliasedName { modulePath = sourceNs, aliasName = "Source", name = "vectorFromUrl", typeName = Nothing })
+                                        call3 (Advanced.aliasedName { modulePath = sourceNs, aliasName = "Source", name = "vector", typeName = Nothing })
                                             (string id)
-                                            (string url)
+                                            (list (List.map string tiles))
+                                            (list ([ bounds, minzoom, maxzoom, attribution, scheme ] |> List.filterMap identity))
                                 )
+                                (D.field "tiles" (D.list D.string))
+                                (sourceField "bounds" "bounds" (D.list D.float) (\l -> List.map float l |> list))
+                                (sourceField "minzoom" "minzoom" D.float float)
+                                (sourceField "maxzoom" "maxzoom" D.float float)
+                                (sourceField "attribution" "attribution" D.string string)
+                                (sourceField "scheme" "scheme" D.string string)
+                            ]
 
                     "raster" ->
                         D.map
@@ -233,6 +259,11 @@ decodeSource =
                     _ ->
                         D.succeed (\a -> Lib.todo ("type " ++ t ++ " not yet supported"))
             )
+
+
+sourceField : String -> String -> Decoder a -> (a -> Expression) -> Decoder (Maybe Expression)
+sourceField name elmName decoder toExpr =
+    D.maybe (D.field name (D.map (\item -> call1 (sourceName elmName) (toExpr item)) decoder))
 
 
 decodeMisc =
