@@ -255,12 +255,16 @@ export function registerCustomElement(settings) {
         this._eventRegistrationQueue = {};
         options.onMount(this._map, this);
         if (commandRegistry[this.id]) {
-          this._map.on("load", () => {
-            var cmd;
-            while ((cmd = commandRegistry[this.id].shift())) {
-              cmd(this._map);
-            }
-          });
+            function onStyleData(){
+              if(map.isStyleLoaded()) {
+                var cmd;
+  	            while ((cmd = commandRegistry[this.id].shift())) {
+  	              cmd(this._map);
+  	            }
+                map.off('data', onStyleData)
+              }
+            };
+	          this._map.on("data", onStyleData);
         }
         return this._map;
       }
