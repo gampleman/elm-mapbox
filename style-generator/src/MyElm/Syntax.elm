@@ -1,6 +1,6 @@
 module MyElm.Syntax exposing
     ( QualifiedName, local, valueName, typeName, constructorName
-    , Expression, string, float, int, list, pair, triple, call0, call1, call2, call3, call4, calln, pipe, record
+    , Expression, string, float, int, bool, list, pair, triple, call0, call1, call2, call3, call4, calln, pipe, record
     , Type, type0, type1, type2, typen, recordType, functionType, pairType, tripleType, typeVar
     , Declaration, variable, fun1, customType, typeAlias
     , build, Exposing, opaque, withConstructors, exposeFn
@@ -319,6 +319,13 @@ float f =
 int : Int -> Expression
 int i =
     Literal (String.fromInt i)
+
+
+{-| A bool literal.
+-}
+bool : Bool -> Expression
+bool b =
+    Literal (if b then "True" else "False")
 
 
 {-| A list literal
