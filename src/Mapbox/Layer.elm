@@ -319,9 +319,9 @@ filter =
 
 {-| Whether this layer is displayed.
 -}
-visible : Expression CameraExpression Bool -> LayerAttr any
-visible vis =
-    Layout "visibility" <| Expression.encode <| Expression.ifElse vis (Expression.str "visible") (Expression.str "none")
+visible : Bool -> LayerAttr any
+visible isVisible =
+    Layout "visibility" <| Expression.encode <| Expression.str <| if isVisible then "visible" else "none"
 
 
 

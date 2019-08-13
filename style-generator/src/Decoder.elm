@@ -194,6 +194,9 @@ decodeAttrs =
                         "filter" ->
                             decodeAttr "filter" (D.oneOf [ Decoder.Legacy.filter, Decode.expression ]) attrValue
 
+                        "visibility" ->
+                            decodeAttr "visible" (D.map ((==) "visible" >> bool) D.string) attrValue
+
                         other ->
                             decodeAttr (toCamelCaseLower attrName) Decode.expression attrValue
                 )
