@@ -1,6 +1,6 @@
 module Mapbox.Element exposing
     ( map, css, MapboxAttr
-    , token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
+    , token, id, zoom_, center_, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
     , EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers
     , onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, on
     )
@@ -12,7 +12,7 @@ module Mapbox.Element exposing
 
 ### Attributes
 
-@docs token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
+@docs token, id, zoom_, center_, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
 
 
 ### Events
@@ -73,6 +73,20 @@ You can include the required styles yourself if it fits better with the way you 
 css : Html msg
 css =
     node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
+
+
+{-| Define the default zoom level of the map (0-24).
+-}
+zoom_ : Float -> MapboxAttr msg
+zoom_ =
+    Encode.float >> property "zoom" >> MapboxAttr
+
+
+{-| The default center pos.
+-}
+center_ : LngLat -> MapboxAttr msg
+center_ =
+    LngLat.encodeAsPair >> property "center" >> MapboxAttr
 
 
 {-| The minimum zoom level of the map (0-24).
