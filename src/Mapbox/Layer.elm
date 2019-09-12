@@ -48,7 +48,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 ### Layer Types
 
 @docs background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
-@docs Background, Fill, Json, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
+@docs Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
 
 
 ### General Attributes
@@ -170,11 +170,6 @@ type Heatmap
 {-| -}
 type Hillshade
     = HillshadeLayer
-
-
-{-| -}
-type Json
-    = JsonLayer
 
 
 {-| Turns a layer into JSON
