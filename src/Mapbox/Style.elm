@@ -156,6 +156,13 @@ type alias StyleDef =
     }
 
 
+{-| A simple record to be used, when a style is read from a json file.
+
+use `decodeMiscDef json` to read out default values, you can reset them by
+setting them to `Nothing` use afterwards `miscDefToList` to generate a misc-list
+to be used in your StyleDef.
+
+-}
 type alias MiscDef =
     { sprite : Maybe MiscAttr
     , glyphs : Maybe MiscAttr
