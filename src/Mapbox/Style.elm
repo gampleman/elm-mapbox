@@ -1,5 +1,5 @@
 module Mapbox.Style exposing
-    ( Style(..), encode, StyleDef
+    ( Style(..), encode, StyleDef, decode, MiscDef, decodeMiscDef, miscDefToList
     , Light, defaultLight
     , Transition, defaultTransition
     , MiscAttr, sprite, glyphs, name, defaultCenter, defaultZoomLevel, defaultBearing, defaultPitch, metadata
@@ -8,7 +8,7 @@ module Mapbox.Style exposing
 
 {-| A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a JSON object with specific root level and nested properties. This specification defines and describes these properties.
 
-@docs Style, encode, StyleDef
+@docs Style, encode, StyleDef, decode, MiscDef, decodeMiscDef, miscDefToList
 
 
 ### Light
@@ -35,7 +35,9 @@ You can also use one of these predefined styles.
 -}
 
 import Array exposing (Array)
+import Dict
 import Internal exposing (Supported)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
 import LngLat exposing (LngLat)
 import Mapbox.Expression exposing (CameraExpression, Color, Expression, float, floats, rgba, viewport)
@@ -151,6 +153,18 @@ type alias StyleDef =
     , layers : List Layer
     , sources : List Source
     , misc : List MiscAttr
+    }
+
+
+type alias MiscDef =
+    { sprite : Maybe MiscAttr
+    , glyphs : Maybe MiscAttr
+    , name : Maybe MiscAttr
+    , center : Maybe MiscAttr
+    , zoom : Maybe MiscAttr
+    , bearing : Maybe MiscAttr
+    , pitch : Maybe MiscAttr
+    , meta : Maybe MiscAttr
     }
 
 
@@ -285,3 +299,74 @@ defaultTransition =
     { duration = 300
     , delay = 0
     }
+
+
+{-| -}
+decode : Decoder StyleDef
+decode =
+    Decode.map5 StyleDef
+        (Decode.maybe decTransition
+            |> Decode.map (Maybe.withDefault defaultTransition)
+        )
+        (Decode.succeed defaultLight)
+        (Decode.field "layers" Mapbox.Layer.decode)
+        (Decode.field "sources" Mapbox.Source.decode)
+        (Decode.succeed [])
+
+
+decTransition : Decoder Transition
+decTransition =
+    Decode.map2 Transition
+        (Decode.field "duration" Decode.int)
+        (Decode.field "delay" Decode.int)
+
+
+maybeDecode : String -> Decoder a -> (a -> b) -> Decoder (Maybe b)
+maybeDecode id dec fn =
+    Decode.field id (dec |> Decode.map fn)
+        |> Decode.maybe
+
+
+{-| -}
+decodeMiscDef : Decoder MiscDef
+decodeMiscDef =
+    Decode.map8 MiscDef
+        (maybeDecode "sprite" Decode.string sprite)
+        (maybeDecode "glyphs" Decode.string glyphs)
+        (maybeDecode "name" Decode.string name)
+        (maybeDecode "center"
+            (Decode.float
+                |> Decode.list
+                |> Decode.andThen
+                    (\list ->
+                        case list of
+                            [ lng, lat ] ->
+                                Decode.succeed <| LngLat lng lat
+
+                            _ ->
+                                Decode.fail "not a valid position"
+                    )
+            )
+            defaultCenter
+        )
+        (maybeDecode "zoom" Decode.float defaultZoomLevel)
+        (maybeDecode "pitch" Decode.float defaultPitch)
+        (maybeDecode "bearing" Decode.float defaultBearing)
+        (maybeDecode "metadata" (Decode.dict Decode.value) (Dict.toList >> metadata))
+
+
+maybeSingleton : Maybe MiscAttr -> List MiscAttr
+maybeSingleton =
+    Maybe.map List.singleton >> Maybe.withDefault []
+
+
+{-| -}
+miscDefToList : MiscDef -> List MiscAttr
+miscDefToList miscDef =
+    maybeSingleton miscDef.sprite
+        ++ maybeSingleton miscDef.glyphs
+        ++ maybeSingleton miscDef.name
+        ++ maybeSingleton miscDef.center
+        ++ maybeSingleton miscDef.zoom
+        ++ maybeSingleton miscDef.bearing
+        ++ maybeSingleton miscDef.pitch

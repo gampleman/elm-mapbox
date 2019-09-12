@@ -1,6 +1,6 @@
 module Mapbox.Layer exposing
     ( Layer, SourceId, encode
-    , background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
+    , background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
     , Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
     , LayerAttr
     , metadata, sourceLayer, minzoom, maxzoom, filter, visible
@@ -13,6 +13,7 @@ module Mapbox.Layer exposing
     , rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterResampling, rasterSaturation
     , hillshadeAccentColor, hillshadeExaggeration, hillshadeHighlightColor, hillshadeIlluminationAnchor, hillshadeIlluminationDirection, hillshadeShadowColor
     , backgroundColor, backgroundOpacity, backgroundPattern
+    , decode
     )
 
 {-| Layers specify what is actually rendered on the map and are rendered in order.
@@ -46,8 +47,8 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Layer Types
 
-@docs background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
-@docs Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
+@docs background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
+@docs Background, Fill, Json, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
 
 
 ### General Attributes
@@ -100,10 +101,16 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 @docs backgroundColor, backgroundOpacity, backgroundPattern
 
+
+### List Decoder
+
+@docs decode
+
 -}
 
 import Array exposing (Array)
 import Internal exposing (Supported)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
 import Mapbox.Expression as Expression exposing (CameraExpression, Color, DataExpression, Expression, FormattedText)
 
@@ -165,6 +172,11 @@ type Hillshade
     = HillshadeLayer
 
 
+{-| -}
+type Json
+    = JsonLayer
+
+
 {-| Turns a layer into JSON
 -}
 encode : Layer -> Value
@@ -173,8 +185,8 @@ encode (Layer value) =
 
 
 layerImpl tipe id source attrs =
-    [ ( "type", Encode.string tipe )
-    , ( "id", Encode.string id )
+    [ ( "id", Encode.string id )
+    , ( "type", Encode.string tipe )
     , ( "source", Encode.string source )
     ]
         ++ encodeAttrs attrs
@@ -269,6 +281,29 @@ heatmap =
 hillshade : String -> SourceId -> List (LayerAttr Hillshade) -> Layer
 hillshade =
     layerImpl "hillshade"
+
+
+{-| Directly aass a json value layer
+-}
+json : Value -> Layer
+json =
+    Layer
+
+
+{-| Directly aass a json value layer
+-}
+jsonList : String -> List Layer
+jsonList =
+    Decode.decodeString (Decode.list Decode.value)
+        >> Result.withDefault []
+        >> List.map json
+
+
+{-| Directly aass a json value layer
+-}
+decode : Decoder (List Layer)
+decode =
+    Decode.list (Decode.value |> Decode.map json)
 
 
 {-| -}
