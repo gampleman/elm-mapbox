@@ -4,7 +4,7 @@
 > https://github.com/gampleman/elm-mapbox
 >
 > I will remove the project when this functionality will be available in the
-> original project. 
+> original project.
 
 __Changes:__
 
@@ -27,7 +27,14 @@ __Changes:__
     , light = Style.defaultLight
     , layers =
         """
-        [{"id": "background","type": "background","layout": {"visibility": "visible"},"paint": {"background-color": "#fff", "background-opacity": 1},"interactive": true},{"id": "waterway","type": "line","metadata": {"mapbox:group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6","source-layer": "waterway","layout": {"visibility": "visible","line-cap": "round","line-join": "round"},"paint": {"line-width": 2,"line-color": "#62b0f0","line-blur": 0,"line-opacity": 0.7},"interactive": true},{"id": "water","type": "fill","metadata": {"mapbox:group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6","source-layer": "water","layout": {"visibility": "visible"},"paint": {"fill-color": "#62b0f0","fill-opacity": 0.35,"fill-outline-color": "#62b0f0"},"interactive": true},{"id": "water outline","type": "line","metadata": {"mapbox:group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6","source-layer": "water","layout": {},"paint": {"line-color": "#62b0f0", "line-width": 2, "line-blur": 1},"interactive": true},{"id": "water copy","type": "fill","metadata": {"mapbox:group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6","source-layer": "water","layout": {"visibility": "visible"},"paint": {"fill-opacity": 0.35, "fill-color": "#fff"},"interactive": true},{"id": "snow copy","type": "fill","metadata": {"mapbox:group": "1452538953048.7173"},"source": "mapbox://mapbox.mapbox-terrain-v2","source-layer": "landcover","filter": ["==", "class", "snow"],"layout": {"visibility": "visible"} ...
+        [{"id": "background","type": "background","layout": {"visibility": "visi
+        ble"},"paint": {"background-color": "#fff", "background-opacity": 1},"in
+        teractive": true},{"id": "waterway","type": "line","metadata": {"mapbox:
+        group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6
+        ","source-layer": "waterway","layout": {"visibility": "visible","line-ca
+        p": "round","line-join": "round"},"paint": {"line-width": 2,"line-color"
+        : "#62b0f0","line-blur": 0,"line-opacity": 0.7},"interactive": true},{"i
+        d": "water","type": "fill","metadata": {"mapbox:group": "14521166080 ...
         """
          |> Layer.jsonList
     , ...

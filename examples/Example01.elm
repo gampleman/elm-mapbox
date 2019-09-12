@@ -151,7 +151,6 @@ view model =
                         ]
                     }
                 )
-            , div [ style "position" "absolute", style "bottom" "20px", style "left" "20px" ] [ text (LngLat.toString model.position) ]
             ]
         ]
     }
