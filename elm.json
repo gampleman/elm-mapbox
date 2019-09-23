@@ -3,7 +3,7 @@
     "name": "andre-dietrich/elm-mapbox",
     "summary": "Fork form gampleman/elm-mapbox (4.1.0) ... An advanced mapping library",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "exposed-modules": [
         "Mapbox.Element",
         "Mapbox.Cmd.Template",
