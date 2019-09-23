@@ -3,7 +3,7 @@ module Mapbox.Layer exposing
     , background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
     , Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
     , LayerAttr
-    , metadata, sourceLayer, minzoom, maxzoom, filter, visible
+    , metadata, sourceLayer, minzoom, maxzoom, filter, visible, visible2
     , fillAntialias, fillColor, fillOpacity, fillOutlineColor, fillPattern, fillTranslate, fillTranslateAnchor
     , lineBlur, lineCap, lineColor, lineDasharray, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
     , circleBlur, circleColor, circleOpacity, circlePitchAlignment, circlePitchScale, circleRadius, circleStrokeColor, circleStrokeOpacity, circleStrokeWidth, circleTranslate, circleTranslateAnchor
@@ -54,7 +54,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 ### General Attributes
 
 @docs LayerAttr
-@docs metadata, sourceLayer, minzoom, maxzoom, filter, visible
+@docs metadata, sourceLayer, minzoom, maxzoom, filter, visible, visible2
 
 
 ### Fill Attributes
@@ -352,6 +352,21 @@ filter =
 visible : Expression CameraExpression Bool -> LayerAttr any
 visible vis =
     Layout "visibility" <| Expression.encode <| Expression.ifElse vis (Expression.str "visible") (Expression.str "none")
+
+
+{-| Directly use a boolean value to set a layer to visible or not.
+-}
+visible2 : Bool -> LayerAttr any
+visible2 vis =
+    (if vis then
+        "visible"
+
+     else
+        "none"
+    )
+        |> Expression.str
+        |> Expression.encode
+        |> Layout "visibility"
 
 
 
