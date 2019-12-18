@@ -1,5 +1,5 @@
-module Mapbox.Element exposing
-    ( map, css, MapboxAttr
+module Mapbox exposing
+    ( map, MapboxAttr
     , token, id, maxZoom, minZoom, maxBounds, renderWorldCopies, featureState
     , EventData, TouchEvent, eventFeaturesFilter, eventFeaturesLayers
     , onMouseDown, onMouseUp, onMouseOver, onMouseMove, onClick, onDblClick, onMouseOut, onContextMenu, onZoom, onZoomStart, onZoomEnd, onRotate, onRotateStart, onRotateEnd, onTouchEnd, onTouchMove, onTouchCancel, on
@@ -26,6 +26,7 @@ module Mapbox.Element exposing
 import Html exposing (Attribute, Html, node)
 import Html.Attributes exposing (attribute, property)
 import Html.Events
+import Internal
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 import LngLat exposing (LngLat)
@@ -49,30 +50,15 @@ type Position
 
 {-| A Map html element renders a map based on a Style.
 -}
-map : List (MapboxAttr msg) -> Style -> Html msg
+map : List (MapboxAttr msg) -> Style msg -> Html msg
 map attrs style =
     let
         props =
-            (Mapbox.Style.encode style
-                |> property "mapboxStyle"
-            )
-                :: List.map (\(MapboxAttr attr) -> attr) attrs
+            Internal.styleProperties style
+                ++ List.map (\(MapboxAttr attr) -> attr) attrs
+                |> Debug.log "props"
     in
     node "elm-mapbox-map" props []
-
-
-{-| This is literally:
-
-    <link
-      href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css'
-      rel='stylesheet' />
-
-You can include the required styles yourself if it fits better with the way you deploy your assets, this is meant as a quick way to get started.
-
--}
-css : Html msg
-css =
-    node "link" [ attribute "href" "https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css", attribute "rel" "stylesheet" ] []
 
 
 {-| The minimum zoom level of the map (0-24).
@@ -188,7 +174,25 @@ eventFeaturesLayers =
 
 {-| This allows you to use other events not provided by this libary, or decode more or different data.
 
+There is some magic in elm-mapbox that allows you to extract information out of mapbox using a Decoder. It works like this:
+
+  - _if_ the field you ask for exists on the event object, it will return that (i.e. normal behavior for decoders)
+  - _else if_ the property is called `"features"`, it will return the result of `queryRenderedFeatures` being called on the `point` property of the event, filtered by `eventFeaturesFilter` and/or `eventFeaturesLayers`
+  - _else if_ the property is called `"perPointFeatures"` it will return an array of `queryRenderedFeatures` calls, one for each point in `points`, filtered by `eventFeaturesFilter` and/or `eventFeaturesLayers`
+  - _else if_ the property starts with `is`, then it will try to call a method on the map with no arguments and return the result. Useful for example for `isMoving`.
+  - _else if_ the property starts with `get`, then it will try to call a method on the map with no arguments and return the result. Useful for example for `getZoom`.
+  - _else_ fails like any other decoder
+
 See <https://www.mapbox.com/mapbox-gl-js/api/#map.event> for all supported events.
+
+For example, here is a custom `onMoveEnd`:
+
+     onMoveEnd : (LngLat -> LngLat -> msg) -> MapboxAttr msg
+     onMoveEnd tagger =
+         Decode.map2 tagger
+            (Decode.at [ "getBounds", "_sw" ] LngLat.decodeFromObject)
+            (Decode.at [ "getBounds", "_ne" ] LngLat.decodeFromObject)
+            |> Mapbox.Element.on "moveend"
 
 -}
 on : String -> Decoder msg -> MapboxAttr msg
@@ -414,21 +418,23 @@ type alias Viewport =
     }
 
 
-{-| By default the map is "uncontrolled". By this we mean that it has its own internal state (namely the center, zoom level, pitch and bearing). This is nice if you don't care about these, but it does break some of the niceness of TEA. It also means some advanced interaction techniques are impossible to implement. For this reason we allow controlled mode where no event handlers are attached, but you need to feed the element its state. So it's up to you to implement all the user interactions. In the future, this library may help with that, but in the present this is not available.
 
-Not done, so let's not release this.
+{- By default the map is "uncontrolled". By this we mean that it has its own internal state (namely the center, zoom level, pitch and bearing). This is nice if you don't care about these, but it does break some of the niceness of TEA. It also means some advanced interaction techniques are impossible to implement. For this reason we allow controlled mode where no event handlers are attached, but you need to feed the element its state. So it's up to you to implement all the user interactions. In the future, this library may help with that, but in the present this is not available.
+
+   Not done, so let's not release this.
+
+   controlledMap : Viewport -> List (MapboxAttr msg) -> Style msg -> Html msg
+   controlledMap { center, zoom, bearing, pitch } attrs style =
+   let
+   props =
+   property "mapboxStyle" (Mapbox.Style.encode style)
+   :: property "interactive" (Encode.bool False)
+   :: property "center" (LngLat.encodeAsPair center)
+   :: property "zoom" (Encode.float zoom)
+   :: property "bearing" (Encode.float bearing)
+   :: property "pitch" (Encode.float pitch)
+   :: List.map ((MapboxAttr attr) -> attr) attrs
+   in
+   node "elm-mapbox-map" props []
 
 -}
-controlledMap : Viewport -> List (MapboxAttr msg) -> Style -> Html msg
-controlledMap { center, zoom, bearing, pitch } attrs style =
-    let
-        props =
-            property "mapboxStyle" (Mapbox.Style.encode style)
-                :: property "interactive" (Encode.bool False)
-                :: property "center" (LngLat.encodeAsPair center)
-                :: property "zoom" (Encode.float zoom)
-                :: property "bearing" (Encode.float bearing)
-                :: property "pitch" (Encode.float pitch)
-                :: List.map (\(MapboxAttr attr) -> attr) attrs
-    in
-    node "elm-mapbox-map" props []

@@ -1,5 +1,5 @@
 module Mapbox.Layer exposing
-    ( Layer, SourceId, encode
+    ( Layer
     , background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
     , Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
     , LayerAttr
@@ -41,7 +41,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Working with layers
 
-@docs Layer, SourceId, encode
+@docs Layer
 
 
 ### Layer Types
@@ -103,21 +103,18 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 -}
 
 import Array exposing (Array)
-import Internal exposing (Supported)
+import Html exposing (Attribute)
+import Html.Events
+import Internal exposing (Source, Supported)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
 import Mapbox.Expression as Expression exposing (CameraExpression, Color, DataExpression, Expression, FormattedText)
 
 
 {-| Represents a layer.
 -}
-type Layer
-    = Layer Value
-
-
-{-| All layers (except background layers) need a source
--}
-type alias SourceId =
-    String
+type alias Layer msg =
+    Internal.Layer msg
 
 
 {-| -}
@@ -165,26 +162,23 @@ type Hillshade
     = HillshadeLayer
 
 
-{-| Turns a layer into JSON
--}
-encode : Layer -> Value
-encode (Layer value) =
-    value
-
-
 layerImpl tipe id source attrs =
-    [ ( "type", Encode.string tipe )
-    , ( "id", Encode.string id )
-    , ( "source", Encode.string source )
-    ]
-        ++ encodeAttrs attrs
-        |> Encode.object
-        |> Layer
-
-
-encodeAttrs attrs =
     let
-        { top, layout, paint } =
+        ( properties, events ) =
+            encodeAttrs id attrs
+    in
+    Internal.Layer
+        { id = id
+        , source = Just source
+        , tipe = tipe
+        , properties = properties
+        , events = events
+        }
+
+
+encodeAttrs id attrs =
+    let
+        { top, layout, paint, events } =
             List.foldl
                 (\attr lists ->
                     case attr of
@@ -196,86 +190,95 @@ encodeAttrs attrs =
 
                         Layout key val ->
                             { lists | layout = ( key, val ) :: lists.layout }
+
+                        Event event decoder ->
+                            { lists | events = Html.Events.on (event ++ ":" ++ id) decoder :: lists.events }
                 )
-                { top = [], layout = [], paint = [] }
+                { top = [], layout = [], paint = [], events = [] }
                 attrs
     in
-    ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top
+    ( ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top, events )
 
 
 {-| The background color or pattern of the map.
 -}
-background : String -> List (LayerAttr Background) -> Layer
+background : String -> List (LayerAttr Background msg) -> Layer msg
 background id attrs =
-    [ ( "type", Encode.string "background" )
-    , ( "id", Encode.string id )
-    ]
-        ++ encodeAttrs attrs
-        |> Encode.object
-        |> Layer
+    let
+        ( properties, events ) =
+            encodeAttrs id attrs
+    in
+    Internal.Layer
+        { id = id
+        , source = Nothing
+        , tipe = "background"
+        , properties = properties
+        , events = events
+        }
 
 
 {-| A filled polygon with an optional stroked border.
 -}
-fill : String -> SourceId -> List (LayerAttr Fill) -> Layer
+fill : String -> Source -> List (LayerAttr Fill msg) -> Layer msg
 fill =
     layerImpl "fill"
 
 
 {-| A stroked line.
 -}
-line : String -> SourceId -> List (LayerAttr Line) -> Layer
+line : String -> Source -> List (LayerAttr Line msg) -> Layer msg
 line =
     layerImpl "line"
 
 
 {-| An icon or a text label.
 -}
-symbol : String -> SourceId -> List (LayerAttr Symbol) -> Layer
+symbol : String -> Source -> List (LayerAttr Symbol msg) -> Layer msg
 symbol =
     layerImpl "symbol"
 
 
 {-| Raster map textures such as satellite imagery.
 -}
-raster : String -> SourceId -> List (LayerAttr Raster) -> Layer
+raster : String -> Source -> List (LayerAttr Raster msg) -> Layer msg
 raster =
     layerImpl "raster"
 
 
 {-| A filled circle.
 -}
-circle : String -> SourceId -> List (LayerAttr Circle) -> Layer
+circle : String -> Source -> List (LayerAttr Circle msg) -> Layer msg
 circle =
     layerImpl "circle"
 
 
 {-| An extruded (3D) polygon.
 -}
-fillExtrusion : String -> SourceId -> List (LayerAttr FillExtrusion) -> Layer
+fillExtrusion : String -> Source -> List (LayerAttr FillExtrusion msg) -> Layer msg
 fillExtrusion =
     layerImpl "fill-extrusion"
 
 
 {-| A heatmap.
 -}
-heatmap : String -> SourceId -> List (LayerAttr Heatmap) -> Layer
+heatmap : String -> Source -> List (LayerAttr Heatmap msg) -> Layer msg
 heatmap =
     layerImpl "heatmap"
 
 
 {-| Client-side hillshading visualization based on DEM data. Currently, the implementation only supports Mapbox Terrain RGB and Mapzen Terrarium tiles.
 -}
-hillshade : String -> SourceId -> List (LayerAttr Hillshade) -> Layer
+hillshade : String -> Source -> List (LayerAttr Hillshade msg) -> Layer msg
 hillshade =
     layerImpl "hillshade"
 
 
 {-| -}
-type LayerAttr tipe
+type LayerAttr tipe msg
     = Top String Value
     | Paint String Value
     | Layout String Value
+    | Event String (Decoder msg)
 
 
 
@@ -284,42 +287,42 @@ type LayerAttr tipe
 
 {-| Arbitrary properties useful to track with the layer, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'mapbox:'.
 -}
-metadata : Value -> LayerAttr all
+metadata : Value -> LayerAttr all msg
 metadata =
     Top "metadata"
 
 
 {-| Layer to use from a vector tile source. Required for vector tile sources; prohibited for all other source types, including GeoJSON sources.
 -}
-sourceLayer : String -> LayerAttr all
+sourceLayer : String -> LayerAttr all msg
 sourceLayer =
     Encode.string >> Top "source-layer"
 
 
 {-| The minimum zoom level for the layer. At zoom levels less than the minzoom, the layer will be hidden. A number between 0 and 24 inclusive.
 -}
-minzoom : Float -> LayerAttr all
+minzoom : Float -> LayerAttr all msg
 minzoom =
     Encode.float >> Top "minzoom"
 
 
 {-| The maximum zoom level for the layer. At zoom levels equal to or greater than the maxzoom, the layer will be hidden. A number between 0 and 24 inclusive.
 -}
-maxzoom : Float -> LayerAttr all
+maxzoom : Float -> LayerAttr all msg
 maxzoom =
     Encode.float >> Top "maxzoom"
 
 
 {-| A expression specifying conditions on source features. Only features that match the filter are displayed.
 -}
-filter : Expression any Bool -> LayerAttr all
+filter : Expression any Bool -> LayerAttr all msg
 filter =
     Expression.encode >> Top "filter"
 
 
 {-| Whether this layer is displayed.
 -}
-visible : Expression CameraExpression Bool -> LayerAttr any
+visible : Expression CameraExpression Bool -> LayerAttr any msg
 visible vis =
     Layout "visibility" <| Expression.encode <| Expression.ifElse vis (Expression.str "visible") (Expression.str "none")
 
@@ -334,21 +337,21 @@ visible vis =
   - `viewport`: The fill is translated relative to the viewport.
 
 -}
-fillTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Fill
+fillTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Fill msg
 fillTranslateAnchor =
     Expression.encode >> Paint "fill-translate-anchor"
 
 
 {-| Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-fillPattern : Expression any String -> LayerAttr Fill
+fillPattern : Expression any String -> LayerAttr Fill msg
 fillPattern =
     Expression.encode >> Paint "fill-pattern"
 
 
 {-| The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. Paint property. Defaults to `#000000`. Disabled by `fillPattern`.
 -}
-fillColor : Expression any Color -> LayerAttr Fill
+fillColor : Expression any Color -> LayerAttr Fill msg
 fillColor =
     Expression.encode >> Paint "fill-color"
 
@@ -356,7 +359,7 @@ fillColor =
 {-| The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively. Paint property.
 Units in pixels. Defaults to `0,0`.
 -}
-fillTranslate : Expression CameraExpression (Array Float) -> LayerAttr Fill
+fillTranslate : Expression CameraExpression (Array Float) -> LayerAttr Fill msg
 fillTranslate =
     Expression.encode >> Paint "fill-translate"
 
@@ -366,21 +369,21 @@ fillTranslate =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-fillOpacity : Expression any Float -> LayerAttr Fill
+fillOpacity : Expression any Float -> LayerAttr Fill msg
 fillOpacity =
     Expression.encode >> Paint "fill-opacity"
 
 
 {-| The outline color of the fill. Matches the value of `fillColor` if unspecified. Paint property. Disabled by `fillPattern`. Requires `fillAntialias` to be `true`.
 -}
-fillOutlineColor : Expression any Color -> LayerAttr Fill
+fillOutlineColor : Expression any Color -> LayerAttr Fill msg
 fillOutlineColor =
     Expression.encode >> Paint "fill-outline-color"
 
 
 {-| Whether or not the fill should be antialiased. Paint property. Defaults to `true`.
 -}
-fillAntialias : Expression CameraExpression Bool -> LayerAttr Fill
+fillAntialias : Expression CameraExpression Bool -> LayerAttr Fill msg
 fillAntialias =
     Expression.encode >> Paint "fill-antialias"
 
@@ -395,7 +398,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`.
 
 -}
-lineBlur : Expression any Float -> LayerAttr Line
+lineBlur : Expression any Float -> LayerAttr Line msg
 lineBlur =
     Expression.encode >> Paint "line-blur"
 
@@ -406,14 +409,14 @@ lineBlur =
   - `viewport`: The line is translated relative to the viewport.
 
 -}
-lineTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Line
+lineTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Line msg
 lineTranslateAnchor =
     Expression.encode >> Paint "line-translate-anchor"
 
 
 {-| Defines a gradient with which to color a line feature. Can only be used with GeoJSON sources that specify `"lineMetrics": true`. Paint property. Disabled by `lineDasharray`. Disabled by `linePattern`. Requires `source` to be `geojson`.
 -}
-lineGradient : Expression CameraExpression Color -> LayerAttr Line
+lineGradient : Expression CameraExpression Color -> LayerAttr Line msg
 lineGradient =
     Expression.encode >> Paint "line-gradient"
 
@@ -424,14 +427,14 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`.
 
 -}
-lineGapWidth : Expression any Float -> LayerAttr Line
+lineGapWidth : Expression any Float -> LayerAttr Line msg
 lineGapWidth =
     Expression.encode >> Paint "line-gap-width"
 
 
 {-| Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-linePattern : Expression any String -> LayerAttr Line
+linePattern : Expression any String -> LayerAttr Line msg
 linePattern =
     Expression.encode >> Paint "line-pattern"
 
@@ -442,7 +445,7 @@ Should be greater than or equal to `0`.
 Units in line widths. Disabled by `linePattern`.
 
 -}
-lineDasharray : Expression CameraExpression (Array Float) -> LayerAttr Line
+lineDasharray : Expression CameraExpression (Array Float) -> LayerAttr Line msg
 lineDasharray =
     Expression.encode >> Paint "line-dasharray"
 
@@ -453,14 +456,14 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `1`.
 
 -}
-lineWidth : Expression any Float -> LayerAttr Line
+lineWidth : Expression any Float -> LayerAttr Line msg
 lineWidth =
     Expression.encode >> Paint "line-width"
 
 
 {-| The color with which the line will be drawn. Paint property. Defaults to `#000000`. Disabled by `linePattern`.
 -}
-lineColor : Expression any Color -> LayerAttr Line
+lineColor : Expression any Color -> LayerAttr Line msg
 lineColor =
     Expression.encode >> Paint "line-color"
 
@@ -472,7 +475,7 @@ lineColor =
   - `square`: A cap with a squared-off end which is drawn beyond the endpoint of the line at a distance of one-half of the line's width.
 
 -}
-lineCap : Expression CameraExpression { butt : Supported, rounded : Supported, square : Supported } -> LayerAttr Line
+lineCap : Expression CameraExpression { butt : Supported, rounded : Supported, square : Supported } -> LayerAttr Line msg
 lineCap =
     Expression.encode >> Layout "line-cap"
 
@@ -484,7 +487,7 @@ lineCap =
   - `miter`: A join with a sharp, angled corner which is drawn with the outer sides beyond the endpoint of the path until they meet.
 
 -}
-lineJoin : Expression any { bevel : Supported, rounded : Supported, miter : Supported } -> LayerAttr Line
+lineJoin : Expression any { bevel : Supported, rounded : Supported, miter : Supported } -> LayerAttr Line msg
 lineJoin =
     Expression.encode >> Layout "line-join"
 
@@ -492,7 +495,7 @@ lineJoin =
 {-| The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively. Paint property.
 Units in pixels. Defaults to `0,0`.
 -}
-lineTranslate : Expression CameraExpression (Array Float) -> LayerAttr Line
+lineTranslate : Expression CameraExpression (Array Float) -> LayerAttr Line msg
 lineTranslate =
     Expression.encode >> Paint "line-translate"
 
@@ -500,7 +503,7 @@ lineTranslate =
 {-| The line's offset. For linear features, a positive value offsets the line to the right, relative to the direction of the line, and a negative value to the left. For polygon features, a positive value results in an inset, and a negative value results in an outset. Paint property.
 Units in pixels. Defaults to `0`.
 -}
-lineOffset : Expression any Float -> LayerAttr Line
+lineOffset : Expression any Float -> LayerAttr Line msg
 lineOffset =
     Expression.encode >> Paint "line-offset"
 
@@ -510,21 +513,21 @@ lineOffset =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-lineOpacity : Expression any Float -> LayerAttr Line
+lineOpacity : Expression any Float -> LayerAttr Line msg
 lineOpacity =
     Expression.encode >> Paint "line-opacity"
 
 
 {-| Used to automatically convert miter joins to bevel joins for sharp angles. Layout property. Defaults to `2`. Requires `lineJoin` to be `miter`.
 -}
-lineMiterLimit : Expression CameraExpression Float -> LayerAttr Line
+lineMiterLimit : Expression CameraExpression Float -> LayerAttr Line msg
 lineMiterLimit =
     Expression.encode >> Layout "line-miter-limit"
 
 
 {-| Used to automatically convert round joins to miter joins for shallow angles. Layout property. Defaults to `1.05`. Requires `lineJoin` to be `round`.
 -}
-lineRoundLimit : Expression CameraExpression Float -> LayerAttr Line
+lineRoundLimit : Expression CameraExpression Float -> LayerAttr Line msg
 lineRoundLimit =
     Expression.encode >> Layout "line-round-limit"
 
@@ -535,7 +538,7 @@ lineRoundLimit =
 
 {-| Amount to blur the circle. 1 blurs the circle such that only the centerpoint is full opacity. Paint property. Defaults to `0`.
 -}
-circleBlur : Expression any Float -> LayerAttr Circle
+circleBlur : Expression any Float -> LayerAttr Circle msg
 circleBlur =
     Expression.encode >> Paint "circle-blur"
 
@@ -546,7 +549,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `5`.
 
 -}
-circleRadius : Expression any Float -> LayerAttr Circle
+circleRadius : Expression any Float -> LayerAttr Circle msg
 circleRadius =
     Expression.encode >> Paint "circle-radius"
 
@@ -557,7 +560,7 @@ circleRadius =
   - `viewport`: The circle is translated relative to the viewport.
 
 -}
-circleTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle
+circleTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle msg
 circleTranslateAnchor =
     Expression.encode >> Paint "circle-translate-anchor"
 
@@ -568,7 +571,7 @@ circleTranslateAnchor =
   - `viewport`: Circles are not scaled.
 
 -}
-circlePitchScale : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle
+circlePitchScale : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle msg
 circlePitchScale =
     Expression.encode >> Paint "circle-pitch-scale"
 
@@ -579,14 +582,14 @@ circlePitchScale =
   - `viewport`: The circle is aligned to the plane of the viewport.
 
 -}
-circlePitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle
+circlePitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Circle msg
 circlePitchAlignment =
     Expression.encode >> Paint "circle-pitch-alignment"
 
 
 {-| The fill color of the circle. Paint property. Defaults to `#000000`.
 -}
-circleColor : Expression any Color -> LayerAttr Circle
+circleColor : Expression any Color -> LayerAttr Circle msg
 circleColor =
     Expression.encode >> Paint "circle-color"
 
@@ -594,7 +597,7 @@ circleColor =
 {-| The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively. Paint property.
 Units in pixels. Defaults to `0,0`.
 -}
-circleTranslate : Expression CameraExpression (Array Float) -> LayerAttr Circle
+circleTranslate : Expression CameraExpression (Array Float) -> LayerAttr Circle msg
 circleTranslate =
     Expression.encode >> Paint "circle-translate"
 
@@ -604,7 +607,7 @@ circleTranslate =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-circleOpacity : Expression any Float -> LayerAttr Circle
+circleOpacity : Expression any Float -> LayerAttr Circle msg
 circleOpacity =
     Expression.encode >> Paint "circle-opacity"
 
@@ -614,14 +617,14 @@ circleOpacity =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-circleStrokeOpacity : Expression any Float -> LayerAttr Circle
+circleStrokeOpacity : Expression any Float -> LayerAttr Circle msg
 circleStrokeOpacity =
     Expression.encode >> Paint "circle-stroke-opacity"
 
 
 {-| The stroke color of the circle. Paint property. Defaults to `#000000`.
 -}
-circleStrokeColor : Expression any Color -> LayerAttr Circle
+circleStrokeColor : Expression any Color -> LayerAttr Circle msg
 circleStrokeColor =
     Expression.encode >> Paint "circle-stroke-color"
 
@@ -632,7 +635,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`.
 
 -}
-circleStrokeWidth : Expression any Float -> LayerAttr Circle
+circleStrokeWidth : Expression any Float -> LayerAttr Circle msg
 circleStrokeWidth =
     Expression.encode >> Paint "circle-stroke-width"
 
@@ -646,7 +649,7 @@ circleStrokeWidth =
 Should be greater than or equal to `0`. Defaults to `1`.
 
 -}
-heatmapWeight : Expression any Float -> LayerAttr Heatmap
+heatmapWeight : Expression any Float -> LayerAttr Heatmap msg
 heatmapWeight =
     Expression.encode >> Paint "heatmap-weight"
 
@@ -663,7 +666,7 @@ heatmapWeight =
         , (1.0, rgba 255 0 0 1)] Paint property.
 
 -}
-heatmapColor : Expression CameraExpression Color -> LayerAttr Heatmap
+heatmapColor : Expression CameraExpression Color -> LayerAttr Heatmap msg
 heatmapColor =
     Expression.encode >> Paint "heatmap-color"
 
@@ -674,7 +677,7 @@ Should be greater than or equal to `1`.
 Units in pixels. Defaults to `30`.
 
 -}
-heatmapRadius : Expression any Float -> LayerAttr Heatmap
+heatmapRadius : Expression any Float -> LayerAttr Heatmap msg
 heatmapRadius =
     Expression.encode >> Paint "heatmap-radius"
 
@@ -684,7 +687,7 @@ heatmapRadius =
 Should be greater than or equal to `0`. Defaults to `1`.
 
 -}
-heatmapIntensity : Expression CameraExpression Float -> LayerAttr Heatmap
+heatmapIntensity : Expression CameraExpression Float -> LayerAttr Heatmap msg
 heatmapIntensity =
     Expression.encode >> Paint "heatmap-intensity"
 
@@ -694,7 +697,7 @@ heatmapIntensity =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-heatmapOpacity : Expression CameraExpression Float -> LayerAttr Heatmap
+heatmapOpacity : Expression CameraExpression Float -> LayerAttr Heatmap msg
 heatmapOpacity =
     Expression.encode >> Paint "heatmap-opacity"
 
@@ -709,21 +712,21 @@ heatmapOpacity =
   - `viewport`: The fill extrusion is translated relative to the viewport.
 
 -}
-fillExtrusionTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr FillExtrusion
+fillExtrusionTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr FillExtrusion msg
 fillExtrusionTranslateAnchor =
     Expression.encode >> Paint "fill-extrusion-translate-anchor"
 
 
 {-| Name of image in sprite to use for drawing images on extruded fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-fillExtrusionPattern : Expression any String -> LayerAttr FillExtrusion
+fillExtrusionPattern : Expression any String -> LayerAttr FillExtrusion msg
 fillExtrusionPattern =
     Expression.encode >> Paint "fill-extrusion-pattern"
 
 
 {-| The base color of the extruded fill. The extrusion's surfaces will be shaded differently based on this color in combination with the root `light` settings. If this color is specified as `rgba` with an alpha component, the alpha component will be ignored; use `fillExtrusionOpacity` to set layer opacity. Paint property. Defaults to `#000000`. Disabled by `fillExtrusionPattern`.
 -}
-fillExtrusionColor : Expression any Color -> LayerAttr FillExtrusion
+fillExtrusionColor : Expression any Color -> LayerAttr FillExtrusion msg
 fillExtrusionColor =
     Expression.encode >> Paint "fill-extrusion-color"
 
@@ -731,7 +734,7 @@ fillExtrusionColor =
 {-| The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively. Paint property.
 Units in pixels. Defaults to `0,0`.
 -}
-fillExtrusionTranslate : Expression CameraExpression (Array Float) -> LayerAttr FillExtrusion
+fillExtrusionTranslate : Expression CameraExpression (Array Float) -> LayerAttr FillExtrusion msg
 fillExtrusionTranslate =
     Expression.encode >> Paint "fill-extrusion-translate"
 
@@ -742,7 +745,7 @@ Should be greater than or equal to `0`.
 Units in meters. Defaults to `0`. Requires `fillExtrusionHeight`.
 
 -}
-fillExtrusionBase : Expression any Float -> LayerAttr FillExtrusion
+fillExtrusionBase : Expression any Float -> LayerAttr FillExtrusion msg
 fillExtrusionBase =
     Expression.encode >> Paint "fill-extrusion-base"
 
@@ -753,7 +756,7 @@ Should be greater than or equal to `0`.
 Units in meters. Defaults to `0`.
 
 -}
-fillExtrusionHeight : Expression any Float -> LayerAttr FillExtrusion
+fillExtrusionHeight : Expression any Float -> LayerAttr FillExtrusion msg
 fillExtrusionHeight =
     Expression.encode >> Paint "fill-extrusion-height"
 
@@ -763,14 +766,14 @@ fillExtrusionHeight =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-fillExtrusionOpacity : Expression CameraExpression Float -> LayerAttr FillExtrusion
+fillExtrusionOpacity : Expression CameraExpression Float -> LayerAttr FillExtrusion msg
 fillExtrusionOpacity =
     Expression.encode >> Paint "fill-extrusion-opacity"
 
 
 {-| Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down. Paint property. Defaults to `true`.
 -}
-fillExtrusionVerticalGradient : Expression CameraExpression Bool -> LayerAttr FillExtrusion
+fillExtrusionVerticalGradient : Expression CameraExpression Bool -> LayerAttr FillExtrusion msg
 fillExtrusionVerticalGradient =
     Expression.encode >> Paint "fill-extrusion-vertical-gradient"
 
@@ -785,7 +788,7 @@ fillExtrusionVerticalGradient =
   - `viewport`: Icons are translated relative to the viewport.
 
 -}
-iconTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Symbol
+iconTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Symbol msg
 iconTranslateAnchor =
     Expression.encode >> Paint "icon-translate-anchor"
 
@@ -796,7 +799,7 @@ iconTranslateAnchor =
   - `viewport`: The text is translated relative to the viewport.
 
 -}
-textTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Symbol
+textTranslateAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Symbol msg
 textTranslateAnchor =
     Expression.encode >> Paint "text-translate-anchor"
 
@@ -808,7 +811,7 @@ textTranslateAnchor =
   - `source`: Symbols will be rendered in the same order as the source data with no sorting applied.
 
 -}
-symbolZOrder : Expression CameraExpression { auto : Supported, viewportY : Supported, source : Supported } -> LayerAttr Symbol
+symbolZOrder : Expression CameraExpression { auto : Supported, viewportY : Supported, source : Supported } -> LayerAttr Symbol msg
 symbolZOrder =
     Expression.encode >> Layout "symbol-z-order"
 
@@ -819,7 +822,7 @@ Should be greater than or equal to `1`.
 Units in pixels. Defaults to `250`. Requires `symbolPlacement` to be `line`.
 
 -}
-symbolSpacing : Expression CameraExpression Float -> LayerAttr Symbol
+symbolSpacing : Expression CameraExpression Float -> LayerAttr Symbol msg
 symbolSpacing =
     Expression.encode >> Layout "symbol-spacing"
 
@@ -830,7 +833,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`. Requires `textField`.
 
 -}
-textHaloWidth : Expression any Float -> LayerAttr Symbol
+textHaloWidth : Expression any Float -> LayerAttr Symbol msg
 textHaloWidth =
     Expression.encode >> Paint "text-halo-width"
 
@@ -841,7 +844,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`. Requires `iconImage`.
 
 -}
-iconHaloWidth : Expression any Float -> LayerAttr Symbol
+iconHaloWidth : Expression any Float -> LayerAttr Symbol msg
 iconHaloWidth =
     Expression.encode >> Paint "icon-halo-width"
 
@@ -849,7 +852,7 @@ iconHaloWidth =
 {-| Distance that the icon's anchor is moved from its original placement. Positive values indicate right and down, while negative values indicate left and up. Paint property.
 Units in pixels. Defaults to `0,0`. Requires `iconImage`.
 -}
-iconTranslate : Expression CameraExpression (Array Float) -> LayerAttr Symbol
+iconTranslate : Expression CameraExpression (Array Float) -> LayerAttr Symbol msg
 iconTranslate =
     Expression.encode >> Paint "icon-translate"
 
@@ -857,7 +860,7 @@ iconTranslate =
 {-| Distance that the text's anchor is moved from its original placement. Positive values indicate right and down, while negative values indicate left and up. Paint property.
 Units in pixels. Defaults to `0,0`. Requires `textField`.
 -}
-textTranslate : Expression CameraExpression (Array Float) -> LayerAttr Symbol
+textTranslate : Expression CameraExpression (Array Float) -> LayerAttr Symbol msg
 textTranslate =
     Expression.encode >> Paint "text-translate"
 
@@ -868,7 +871,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`. Requires `iconImage`.
 
 -}
-iconHaloBlur : Expression any Float -> LayerAttr Symbol
+iconHaloBlur : Expression any Float -> LayerAttr Symbol msg
 iconHaloBlur =
     Expression.encode >> Paint "icon-halo-blur"
 
@@ -879,77 +882,77 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `16`. Requires `textField`.
 
 -}
-textSize : Expression any Float -> LayerAttr Symbol
+textSize : Expression any Float -> LayerAttr Symbol msg
 textSize =
     Expression.encode >> Layout "text-size"
 
 
 {-| Font stack to use for displaying text. Layout property. Requires `textField`.
 -}
-textFont : Expression any (Array String) -> LayerAttr Symbol
+textFont : Expression any (Array String) -> LayerAttr Symbol msg
 textFont =
     Expression.encode >> Layout "text-font"
 
 
 {-| If true, icons will display without their corresponding text when the text collides with other symbols and the icon does not. Layout property. Defaults to `false`. Requires `textField`. Requires `iconImage`.
 -}
-textOptional : Expression CameraExpression Bool -> LayerAttr Symbol
+textOptional : Expression CameraExpression Bool -> LayerAttr Symbol msg
 textOptional =
     Expression.encode >> Layout "text-optional"
 
 
 {-| If true, other symbols can be visible even if they collide with the icon. Layout property. Defaults to `false`. Requires `iconImage`.
 -}
-iconIgnorePlacement : Expression CameraExpression Bool -> LayerAttr Symbol
+iconIgnorePlacement : Expression CameraExpression Bool -> LayerAttr Symbol msg
 iconIgnorePlacement =
     Expression.encode >> Layout "icon-ignore-placement"
 
 
 {-| If true, other symbols can be visible even if they collide with the text. Layout property. Defaults to `false`. Requires `textField`.
 -}
-textIgnorePlacement : Expression CameraExpression Bool -> LayerAttr Symbol
+textIgnorePlacement : Expression CameraExpression Bool -> LayerAttr Symbol msg
 textIgnorePlacement =
     Expression.encode >> Layout "text-ignore-placement"
 
 
 {-| If true, text will display without their corresponding icons when the icon collides with other symbols and the text does not. Layout property. Defaults to `false`. Requires `iconImage`. Requires `textField`.
 -}
-iconOptional : Expression CameraExpression Bool -> LayerAttr Symbol
+iconOptional : Expression CameraExpression Bool -> LayerAttr Symbol msg
 iconOptional =
     Expression.encode >> Layout "icon-optional"
 
 
 {-| If true, the icon may be flipped to prevent it from being rendered upside-down. Layout property. Defaults to `false`. Requires `iconImage`. Requires `iconRotationAlignment` to be `map`. Requires `symbolPlacement` to be `line`, or `lineCenter`.
 -}
-iconKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol
+iconKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol msg
 iconKeepUpright =
     Expression.encode >> Layout "icon-keep-upright"
 
 
 {-| If true, the icon will be visible even if it collides with other previously drawn symbols. Layout property. Defaults to `false`. Requires `iconImage`.
 -}
-iconAllowOverlap : Expression CameraExpression Bool -> LayerAttr Symbol
+iconAllowOverlap : Expression CameraExpression Bool -> LayerAttr Symbol msg
 iconAllowOverlap =
     Expression.encode >> Layout "icon-allow-overlap"
 
 
 {-| If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. Layout property. Defaults to `false`.
 -}
-symbolAvoidEdges : Expression CameraExpression Bool -> LayerAttr Symbol
+symbolAvoidEdges : Expression CameraExpression Bool -> LayerAttr Symbol msg
 symbolAvoidEdges =
     Expression.encode >> Layout "symbol-avoid-edges"
 
 
 {-| If true, the text may be flipped vertically to prevent it from being rendered upside-down. Layout property. Defaults to `true`. Requires `textField`. Requires `textRotationAlignment` to be `map`. Requires `symbolPlacement` to be `line`, or `lineCenter`.
 -}
-textKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol
+textKeepUpright : Expression CameraExpression Bool -> LayerAttr Symbol msg
 textKeepUpright =
     Expression.encode >> Layout "text-keep-upright"
 
 
 {-| If true, the text will be visible even if it collides with other previously drawn symbols. Layout property. Defaults to `false`. Requires `textField`.
 -}
-textAllowOverlap : Expression CameraExpression Bool -> LayerAttr Symbol
+textAllowOverlap : Expression CameraExpression Bool -> LayerAttr Symbol msg
 textAllowOverlap =
     Expression.encode >> Layout "text-allow-overlap"
 
@@ -961,7 +964,7 @@ textAllowOverlap =
   - `auto`: When `symbolPlacement` is set to `point`, this is equivalent to `viewport`. When `symbolPlacement` is set to `line` or `lineCenter`, this is equivalent to `map`.
 
 -}
-iconRotationAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol
+iconRotationAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol msg
 iconRotationAlignment =
     Expression.encode >> Layout "icon-rotation-alignment"
 
@@ -973,7 +976,7 @@ iconRotationAlignment =
   - `auto`: When `symbolPlacement` is set to `point`, this is equivalent to `viewport`. When `symbolPlacement` is set to `line` or `lineCenter`, this is equivalent to `map`.
 
 -}
-textRotationAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol
+textRotationAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol msg
 textRotationAlignment =
     Expression.encode >> Layout "text-rotation-alignment"
 
@@ -985,7 +988,7 @@ textRotationAlignment =
   - `lineCenter`: The label is placed at the center of the line of the geometry. Can only be used on `lineString` and `polygon` geometries. Note that a single feature in a vector tile may contain multiple line geometries.
 
 -}
-symbolPlacement : Expression CameraExpression { point : Supported, line : Supported, lineCenter : Supported } -> LayerAttr Symbol
+symbolPlacement : Expression CameraExpression { point : Supported, line : Supported, lineCenter : Supported } -> LayerAttr Symbol msg
 symbolPlacement =
     Expression.encode >> Layout "symbol-placement"
 
@@ -993,21 +996,21 @@ symbolPlacement =
 {-| Maximum angle change between adjacent characters. Layout property.
 Units in degrees. Defaults to `45`. Requires `textField`. Requires `symbolPlacement` to be `line`, or `lineCenter`.
 -}
-textMaxAngle : Expression CameraExpression Float -> LayerAttr Symbol
+textMaxAngle : Expression CameraExpression Float -> LayerAttr Symbol msg
 textMaxAngle =
     Expression.encode >> Layout "text-max-angle"
 
 
 {-| Name of image in sprite to use for drawing an image background. Layout property.
 -}
-iconImage : Expression any String -> LayerAttr Symbol
+iconImage : Expression any String -> LayerAttr Symbol msg
 iconImage =
     Expression.encode >> Layout "icon-image"
 
 
 {-| Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate left and up. Each component is multiplied by the value of `iconSize` to obtain the final offset in pixels. When combined with `iconRotate` the offset will be as if the rotated direction was up. Layout property. Defaults to `0,0`. Requires `iconImage`.
 -}
-iconOffset : Expression any (Array Float) -> LayerAttr Symbol
+iconOffset : Expression any (Array Float) -> LayerAttr Symbol msg
 iconOffset =
     Expression.encode >> Layout "icon-offset"
 
@@ -1015,7 +1018,7 @@ iconOffset =
 {-| Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up. Layout property.
 Units in ems. Defaults to `0,0`. Requires `textField`. Disabled by `textRadialOffset`.
 -}
-textOffset : Expression any (Array Float) -> LayerAttr Symbol
+textOffset : Expression any (Array Float) -> LayerAttr Symbol msg
 textOffset =
     Expression.encode >> Layout "text-offset"
 
@@ -1027,7 +1030,7 @@ textOffset =
   - `auto`: Automatically matches the value of `iconRotationAlignment`.
 
 -}
-iconPitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol
+iconPitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol msg
 iconPitchAlignment =
     Expression.encode >> Layout "icon-pitch-alignment"
 
@@ -1039,7 +1042,7 @@ iconPitchAlignment =
   - `auto`: Automatically matches the value of `textRotationAlignment`.
 
 -}
-textPitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol
+textPitchAlignment : Expression CameraExpression { map : Supported, viewport : Supported, auto : Supported } -> LayerAttr Symbol msg
 textPitchAlignment =
     Expression.encode >> Layout "text-pitch-alignment"
 
@@ -1057,7 +1060,7 @@ textPitchAlignment =
   - `bottomRight`: The bottom right corner of the icon is placed closest to the anchor.
 
 -}
-iconAnchor : Expression any { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported } -> LayerAttr Symbol
+iconAnchor : Expression any { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported } -> LayerAttr Symbol msg
 iconAnchor =
     Expression.encode >> Layout "icon-anchor"
 
@@ -1075,7 +1078,7 @@ iconAnchor =
   - `bottomRight`: The bottom right corner of the text is placed closest to the anchor.
 
 -}
-textAnchor : Expression any { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported } -> LayerAttr Symbol
+textAnchor : Expression any { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported } -> LayerAttr Symbol msg
 textAnchor =
     Expression.encode >> Layout "text-anchor"
 
@@ -1083,7 +1086,7 @@ textAnchor =
 {-| Radial offset of text, in the direction of the symbol's anchor. Useful in combination with `textVariableAnchor`, which doesn't support the two-dimensional `textOffset`. Layout property.
 Units in ems. Defaults to `0`. Disabled by `textOffset`.
 -}
-textRadialOffset : Expression CameraExpression Float -> LayerAttr Symbol
+textRadialOffset : Expression CameraExpression Float -> LayerAttr Symbol msg
 textRadialOffset =
     Expression.encode >> Layout "text-radial-offset"
 
@@ -1091,7 +1094,7 @@ textRadialOffset =
 {-| Rotates the icon clockwise. Layout property.
 Units in degrees. Defaults to `0`. Requires `iconImage`.
 -}
-iconRotate : Expression any Float -> LayerAttr Symbol
+iconRotate : Expression any Float -> LayerAttr Symbol msg
 iconRotate =
     Expression.encode >> Layout "icon-rotate"
 
@@ -1099,7 +1102,7 @@ iconRotate =
 {-| Rotates the text clockwise. Layout property.
 Units in degrees. Defaults to `0`. Requires `textField`.
 -}
-textRotate : Expression any Float -> LayerAttr Symbol
+textRotate : Expression any Float -> LayerAttr Symbol msg
 textRotate =
     Expression.encode >> Layout "text-rotate"
 
@@ -1112,7 +1115,7 @@ textRotate =
   - `both`: The icon is scaled in both x- and y-dimensions.
 
 -}
-iconTextFit : Expression CameraExpression { none : Supported, width : Supported, height : Supported, both : Supported } -> LayerAttr Symbol
+iconTextFit : Expression CameraExpression { none : Supported, width : Supported, height : Supported, both : Supported } -> LayerAttr Symbol msg
 iconTextFit =
     Expression.encode >> Layout "icon-text-fit"
 
@@ -1123,7 +1126,7 @@ Should be greater than or equal to `0`.
 Units in factor of the original icon size. Defaults to `1`. Requires `iconImage`.
 
 -}
-iconSize : Expression any Float -> LayerAttr Symbol
+iconSize : Expression any Float -> LayerAttr Symbol msg
 iconSize =
     Expression.encode >> Layout "icon-size"
 
@@ -1131,7 +1134,7 @@ iconSize =
 {-| Size of the additional area added to dimensions determined by `iconTextFit`, in clockwise order: top, right, bottom, left. Layout property.
 Units in pixels. Defaults to `0,0,0,0`. Requires `iconImage`. Requires `textField`. Requires `iconTextFit` to be `both`, or `width`, or `height`.
 -}
-iconTextFitPadding : Expression CameraExpression (Array Float) -> LayerAttr Symbol
+iconTextFitPadding : Expression CameraExpression (Array Float) -> LayerAttr Symbol msg
 iconTextFitPadding =
     Expression.encode >> Layout "icon-text-fit-padding"
 
@@ -1142,7 +1145,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `2`. Requires `iconImage`.
 
 -}
-iconPadding : Expression CameraExpression Float -> LayerAttr Symbol
+iconPadding : Expression CameraExpression Float -> LayerAttr Symbol msg
 iconPadding =
     Expression.encode >> Layout "icon-padding"
 
@@ -1153,14 +1156,14 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `2`. Requires `textField`.
 
 -}
-textPadding : Expression CameraExpression Float -> LayerAttr Symbol
+textPadding : Expression CameraExpression Float -> LayerAttr Symbol msg
 textPadding =
     Expression.encode >> Layout "text-padding"
 
 
 {-| Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement. Layout property.
 -}
-symbolSortKey : Expression CameraExpression Float -> LayerAttr Symbol
+symbolSortKey : Expression CameraExpression Float -> LayerAttr Symbol msg
 symbolSortKey =
     Expression.encode >> Layout "symbol-sort-key"
 
@@ -1172,19 +1175,20 @@ symbolSortKey =
   - `lowercase`: Forces all letters to be displayed in lowercase.
 
 -}
-textTransform : Expression any { none : Supported, uppercase : Supported, lowercase : Supported } -> LayerAttr Symbol
+textTransform : Expression any { none : Supported, uppercase : Supported, lowercase : Supported } -> LayerAttr Symbol msg
 textTransform =
     Expression.encode >> Layout "text-transform"
 
 
 {-| Text justification options. Layout property. Defaults to `center`. Requires `textField`.
 
+  - `auto`: The text is aligned towards the anchor position.
   - `left`: The text is aligned to the left.
   - `center`: The text is centered.
   - `right`: The text is aligned to the right.
 
 -}
-textJustify : Expression any { left : Supported, center : Supported, right : Supported } -> LayerAttr Symbol
+textJustify : Expression any { auto : Supported, left : Supported, center : Supported, right : Supported } -> LayerAttr Symbol msg
 textJustify =
     Expression.encode >> Layout "text-justify"
 
@@ -1192,7 +1196,7 @@ textJustify =
 {-| Text leading value for multi-line text. Layout property.
 Units in ems. Defaults to `1.2`. Requires `textField`.
 -}
-textLineHeight : Expression CameraExpression Float -> LayerAttr Symbol
+textLineHeight : Expression CameraExpression Float -> LayerAttr Symbol msg
 textLineHeight =
     Expression.encode >> Layout "text-line-height"
 
@@ -1200,35 +1204,35 @@ textLineHeight =
 {-| Text tracking amount. Layout property.
 Units in ems. Defaults to `0`. Requires `textField`.
 -}
-textLetterSpacing : Expression any Float -> LayerAttr Symbol
+textLetterSpacing : Expression any Float -> LayerAttr Symbol msg
 textLetterSpacing =
     Expression.encode >> Layout "text-letter-spacing"
 
 
 {-| The color of the icon's halo. Icon halos can only be used with SDF icons. Paint property. Defaults to `rgba 0 0 0 0`. Requires `iconImage`.
 -}
-iconHaloColor : Expression any Color -> LayerAttr Symbol
+iconHaloColor : Expression any Color -> LayerAttr Symbol msg
 iconHaloColor =
     Expression.encode >> Paint "icon-halo-color"
 
 
 {-| The color of the icon. This can only be used with sdf icons. Paint property. Defaults to `#000000`. Requires `iconImage`.
 -}
-iconColor : Expression any Color -> LayerAttr Symbol
+iconColor : Expression any Color -> LayerAttr Symbol msg
 iconColor =
     Expression.encode >> Paint "icon-color"
 
 
 {-| The color of the text's halo, which helps it stand out from backgrounds. Paint property. Defaults to `rgba 0 0 0 0`. Requires `textField`.
 -}
-textHaloColor : Expression any Color -> LayerAttr Symbol
+textHaloColor : Expression any Color -> LayerAttr Symbol msg
 textHaloColor =
     Expression.encode >> Paint "text-halo-color"
 
 
 {-| The color with which the text will be drawn. Paint property. Defaults to `#000000`. Requires `textField`.
 -}
-textColor : Expression any Color -> LayerAttr Symbol
+textColor : Expression any Color -> LayerAttr Symbol msg
 textColor =
     Expression.encode >> Paint "text-color"
 
@@ -1239,7 +1243,7 @@ Should be greater than or equal to `0`.
 Units in pixels. Defaults to `0`. Requires `textField`.
 
 -}
-textHaloBlur : Expression any Float -> LayerAttr Symbol
+textHaloBlur : Expression any Float -> LayerAttr Symbol msg
 textHaloBlur =
     Expression.encode >> Paint "text-halo-blur"
 
@@ -1250,7 +1254,7 @@ Should be greater than or equal to `0`.
 Units in ems. Defaults to `10`. Requires `textField`.
 
 -}
-textMaxWidth : Expression any Float -> LayerAttr Symbol
+textMaxWidth : Expression any Float -> LayerAttr Symbol msg
 textMaxWidth =
     Expression.encode >> Layout "text-max-width"
 
@@ -1260,7 +1264,7 @@ textMaxWidth =
 Should be between `0` and `1` inclusive. Defaults to `1`. Requires `iconImage`.
 
 -}
-iconOpacity : Expression any Float -> LayerAttr Symbol
+iconOpacity : Expression any Float -> LayerAttr Symbol msg
 iconOpacity =
     Expression.encode >> Paint "icon-opacity"
 
@@ -1270,7 +1274,7 @@ iconOpacity =
 Should be between `0` and `1` inclusive. Defaults to `1`. Requires `textField`.
 
 -}
-textOpacity : Expression any Float -> LayerAttr Symbol
+textOpacity : Expression any Float -> LayerAttr Symbol msg
 textOpacity =
     Expression.encode >> Paint "text-opacity"
 
@@ -1288,14 +1292,14 @@ textOpacity =
   - `bottomRight`: The bottom right corner of the text is placed closest to the anchor.
 
 -}
-textVariableAnchor : Expression any (Array { center : Supported, left : Supported, right : Supported, top : Supported, bottom : Supported, topLeft : Supported, topRight : Supported, bottomLeft : Supported, bottomRight : Supported }) -> LayerAttr Symbol
+textVariableAnchor : Expression any FormattedText -> LayerAttr Symbol msg
 textVariableAnchor =
     Expression.encode >> Layout "text-variable-anchor"
 
 
 {-| Value to use for a text label. Layout property. Defaults to `""`.
 -}
-textField : Expression any FormattedText -> LayerAttr Symbol
+textField : Expression any FormattedText -> LayerAttr Symbol msg
 textField =
     Expression.encode >> Layout "text-field"
 
@@ -1310,7 +1314,7 @@ Should be greater than or equal to `0`.
 Units in milliseconds. Defaults to `300`.
 
 -}
-rasterFadeDuration : Expression CameraExpression Float -> LayerAttr Raster
+rasterFadeDuration : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterFadeDuration =
     Expression.encode >> Paint "raster-fade-duration"
 
@@ -1320,7 +1324,7 @@ rasterFadeDuration =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-rasterBrightnessMax : Expression CameraExpression Float -> LayerAttr Raster
+rasterBrightnessMax : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterBrightnessMax =
     Expression.encode >> Paint "raster-brightness-max"
 
@@ -1330,7 +1334,7 @@ rasterBrightnessMax =
 Should be between `0` and `1` inclusive. Defaults to `0`.
 
 -}
-rasterBrightnessMin : Expression CameraExpression Float -> LayerAttr Raster
+rasterBrightnessMin : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterBrightnessMin =
     Expression.encode >> Paint "raster-brightness-min"
 
@@ -1340,7 +1344,7 @@ rasterBrightnessMin =
 Should be between `-1` and `1` inclusive. Defaults to `0`.
 
 -}
-rasterContrast : Expression CameraExpression Float -> LayerAttr Raster
+rasterContrast : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterContrast =
     Expression.encode >> Paint "raster-contrast"
 
@@ -1350,7 +1354,7 @@ rasterContrast =
 Should be between `-1` and `1` inclusive. Defaults to `0`.
 
 -}
-rasterSaturation : Expression CameraExpression Float -> LayerAttr Raster
+rasterSaturation : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterSaturation =
     Expression.encode >> Paint "raster-saturation"
 
@@ -1358,7 +1362,7 @@ rasterSaturation =
 {-| Rotates hues around the color wheel. Paint property.
 Units in degrees. Defaults to `0`.
 -}
-rasterHueRotate : Expression CameraExpression Float -> LayerAttr Raster
+rasterHueRotate : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterHueRotate =
     Expression.encode >> Paint "raster-hue-rotate"
 
@@ -1368,7 +1372,7 @@ rasterHueRotate =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-rasterOpacity : Expression CameraExpression Float -> LayerAttr Raster
+rasterOpacity : Expression CameraExpression Float -> LayerAttr Raster msg
 rasterOpacity =
     Expression.encode >> Paint "raster-opacity"
 
@@ -1379,7 +1383,7 @@ rasterOpacity =
   - `nearest`: Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled
 
 -}
-rasterResampling : Expression CameraExpression { linear : Supported, nearest : Supported } -> LayerAttr Raster
+rasterResampling : Expression CameraExpression { linear : Supported, nearest : Supported } -> LayerAttr Raster msg
 rasterResampling =
     Expression.encode >> Paint "raster-resampling"
 
@@ -1394,7 +1398,7 @@ rasterResampling =
   - `viewport`: The hillshade illumination is relative to the top of the viewport.
 
 -}
-hillshadeIlluminationAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Hillshade
+hillshadeIlluminationAnchor : Expression CameraExpression { map : Supported, viewport : Supported } -> LayerAttr Hillshade msg
 hillshadeIlluminationAnchor =
     Expression.encode >> Paint "hillshade-illumination-anchor"
 
@@ -1404,7 +1408,7 @@ hillshadeIlluminationAnchor =
 Should be between `0` and `1` inclusive. Defaults to `0.5`.
 
 -}
-hillshadeExaggeration : Expression CameraExpression Float -> LayerAttr Hillshade
+hillshadeExaggeration : Expression CameraExpression Float -> LayerAttr Hillshade msg
 hillshadeExaggeration =
     Expression.encode >> Paint "hillshade-exaggeration"
 
@@ -1414,28 +1418,28 @@ hillshadeExaggeration =
 Should be between `0` and `359` inclusive. Defaults to `335`.
 
 -}
-hillshadeIlluminationDirection : Expression CameraExpression Float -> LayerAttr Hillshade
+hillshadeIlluminationDirection : Expression CameraExpression Float -> LayerAttr Hillshade msg
 hillshadeIlluminationDirection =
     Expression.encode >> Paint "hillshade-illumination-direction"
 
 
 {-| The shading color of areas that face away from the light source. Paint property. Defaults to `#000000`.
 -}
-hillshadeShadowColor : Expression CameraExpression Color -> LayerAttr Hillshade
+hillshadeShadowColor : Expression CameraExpression Color -> LayerAttr Hillshade msg
 hillshadeShadowColor =
     Expression.encode >> Paint "hillshade-shadow-color"
 
 
 {-| The shading color of areas that faces towards the light source. Paint property. Defaults to `#FFFFFF`.
 -}
-hillshadeHighlightColor : Expression CameraExpression Color -> LayerAttr Hillshade
+hillshadeHighlightColor : Expression CameraExpression Color -> LayerAttr Hillshade msg
 hillshadeHighlightColor =
     Expression.encode >> Paint "hillshade-highlight-color"
 
 
 {-| The shading color used to accentuate rugged terrain like sharp cliffs and gorges. Paint property. Defaults to `#000000`.
 -}
-hillshadeAccentColor : Expression CameraExpression Color -> LayerAttr Hillshade
+hillshadeAccentColor : Expression CameraExpression Color -> LayerAttr Hillshade msg
 hillshadeAccentColor =
     Expression.encode >> Paint "hillshade-accent-color"
 
@@ -1446,14 +1450,14 @@ hillshadeAccentColor =
 
 {-| Name of image in sprite to use for drawing an image background. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
 -}
-backgroundPattern : Expression CameraExpression String -> LayerAttr Background
+backgroundPattern : Expression CameraExpression String -> LayerAttr Background msg
 backgroundPattern =
     Expression.encode >> Paint "background-pattern"
 
 
 {-| The color with which the background will be drawn. Paint property. Defaults to `#000000`. Disabled by `backgroundPattern`.
 -}
-backgroundColor : Expression CameraExpression Color -> LayerAttr Background
+backgroundColor : Expression CameraExpression Color -> LayerAttr Background msg
 backgroundColor =
     Expression.encode >> Paint "background-color"
 
@@ -1463,6 +1467,6 @@ backgroundColor =
 Should be between `0` and `1` inclusive. Defaults to `1`.
 
 -}
-backgroundOpacity : Expression CameraExpression Float -> LayerAttr Background
+backgroundOpacity : Expression CameraExpression Float -> LayerAttr Background msg
 backgroundOpacity =
     Expression.encode >> Paint "background-opacity"

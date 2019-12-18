@@ -36,8 +36,7 @@ function generateProperties(spec) {
   Object.values(codes).forEach(d => d.sort());
   return `
 module Mapbox.Layer exposing (
-  Layer, SourceId, Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade, LayerAttr,
-  encode,
+  Layer, Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade, LayerAttr,
   background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade,
   metadata, sourceLayer, minzoom, maxzoom, filter, visible,
   ${Object.values(docs)
@@ -67,7 +66,7 @@ ${Object.keys(docs)
 
 ### Working with layers
 
-@docs Layer, SourceId, encode
+@docs Layer
 
 ### Layer Types
 
@@ -88,16 +87,16 @@ ${Object.entries(docs)
 -}
 
 import Array exposing (Array)
+import Html exposing (Attribute)
+import Html.Events
 import Json.Encode as Encode exposing (Value)
+import Json.Decode as Decode exposing (Decoder)
 import Mapbox.Expression as Expression exposing (CameraExpression, Color, DataExpression, Expression, FormattedText)
-import Internal exposing (Supported)
+import Internal exposing (Supported, Source)
 
 {-| Represents a layer. -}
-type Layer
-    = Layer Value
-
-{-| All layers (except background layers) need a source -}
-type alias SourceId = String
+type alias Layer msg
+    = Internal.Layer msg
 
 {-| -}
 type Background
@@ -135,25 +134,25 @@ type Heatmap
 type Hillshade
     = HillshadeLayer
 
-{-| Turns a layer into JSON -}
-encode : Layer -> Value
-encode (Layer value) =
-    value
-
 
 layerImpl tipe id source attrs =
-    [ ( "type", Encode.string tipe )
-    , ( "id", Encode.string id )
-    , ( "source", Encode.string source)
-    ]
-        ++ encodeAttrs attrs
-        |> Encode.object
-        |> Layer
-
-
-encodeAttrs attrs =
     let
-        { top, layout, paint } =
+        ( properties, events ) =
+            encodeAttrs id attrs
+    in
+    Internal.Layer
+        { id = id
+        , source = Just source
+        , tipe = tipe
+        , properties = properties
+        , events = events
+        }
+
+
+
+encodeAttrs id attrs =
+    let
+        { top, layout, paint, events } =
             List.foldl
                 (\\attr lists ->
                     case attr of
@@ -165,100 +164,111 @@ encodeAttrs attrs =
 
                         Layout key val ->
                             { lists | layout = ( key, val ) :: lists.layout }
+
+                        Event event decoder ->
+                            { lists | events = Html.Events.on (event ++ ":" ++ id) decoder :: lists.events }
                 )
-                { top = [], layout = [], paint = [] }
+                { top = [], layout = [], paint = [], events = [] }
                 attrs
     in
-        ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top
+    ( ( "layout", Encode.object layout ) :: ( "paint", Encode.object paint ) :: top, events )
 
-{-| The background color or pattern of the map. -}
-background : String -> List (LayerAttr Background) -> Layer
+
+{-| The background color or pattern of the map.
+-}
+background : String -> List (LayerAttr Background msg) -> Layer msg
 background id attrs =
-    [ ( "type", Encode.string "background" )
-    , ( "id", Encode.string id )
-    ]
-        ++ encodeAttrs attrs
-        |> Encode.object
-        |> Layer
+    let
+        ( properties, events ) =
+            encodeAttrs id attrs
+    in
+    Internal.Layer
+        { id = id
+        , source = Nothing
+        , tipe = "background"
+        , properties = properties
+        , events = events
+        }
 
 {-| A filled polygon with an optional stroked border. -}
-fill : String -> SourceId -> List (LayerAttr Fill) -> Layer
+fill : String -> Source -> List (LayerAttr Fill msg) -> Layer msg
 fill =
     layerImpl "fill"
 
 {-| A stroked line. -}
-line : String  -> SourceId -> List (LayerAttr Line) -> Layer
+line : String  -> Source -> List (LayerAttr Line msg) -> Layer msg
 line =
     layerImpl "line"
 
 {-| An icon or a text label. -}
-symbol : String  -> SourceId -> List (LayerAttr Symbol) -> Layer
+symbol : String  -> Source -> List (LayerAttr Symbol msg) -> Layer msg
 symbol =
     layerImpl "symbol"
 
 {-| Raster map textures such as satellite imagery. -}
-raster : String -> SourceId -> List (LayerAttr Raster) -> Layer
+raster : String -> Source -> List (LayerAttr Raster msg) -> Layer msg
 raster =
     layerImpl "raster"
 
 {-| A filled circle. -}
-circle : String -> SourceId -> List (LayerAttr Circle) -> Layer
+circle : String -> Source -> List (LayerAttr Circle msg) -> Layer msg
 circle =
     layerImpl "circle"
 
 {-| An extruded (3D) polygon. -}
-fillExtrusion : String -> SourceId -> List (LayerAttr FillExtrusion) -> Layer
+fillExtrusion : String -> Source -> List (LayerAttr FillExtrusion msg) -> Layer msg
 fillExtrusion =
     layerImpl "fill-extrusion"
 
 {-| A heatmap. -}
-heatmap : String -> SourceId -> List (LayerAttr Heatmap) -> Layer
+heatmap : String -> Source -> List (LayerAttr Heatmap msg) -> Layer msg
 heatmap =
     layerImpl "heatmap"
 
 {-| Client-side hillshading visualization based on DEM data. Currently, the implementation only supports Mapbox Terrain RGB and Mapzen Terrarium tiles. -}
-hillshade : String -> SourceId -> List (LayerAttr Hillshade) -> Layer
+hillshade : String -> Source -> List (LayerAttr Hillshade msg) -> Layer msg
 hillshade =
     layerImpl "hillshade"
 
 {-| -}
-type LayerAttr tipe
+type LayerAttr tipe msg
     = Top String Value
     | Paint String Value
     | Layout String Value
+    | Event String (Decoder msg)
 
 
 
 -- General Attributes
 
 {-| Arbitrary properties useful to track with the layer, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'mapbox:'. -}
-metadata : Value -> LayerAttr all
+metadata : Value -> LayerAttr all msg
 metadata =
     Top "metadata"
 
 
 {-| Layer to use from a vector tile source. Required for vector tile sources; prohibited for all other source types, including GeoJSON sources. -}
-sourceLayer : String -> LayerAttr all
+sourceLayer : String -> LayerAttr all msg
 sourceLayer =
     Encode.string >> Top "source-layer"
 
 {-| The minimum zoom level for the layer. At zoom levels less than the minzoom, the layer will be hidden. A number between 0 and 24 inclusive. -}
-minzoom : Float -> LayerAttr all
+minzoom : Float -> LayerAttr all msg
 minzoom =
     Encode.float >> Top "minzoom"
 
 {-| The maximum zoom level for the layer. At zoom levels equal to or greater than the maxzoom, the layer will be hidden. A number between 0 and 24 inclusive. -}
-maxzoom : Float -> LayerAttr all
+maxzoom : Float -> LayerAttr all msg
 maxzoom =
     Encode.float >> Top "maxzoom"
 
 {-| A expression specifying conditions on source features. Only features that match the filter are displayed. -}
-filter : Expression any Bool -> LayerAttr all
+filter : Expression any Bool -> LayerAttr all msg
 filter =
     Expression.encode >> Top "filter"
 
 {-| Whether this layer is displayed. -}
-visible : Expression CameraExpression Bool -> LayerAttr any
+visible : Expression CameraExpression Bool -> LayerAttr any msg
 visible vis =
     Layout "visibility" <| Expression.encode <| Expression.ifElse vis (Expression.str "visible") (Expression.str "none")
 
@@ -329,7 +339,7 @@ function generateElmProperty(name, prop, layerType, position) {
     prop.requires ? prop.requires.map(requires).join(" ") : ""
   }${valueHelp}
 -}
-${elmName} : Expression ${exprKind} ${exprType} -> LayerAttr ${layerType}
+${elmName} : Expression ${exprKind} ${exprType} -> LayerAttr ${layerType} msg
 ${elmName} =
     Expression.encode >> ${position} "${name}"`;
 }

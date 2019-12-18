@@ -1,5 +1,5 @@
 import mapboxgl from "mapbox-gl";
-
+import style from "mapbox-gl/dist/style-spec";
 var commandRegistry = {};
 
 export function registerCustomElement(settings) {
@@ -28,8 +28,27 @@ export function registerCustomElement(settings) {
         return this._style;
       }
       set mapboxStyle(value) {
-        if (this._map) this._map.setStyle(value);
-        this._style = value;
+        console.log("set mapboxStyle", value);
+        if (this._map) {
+          if (value.type === "literal-style") {
+            this._map.setStyle(value.value);
+          } else if (value.type === "remote-style") {
+            if (value.value.url !== this._mapboxStyle.value.url) {
+              this._map.setStyle(value.value.url);
+            }
+            this.scheduleDiffPatch(this._mapboxStyle.value, value.value);
+          }
+        }
+        if (value.type === "literal-style") {
+          this._style = value.value;
+        } else if (value.type === "remote-style") {
+          this._style = value.value.url;
+        } else {
+          throw new Error(
+            "You might be using incompatible versions of gampleman/elm-mapbox elm library and npm library. Please make sure these versions match."
+          );
+        }
+        this._mapboxStyle = value;
       }
 
       get minZoom() {
@@ -218,6 +237,46 @@ export function registerCustomElement(settings) {
         }
       }
 
+      scheduleDiffPatch(prev, next) {
+        this._nextStyle = next;
+        if (!this._prevStyle) {
+          this._prevStyle = prev;
+          if (this._map.isStyleLoaded()) {
+            this.runDiffPatch();
+          } else {
+            this._map.on("load", () => {
+              this.runDiffPatch();
+            });
+          }
+        }
+      }
+
+      runDiffPatch() {
+        const prev = this._prevStyle;
+        const next = this._nextStyle;
+        delete this._prevStyle;
+        delete this._nextStyle;
+        const patches = [];
+        patches.push(
+          ...style.diff({ sources: prev.sources }, { sources: next.sources })
+        );
+
+        patches.push(
+          ...Array.from(new Set(
+            Object.keys(prev.layers).concat(Object.keys(next.layers))
+        )).flatMap(key => {
+              return style.diff({layers: (prev.layers[key] || []).concat([{id: key}])}, {layers: (next.layers[key] || []).concat([{id: key}])})
+          })
+        );
+
+        console.log(patches);
+        patches.forEach(patch => {
+            console.log(`${patch.command}(${patch.args.join(', ')})`)
+
+            this._map.style[patch.command](...patch.args);
+        })
+      }
+
       _createMapInstance() {
         let mapOptions = {
           container: this,
@@ -252,6 +311,10 @@ export function registerCustomElement(settings) {
             });
           }
         );
+        this.scheduleDiffPatch(
+          { sources: {}, layers: {} },
+          this._mapboxStyle.value
+        );
         this._eventRegistrationQueue = {};
         options.onMount(this._map, this);
         if (commandRegistry[this.id]) {
@@ -272,7 +335,6 @@ export function registerCustomElement(settings) {
         this.style.display = "block";
         this.style.width = "100%";
         this.style.height = "100%";
-
         this._upgradeProperty("mapboxStyle");
         this._upgradeProperty("minZoom");
         this._upgradeProperty("maxZoom");

@@ -7,7 +7,6 @@ module Mapbox.Source exposing
     , geoJSONFromUrl, geoJSONFromValue, GeoJSONSource, buffer, tolerance, cluster, clusterRadius, clusterProperties, lineMetrics, generateIds
     , Coords, image, video, staticCanvas, animatedCanvas
     , bounds, minzoom, maxzoom, attribution, scheme, Scheme(..)
-    , encode, getId
     )
 
 {-|
@@ -51,11 +50,6 @@ Tiled sources can also take the following attributes:
 
 @docs bounds, minzoom, maxzoom, attribution, scheme, Scheme
 
-
-### Working with sources
-
-@docs encode, getId
-
 -}
 
 import Internal
@@ -78,8 +72,8 @@ type alias Url =
 
 {-| Sources supply data to be shown on the map. Adding a source won't immediately make data appear on the map because sources don't contain styling details like color or width. Layers refer to a source and give it a visual representation. This makes it possible to style the same source in different ways, like differentiating between types of roads in a highways layer.
 -}
-type Source
-    = Source String Value
+type alias Source =
+    Internal.Source
 
 
 {-| `XYZ`: Slippy map tilenames scheme.
@@ -114,18 +108,6 @@ type GeoJSONSource
 -}
 type SourceOption sourceType
     = SourceOption String Value
-
-
-{-| -}
-encode : Source -> Value
-encode (Source _ value) =
-    value
-
-
-{-| -}
-getId : Source -> String
-getId (Source k _) =
-    k
 
 
 {-| The longitude and latitude of the southwest and northeast corners of the source's bounding box. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL.
@@ -264,7 +246,7 @@ The first argument is the layers id, the second is a url to a [TileJSON specific
 -}
 vectorFromUrl : Id -> Url -> Source
 vectorFromUrl id url =
-    Source id (Json.Encode.object [ ( "type", Json.Encode.string "vector" ), ( "url", Json.Encode.string url ) ])
+    Internal.Source id (Json.Encode.object [ ( "type", Json.Encode.string "vector" ), ( "url", Json.Encode.string url ) ])
 
 
 {-| A vector tile source. Tiles must be in [Mapbox Vector Tile format](https://www.mapbox.com/developers/vector-tiles/). All geometric coordinates in vector tiles must be between `-1 * extent` and `(extent * 2) - 1` inclusive. All layers that use a vector source must specify a `sourceLayer` value.
@@ -278,14 +260,14 @@ vector id urls options =
         :: ( "type", Json.Encode.string "vector" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A raster tile source configured from a TileJSON spec.
 -}
 rasterFromUrl : Id -> Url -> Source
 rasterFromUrl id url =
-    Source id (Json.Encode.object [ ( "type", Json.Encode.string "raster" ), ( "url", Json.Encode.string url ) ])
+    Internal.Source id (Json.Encode.object [ ( "type", Json.Encode.string "raster" ), ( "url", Json.Encode.string url ) ])
 
 
 {-| A raster tile source. Takes a list of one or more tile source URLs, as in the TileJSON spec.
@@ -296,14 +278,14 @@ raster id urls options =
         :: ( "type", Json.Encode.string "raster" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| The [Mapbox Terrain RGB](https://blog.mapbox.com/global-elevation-data-6689f1d0ba65) DEM source.
 -}
 rasterDEMMapbox : Id -> Source
 rasterDEMMapbox id =
-    Source id
+    Internal.Source id
         (Json.Encode.object
             [ ( "type", Json.Encode.string "raster-dem" )
             , ( "url", Json.Encode.string "mapbox://mapbox.terrain-rgb" )
@@ -321,7 +303,7 @@ rasterDEMTerrarium id url options =
         :: ( "encoding", Json.Encode.string "terrarium" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A remote GeoJSON source.
@@ -332,7 +314,7 @@ geoJSONFromUrl id url options =
         :: ( "type", Json.Encode.string "geojson" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A GeoJSON source from some local data.
@@ -343,7 +325,7 @@ geoJSONFromValue id options data =
         :: ( "type", Json.Encode.string "geojson" )
         :: List.map (\(SourceOption k v) -> ( k, v )) options
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| `(longitude, latitude)` pairs for the corners. You can use the type alias constructor in clockwise order: top left, top right, bottom right, bottom left.
@@ -375,7 +357,7 @@ image id url coordinates =
     , ( "coordinates", encodeCoordinates coordinates )
     ]
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A video source. For each URL in the list, a video element source will be created, in order to support same media in multiple formats supported by different browsers.
@@ -387,7 +369,7 @@ video id urls coordinates =
     , ( "coordinates", encodeCoordinates coordinates )
     ]
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A data source containing the contents of an HTML canvas. The second argument must be the DOM ID of the canvas element. This method is only appropriate with a static Canvas (i.e. one that doesn't change), as it will be cached to improve performance.
@@ -400,7 +382,7 @@ staticCanvas id domid coordinates =
     , ( "coordinates", encodeCoordinates coordinates )
     ]
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
 
 
 {-| A data source containing the contents of an HTML canvas. The second argument must be the DOM ID of the canvas element. This method is only appropriate with an animated Canvas (i.e. one that changes over time).
@@ -413,4 +395,4 @@ animatedCanvas id domid coordinates =
     , ( "coordinates", encodeCoordinates coordinates )
     ]
         |> Json.Encode.object
-        |> Source id
+        |> Internal.Source id
