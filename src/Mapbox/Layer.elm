@@ -5,7 +5,7 @@ module Mapbox.Layer exposing
     , LayerAttr
     , metadata, sourceLayer, minzoom, maxzoom, filter, visible
     , fillAntialias, fillColor, fillOpacity, fillOutlineColor, fillPattern, fillTranslate, fillTranslateAnchor
-    , lineBlur, lineCap, lineColor, lineDasharray, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
+    , lineBlur, lineCap, lineColor, lineDasharray, lineDasharray2, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
     , circleBlur, circleColor, circleOpacity, circlePitchAlignment, circlePitchScale, circleRadius, circleStrokeColor, circleStrokeOpacity, circleStrokeWidth, circleTranslate, circleTranslateAnchor
     , heatmapColor, heatmapIntensity, heatmapOpacity, heatmapRadius, heatmapWeight
     , fillExtrusionBase, fillExtrusionColor, fillExtrusionHeight, fillExtrusionOpacity, fillExtrusionPattern, fillExtrusionTranslate, fillExtrusionTranslateAnchor, fillExtrusionVerticalGradient
@@ -63,7 +63,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Line Attributes
 
-@docs lineBlur, lineCap, lineColor, lineDasharray, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
+@docs lineBlur, lineCap, lineColor, lineDasharray, lineDasharray2, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
 
 
 ### Circle Attributes
@@ -321,7 +321,14 @@ filter =
 -}
 visible : Bool -> LayerAttr any
 visible isVisible =
-    Layout "visibility" <| Expression.encode <| Expression.str <| if isVisible then "visible" else "none"
+    Layout "visibility" <|
+        Expression.encode <|
+            Expression.str <|
+                if isVisible then
+                    "visible"
+
+                else
+                    "none"
 
 
 
@@ -444,6 +451,17 @@ Units in line widths. Disabled by `linePattern`.
 -}
 lineDasharray : Expression CameraExpression (Array Float) -> LayerAttr Line
 lineDasharray =
+    Expression.encode >> Paint "line-dasharray"
+
+
+{-| Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
+
+Should be greater than or equal to `0`.
+Units in line widths. Disabled by `linePattern`.
+
+-}
+lineDasharray2 : Expression any (Array Float) -> LayerAttr Line
+lineDasharray2 =
     Expression.encode >> Paint "line-dasharray"
 
 
