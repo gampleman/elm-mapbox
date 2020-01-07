@@ -1,0 +1,75 @@
+--- node_modules/elm-mapbox/dist/elm-mapbox.umd.js	1985-10-26 09:15:00.000000000 +0100
++++ elm-mapbox.umd.js	2019-09-12 18:24:24.087505291 +0200
+@@ -77,9 +77,16 @@
+ 	      get mapboxStyle() {
+ 	        return this._style;
+ 	      }
+-	      set mapboxStyle(value) {
+-	        if (this._map) this._map.setStyle(value);
+-	        this._style = value;
++	      set mapboxStyle(value)
++	        if (this._map) {
++            // This is a simple check to prevent mapbox from
++            // setting the style over and over agian, otherwise
++            // it may cause errors by using events ...
++            if (JSON.stringify(this._style) != JSON.stringify(value)) {
++              this._map.setStyle(value);
++            }
++          }
++          this._style = value;
+ 	      }
+ 
+ 	      get minZoom() {
+@@ -229,7 +236,8 @@
+ 	            };
+ 	          } else if (["touchend", "touchmove", "touchcancel"].includes(type)) {
+ 	            wrapped = e => {
+-	              e.features = this._map.queryRenderedFeatures([e.point], {
++                // removed the arrays, caused errors with using touch-events
++	              e.features = this._map.queryRenderedFeatures(e.point, {
+ 	                layers: this.eventFeaturesLayers,
+ 	                filter: this.eventFeaturesFilter
+ 	              });
+@@ -304,14 +312,18 @@
+ 	        );
+ 	        this._eventRegistrationQueue = {};
+ 	        options.onMount(this._map, this);
+-	        if (commandRegistry[this.id]) {
+-	          this._map.on("load", () => {
+-	            var cmd;
+-	            while ((cmd = commandRegistry[this.id].shift())) {
+-	              cmd(this._map);
+-	            }
+-	          });
+-	        }
++          if (commandRegistry[this.id]) {
++            function onStyleData(){
++              if(map.isStyleLoaded()) {
++                var cmd;
++                while ((cmd = commandRegistry[this.id].shift())) {
++                  cmd(this._map);
++                }
++                map.off('data', onStyleData)
++              }
++            };
++            this._map.on("data", onStyleData);
++          }
+ 	        return this._map;
+ 	      }
+ 
+@@ -415,6 +427,15 @@
+ 	              bounds: map.getBounds().toArray()
+ 	            });
+ 
++            // use it to get the center and the current zoom-level of the map
++            case "getCenter":
++              return elmApp.ports[options.incomingPort].send({
++                type: "getCenter",
++                id: event.requestId,
++                center: map.getCenter().toArray(),
++                zoom: map.getZoom()
++              });
++
+ 	          case "queryRenderedFeatures":
+ 	            return elmApp.ports[options.incomingPort].send({
+ 	              type: "queryRenderedFeatures",

@@ -1,6 +1,6 @@
 module Mapbox.Source exposing
     ( Source, SourceOption
-    , Id, Url
+    , Id, Url, decode
     , vector, vectorFromUrl, VectorSource
     , raster, tileSize, rasterFromUrl, RasterSource
     , rasterDEMMapbox, rasterDEMTerrarium
@@ -17,7 +17,7 @@ module Mapbox.Source exposing
 
 @docs Source, SourceOption
 
-@docs Id, Url
+@docs Id, Url, decode
 
 
 ### Vector
@@ -58,7 +58,9 @@ Tiled sources can also take the following attributes:
 
 -}
 
+import Dict
 import Internal
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode exposing (Value)
 import LngLat exposing (LngLat)
 import Mapbox.Expression as Expression exposing (DataExpression, Expression)
@@ -120,6 +122,18 @@ type SourceOption sourceType
 encode : Source -> Value
 encode (Source _ value) =
     value
+
+
+{-| -}
+decode : Decoder (List Source)
+decode =
+    Decode.dict Decode.value
+        |> Decode.map (Dict.toList >> List.map tupleToSource)
+
+
+tupleToSource : ( String, Value ) -> Source
+tupleToSource ( id, value ) =
+    Source id value
 
 
 {-| -}
