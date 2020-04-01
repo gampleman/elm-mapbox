@@ -34,7 +34,7 @@
     "elm": "^0.19.0-bugfix6",
     "elm-format": "^0.8.1",
     "elm-test": "^0.19.0",
-    "prettier": "^1.13.5",
+    "prettier": "^2.0.2",
     "rollup": "^1.8.0",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^10.0.0",
