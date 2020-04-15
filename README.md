@@ -1,3 +1,50 @@
+
+> This is only a fork of the great elm-mapbox library from Jakub Hampl with some
+> quick fixes, that I needed for my project. Please use the original version from
+> https://github.com/gampleman/elm-mapbox
+>
+> I will remove the project when this functionality will be available in the
+> original project.
+
+__Changes:__
+
+* Use the patch after running `npm i` in order to remove some errors
+  (at least on my system) with TouchEvents and not ready loaded maps
+
+  `patch -N node_modules/elm-mapbox/dist/elm-mapbox.umd.js < elm-mapbox.umd.js.patch`
+
+* This version contains some decoders for `StyleDef`, which are nice to
+  use, if you want to load your maps from MapBox-Studio and add some custom
+  layers in your code ... see for example examples/Example04
+
+* Or, as in my case, you can also use the great style generator to generate your
+  `StyleDef`, which in my case caused some errors and remove the layers by a
+  simple json-parser. Simply copy your original json definition into a string ...
+
+  ``` elm
+  Style
+    { transition = Style.defaultTransition
+    , light = Style.defaultLight
+    , layers =
+        """
+        [{"id": "background","type": "background","layout": {"visibility": "visi
+        ble"},"paint": {"background-color": "#fff", "background-opacity": 1},"in
+        teractive": true},{"id": "waterway","type": "line","metadata": {"mapbox:
+        group": "1452116608071.19"},"source": "mapbox://mapbox.mapbox-streets-v6
+        ","source-layer": "waterway","layout": {"visibility": "visible","line-ca
+        p": "round","line-join": "round"},"paint": {"line-width": 2,"line-color"
+        : "#62b0f0","line-blur": 0,"line-opacity": 0.7},"interactive": true},{"i
+        d": "water","type": "fill","metadata": {"mapbox:group": "14521166080 ...
+        """
+         |> Layer.jsonList
+    , ...
+  ```
+
+* If you want to achieve the same, but only for one layer, then use `Layer.json`...
+
+
+
+
 # elm-mapbox
 
 Great looking and performant maps in Elm using MapboxGl. Discuss in #maps on the Elm Slack.

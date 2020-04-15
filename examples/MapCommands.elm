@@ -1,4 +1,8 @@
-port module MapCommands exposing (easeTo, fitBounds, flyTo, id, jumpTo, panBy, panTo, resize, rotateTo, stop, zoomIn, zoomOut, zoomTo)
+port module MapCommands exposing
+    ( id
+    , panBy, panTo, zoomTo, zoomIn, zoomOut, rotateTo, jumpTo, easeTo, flyTo, fitBounds, stop
+    , resize
+    )
 
 {-| Tell your map to do something! Most of these Commands tell your map to (with or without animation) to show a different location. You can use the options from `Mapbox.Cmd.Option` to configure these.
 

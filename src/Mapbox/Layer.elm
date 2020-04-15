@@ -1,11 +1,11 @@
 module Mapbox.Layer exposing
     ( Layer, SourceId, encode
-    , background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
+    , background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
     , Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
     , LayerAttr
-    , metadata, sourceLayer, minzoom, maxzoom, filter, visible
+    , metadata, sourceLayer, minzoom, maxzoom, filter, visible, visible2
     , fillAntialias, fillColor, fillOpacity, fillOutlineColor, fillPattern, fillTranslate, fillTranslateAnchor
-    , lineBlur, lineCap, lineColor, lineDasharray, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
+    , lineBlur, lineCap, lineColor, lineDasharray, lineDasharray2, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
     , circleBlur, circleColor, circleOpacity, circlePitchAlignment, circlePitchScale, circleRadius, circleStrokeColor, circleStrokeOpacity, circleStrokeWidth, circleTranslate, circleTranslateAnchor
     , heatmapColor, heatmapIntensity, heatmapOpacity, heatmapRadius, heatmapWeight
     , fillExtrusionBase, fillExtrusionColor, fillExtrusionHeight, fillExtrusionOpacity, fillExtrusionPattern, fillExtrusionTranslate, fillExtrusionTranslateAnchor, fillExtrusionVerticalGradient
@@ -13,6 +13,7 @@ module Mapbox.Layer exposing
     , rasterBrightnessMax, rasterBrightnessMin, rasterContrast, rasterFadeDuration, rasterHueRotate, rasterOpacity, rasterResampling, rasterSaturation
     , hillshadeAccentColor, hillshadeExaggeration, hillshadeHighlightColor, hillshadeIlluminationAnchor, hillshadeIlluminationDirection, hillshadeShadowColor
     , backgroundColor, backgroundOpacity, backgroundPattern
+    , decode
     )
 
 {-| Layers specify what is actually rendered on the map and are rendered in order.
@@ -46,14 +47,14 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Layer Types
 
-@docs background, fill, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
+@docs background, fill, json, jsonList, symbol, line, raster, circle, fillExtrusion, heatmap, hillshade
 @docs Background, Fill, Symbol, Line, Raster, Circle, FillExtrusion, Heatmap, Hillshade
 
 
 ### General Attributes
 
 @docs LayerAttr
-@docs metadata, sourceLayer, minzoom, maxzoom, filter, visible
+@docs metadata, sourceLayer, minzoom, maxzoom, filter, visible, visible2
 
 
 ### Fill Attributes
@@ -63,7 +64,7 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 ### Line Attributes
 
-@docs lineBlur, lineCap, lineColor, lineDasharray, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
+@docs lineBlur, lineCap, lineColor, lineDasharray, lineDasharray2, lineGapWidth, lineGradient, lineJoin, lineMiterLimit, lineOffset, lineOpacity, linePattern, lineRoundLimit, lineTranslate, lineTranslateAnchor, lineWidth
 
 
 ### Circle Attributes
@@ -100,10 +101,16 @@ Paint properties are applied later in the rendering process. Changes to a paint 
 
 @docs backgroundColor, backgroundOpacity, backgroundPattern
 
+
+### List Decoder
+
+@docs decode
+
 -}
 
 import Array exposing (Array)
 import Internal exposing (Supported)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
 import Mapbox.Expression as Expression exposing (CameraExpression, Color, DataExpression, Expression, FormattedText)
 
@@ -173,8 +180,8 @@ encode (Layer value) =
 
 
 layerImpl tipe id source attrs =
-    [ ( "type", Encode.string tipe )
-    , ( "id", Encode.string id )
+    [ ( "id", Encode.string id )
+    , ( "type", Encode.string tipe )
     , ( "source", Encode.string source )
     ]
         ++ encodeAttrs attrs
@@ -271,6 +278,29 @@ hillshade =
     layerImpl "hillshade"
 
 
+{-| Directly aass a json value layer
+-}
+json : Value -> Layer
+json =
+    Layer
+
+
+{-| Directly aass a json value layer
+-}
+jsonList : String -> List Layer
+jsonList =
+    Decode.decodeString (Decode.list Decode.value)
+        >> Result.withDefault []
+        >> List.map json
+
+
+{-| Directly aass a json value layer
+-}
+decode : Decoder (List Layer)
+decode =
+    Decode.list (Decode.value |> Decode.map json)
+
+
 {-| -}
 type LayerAttr tipe
     = Top String Value
@@ -321,7 +351,29 @@ filter =
 -}
 visible : Bool -> LayerAttr any
 visible isVisible =
-    Layout "visibility" <| Expression.encode <| Expression.str <| if isVisible then "visible" else "none"
+    Layout "visibility" <|
+        Expression.encode <|
+            Expression.str <|
+                if isVisible then
+                    "visible"
+
+                else
+                    "none"
+
+
+{-| Directly use a boolean value to set a layer to visible or not.
+-}
+visible2 : Bool -> LayerAttr any
+visible2 vis =
+    (if vis then
+        "visible"
+
+     else
+        "none"
+    )
+        |> Expression.str
+        |> Expression.encode
+        |> Layout "visibility"
 
 
 
@@ -444,6 +496,17 @@ Units in line widths. Disabled by `linePattern`.
 -}
 lineDasharray : Expression CameraExpression (Array Float) -> LayerAttr Line
 lineDasharray =
+    Expression.encode >> Paint "line-dasharray"
+
+
+{-| Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels. Paint property.
+
+Should be greater than or equal to `0`.
+Units in line widths. Disabled by `linePattern`.
+
+-}
+lineDasharray2 : Expression any (Array Float) -> LayerAttr Line
+lineDasharray2 =
     Expression.encode >> Paint "line-dasharray"
 
 
