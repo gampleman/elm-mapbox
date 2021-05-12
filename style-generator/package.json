@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^13.5.0",
-    "codemirror": "^5.42.2"
+    "codemirror": "^5.58.2"
   },
   "devDependencies": {
     "elm-hot": "^1.0.1",
